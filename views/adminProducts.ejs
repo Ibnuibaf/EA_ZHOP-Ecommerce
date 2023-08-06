@@ -1,0 +1,302 @@
+<%- include('partials/adminHeader.ejs') %>
+
+    <div class="container-fluid tab-name ">
+        <h3 class="p-3 ">Products Management&GreaterGreater;</h3>
+    </div>
+    <div class="details mx-5 border-bottom border-3" id="#products-details">
+        <div class="tab-hea  border-bottom border-2 my-3">
+            <h3>Products Details</h3>
+        </div>
+        <div class="search-option my-3 border-bottom">
+            <div class="search px-2 py-1 m-3 d-flex " style="width: fit-content;background-color: #111111;">
+                <input type="text" id="search" placeholder="Search.." class="search-admin"
+                    style="border: none;background-color: #111111;width: 15vw;">
+                <button type="submit" style="border: none;background: transparent;max-width: fit-content;"
+                    onclick="searchProduct()"><img src="/images/icons8-search-30.png" alt="" height="20"
+                        style="filter: invert(1);"></button>
+            </div>
+        </div>
+        <div class="tab  my-5">
+            <table class="table ">
+                <thead class="fs-4 " style="position: sticky;top: 0;">
+                    <tr>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;"></th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Product Name</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Price</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Rating</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Stock</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <% productsList.forEach(product=> { %>
+                        <tr class="data-row ">
+                            <td id="prd_image">
+                                <img src="<%= product.prd_images[0] %>" alt=""  style="max-width: 50px; max-height: 50px;" >
+
+                            </td>
+                            <td>
+                                <%= product.prd_name %>
+                            </td>
+                            <td>
+                                Mrp:<%= product.mrp %><br>
+                                    Sales:<%= Math.floor(product.mrp-((product.mrp*product.discount)/100)) %>
+                            </td>
+                            <td>
+                                <% if (product.reviews.length) { %>
+                                    <% let sum=0 %>
+                                        <% product.reviews.forEach(review=> { %>
+                                            <% sum+=review.rating %>
+                                                <% }) %>
+                                                    <%= sum/product.reviews.length %>
+                                                        <% } %>
+                            </td>
+                            <td>
+                                <%= product.stock%>
+                            </td>
+                            <td>
+                                <button class="btn btn-dark p-1" name="prd.id" value="<%= JSON.stringify(product) %>"
+                                    onclick="editProduct(event.target.value)">Edit</button>
+                                <% if (product.active) { %>
+                                    <button class="btn btn-dark p-1"
+                                        onclick="confirms(event,deactivateProduct('<%= product._id %>'))">Deactivate</button>
+                                    <% } else { %>
+                                        <button class="btn btn-dark p-1"
+                                            onclick="confirms(event,activateProduct('<%= product._id %>'))">Activate</button>
+                                        <% } %>
+                            </td>
+                        </tr>
+
+                        <% }) %>
+
+
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="blocked-user  p-3" style="border: none;background-color: #F3F2EE;">
+        <div class="tab-hea  border-bottom border-2 py-3 text-center">
+            <h3>PRODUCT & CATEGORY</h3>
+        </div>
+        <div class="row">
+            <div class="col-md-6 px-3 d-flex justify-content-center" id="#product-tab">
+                <div class="prd-Tab border border-3 rounded p-2 m-2">
+
+                    <h2 class="text-center" fs-3>Products Tab</h2>
+                    <form action="/admin/products-management/update-prd" method="post"
+                        onsubmit="event.preventDefault();  validatePrdForm()" class="form-group">
+                        <div class="error mt-5">
+
+                            <i class="text-warning"></i>
+
+                        </div>
+                        <input type="hidden" id="product_id" name="product_id">
+
+                        <div class="form-group mt-2">
+
+                            <label for="first_name">Add Images:</label><br>
+                            
+                            <input type="file" class="my-1" name="product_img1" id="img-1" accept=".png,.jpeg,.webp"
+                                onchange="uploadImage(event.target.files[0])">
+                            <button style="border: none;background: transparent;" onclick="(()=>{
+                                let file=document.getElementById('img-1');
+                                file.value=''
+                                })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button><br>
+
+                            <input type="file" class="my-1" name="product_img2" id="img-2" accept=".png,.jpeg,.webp"
+                                onchange="uploadImage(event.target.files[0])">
+                            <button style="border: none;background: transparent;" onclick="(()=>{
+                                let file=document.getElementById('img-2');
+                                file.value=''
+                                })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button><br>
+
+                            <input type="file" class="my-1" name="product_img3" id="img-3" accept=".png,.jpeg,.webp"
+                                onchange="uploadImage(event.target.files[0])">
+                            <button style="border: none;background: transparent;" onclick="(()=>{
+                                let file=document.getElementById('img-3');
+                                file.value=''
+                                })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button><br>
+
+                            <input type="file" class="my-1" name="product_img4" id="img-4" accept=".png,.jpeg,.webp"
+                                onchange="uploadImage(event.target.files[0])">
+                            <button style="border: none;background: transparent;" onclick="(()=>{
+                                let file=document.getElementById('img-4');
+                                file.value=''
+                                })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button>
+                        </div>
+
+
+                        <div class="error">
+                            <i class="text-warning"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prd_name">Product Name:</label>
+                            <input type="text" class="ea-input" id="product_name" placeholder="Enter Product name.."
+                                name="product_name" value="">
+                        </div>
+
+
+                        <div class="error">
+                            <i class="text-warning"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prd_desc">Product Description:</label><br>
+                            <textarea class="ea-input" id="product_desc" name="product_desc" cols="50" rows="5"
+                                style="resize: none;" placeholder="Give description about product.."></textarea>
+                        </div>
+
+
+                        <div class="error">
+                            <i class="text-warning"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="addi_info">Additional Information:</label><br>
+                            <textarea class="ea-input" name="additional_info" id="additional_info" cols="50" rows="3"
+                                style="resize: none;" placeholder="Additional Info.."></textarea>
+                        </div>
+
+                        <div class="error">
+                            <i class="text-warning"></i>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="prd_purchase">Purchase rate:</label><br>
+                            <input type="text" class="ea-input" name="product_purchase" id="product_purchase"
+                                placeholder="0">
+                        </div>
+
+                        <div class="d-flex">
+
+                            <div class="error">
+                                <i class="text-warning"></i>
+                            </div>
+                            <div class="form-group m-2">
+                                <label for="prd_category">Category:</label><br>
+                                <select name="product_category" id="product_category" class="ea-input">
+                                    <% categoriesList.forEach(category=> { %>
+                                        <% if (category.active) { %>
+                                            <option value="<%= category._id %>">
+                                                <%= category.name %>
+                                            </option>
+                                            <% } %>
+                                                <% }) %>
+                                </select>
+                            </div>
+                            <div class="error">
+                                <i class="text-warning"></i>
+                            </div>
+                            <div class="form-group m-2">
+                                <label for="prd_stock">Stock of Product:</label><br>
+                                <input type="number" class="ea-input" id="product_stock" placeholder="0"
+                                    name="product_stock">
+                            </div>
+                        </div>
+
+                        <div class="d-flex">
+
+                            <div class="error">
+                                <i class="text-warning"></i>
+                            </div>
+                            <div class="form-group m-2">
+                                <label for="prd_mrp">MRP:</label><br>
+                                <input type="text" class="ea-input" id="product_mrp" placeholder="0" name="product_mrp">
+                            </div>
+                            <div class="error">
+                                <i class="text-warning"></i>
+                            </div>
+                            <div class="form-group m-2">
+                                <label for="prd_disc">Discount:</label><br>
+                                <input type="text" class="ea-input" id="product_discount" placeholder="%"
+                                    name="product_discount">
+                            </div>
+                        </div>
+                        <div class=" text-center">
+                            <button type="submit" class="btn btn-dark px-5 ">Save Details</button>
+                            <input type="reset" value="Reset" class="btn btn-dark px-5 ">
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+            <div class="col-md-6 px-3 d-flex justify-content-center" id="#category-tab">
+                <div class="prd-Tab border border-3 rounded p-2 m-2">
+                    <h2 class="text-center" fs-3>Category Tab</h2>
+                    <div class="error mt-5">
+
+                        <i class="text-warning"></i>
+
+                    </div>
+
+
+
+
+                    <div class="form-group mt-2">
+                        <form action="/admin/products-management/updateCategory" method="post"
+                            onsubmit="return validateCategoryForm()">
+                            <label for="prd_name">Add Category:</label>
+                            <input type="hidden" id="cat_id" name="cat_id">
+                            <input type="text" class="ea-input" id="cat_name" placeholder="New Category.."
+                                name="cat_name">
+                            <button type="submit" class="btn btn-dark  ">Save +</button>
+                        </form>
+                    </div>
+
+
+                    <div class="tab  my-5">
+                        <table class="table ">
+                            <thead class="fs-6 " style="position: sticky;top: 0;">
+                                <tr>
+                                    <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Category Name
+                                    </th>
+                                    <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Products</th>
+                                    <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% categoriesList.forEach(category=> { %>
+                                    <tr class="data-row ">
+                                        <td>
+                                            <%= category.name %>
+                                        </td>
+                                        <td>
+                                            <% let count=0 %>
+                                                <% productsList.forEach(product=> { %>
+                                                    <% const categoryId=category._id.toString(); %>
+                                                        <% if (product.category==categoryId) { %>
+                                                            <%count++ %>
+                                                                <% } %>
+                                                                    <% }) %>
+                                                                        <%= count %>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-dark p-1" name="cat.id"
+                                                value="<%= JSON.stringify(category) %>"
+                                                onclick="editCategory(event.target.value)">Edit</button>
+                                            <% if (category.active) { %>
+                                                <button class="btn btn-dark p-1"
+                                                    onclick="confirms(event,deactivateCategory('<%= category._id %>'))">Deactivate</button>
+                                                <% } else { %>
+                                                    <button class="btn btn-dark p-1"
+                                                        onclick="confirms(event,activateCategory('<%= category._id %>'))">Activate</button>
+                                                    <% } %>
+                                        </td>
+                                    </tr>
+
+                                    <% }) %>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <%- include('partials/adminFooter.ejs') %>

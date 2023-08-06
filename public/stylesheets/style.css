@@ -1,0 +1,103 @@
+::-webkit-scrollbar{
+  background-color: #F3F2EE;
+  width: 5px;
+}
+::-webkit-scrollbar-corner{
+  background-color: #E5E5E5;
+}
+::-webkit-scrollbar-thumb{
+  border-radius: 5px;
+  background-color: #111111;
+}
+
+.nav-links{
+  width: 50vw
+}
+.nav-buttons{
+  width: 20vw;
+  justify-content: space-evenly;
+}
+.tab-name{
+  background-color: #F3F2EE;
+}
+.cursor{
+  background-color: #F3F2EE;
+}
+.prd-detail{
+  background-color: #F3F2EE;
+}
+.addcart-link{
+  text-decoration: none;
+  font-size: larger;
+  background-color: #111111;
+  color: #E5E5E5;
+  padding: 0.8rem;
+  padding-inline: 3rem;
+}
+.addcart-link:hover{
+  background-color: #ffffff;
+  color: #111111;
+  transition: 0.5s;
+}
+.order-link{
+  text-decoration: none;
+  font-size: larger;
+  background-color: #ffffff;
+  color: #111111;
+  padding: 0.8rem;
+  padding-inline: 3rem;
+}
+.order-link:hover{
+  background-color: #111111;
+  color: #E5E5E5;
+  transition: 0.5s;
+
+}
+.add-wish button{
+  border: none;
+}
+.signup input{
+    width: 25vw;
+    border: none;
+    box-shadow: #E53637;
+    padding: 10px;
+    padding-inline: 15px;
+    border-radius: 5px;
+}
+.search-admin{
+  color: #E5E5E5;
+  outline: none;
+}
+.tab {
+
+  height: 450px;
+  /* Set the desired height for the table container */
+  overflow: auto;
+  /* Add a scroll bar when content overflows */
+
+}
+.dlt{
+  border-style:solid;
+  border-radius: 5px;
+  border-width: 1px; 
+  background-color: transparent;
+}
+.dlt:hover{
+  background-color: #c6c2b2;
+  transition: 0.5s;
+}
+.ea-input{
+  border-width: 1px;
+  border-radius: 5px;
+  border-style: solid;
+  padding: 8px;
+  padding-inline: 15px;
+  max-width: max-content;
+  outline: none;
+}
+.tab-input{
+  background: transparent;
+  border: none;
+  outline: none;
+  max-width: min-content;
+}

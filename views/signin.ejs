@@ -1,0 +1,63 @@
+<%- include('partials/userHeader.ejs') %>
+
+
+<div class="container-fluid tab-name ">
+    <h3 class="p-3 ">SignIn&GreaterGreater;</h3>
+</div>
+<div class="col-12 d-flex justify-content-center py-5">
+    <div class="signup  my-5 p-5  fs-5 " style="background-color: #F3F2EE;">
+        <form action="/signin" method="post" class="form-group">
+            <h2 class="text-center" fs-3>SignIn</h2>
+            <div class="error mt-5">
+                
+                <i class="text-warning"></i>
+                
+            </div>
+            
+
+            <div class="error">
+                
+                <i class="text-warning"></i>
+                
+            </div>
+            <div class="form-group mt-2">
+                <label for="number">Phone Number:</label><br>
+                <input type="text"  id="ph_number" placeholder="Enter your Phone Number.." name="mobile_number"  >
+            </div>
+            
+
+            <div class="error">
+                
+                <i class="text-warning"></i>
+                
+            </div>
+            <div class="form-group my-3">
+                <label for="password">Password:</label><br>
+                <input type="password"  id="password" placeholder="Enter your password.." name="password" >
+            </div>
+            
+            <div class="error">
+                
+                <i class="text-warning"></i>
+               
+            </div>
+            <div class="form-group my-3">
+                <label for="otp">OTP:</label><br>
+                <input type="text"  id="otp" placeholder="Enter OTP Received" name="otp" >
+            </div>
+            <div class="otp-btn text-end">
+                <button class="btn btn-dark">Send OTP</button>
+            </div>
+
+
+            <div class="acc-exist text-center fs-6 mt-5 ">
+                <p>Doesn't have an Account?<br> <a href="/signup" class="text-secondary">SignIn</a></p>
+            </div>
+            <div class="signup text-center">
+                <button type="submit" class="btn btn-dark px-5 ">SignIn</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/userFooter.ejs') %>

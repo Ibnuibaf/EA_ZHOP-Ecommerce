@@ -1,0 +1,176 @@
+<%- include('partials/userHeader.ejs') %>
+
+    <div class="container-fluid tab-name ">
+        <h3 class="p-3 ">Products&GreaterGreater;</h3>
+    </div>
+
+    <div class="row m-3 ">
+        <div class="d-flex">
+
+            <div class="products-tab d-none d-lg-block">
+                <div class="search border px-2 py-1 d-flex" style="width: fit-content;">
+                    <input type="text" id="search" placeholder="Search.." style="border: none;">
+                    <button type="submit" style="border: none;background: transparent;max-width: fit-content;"
+                        onclick="searchPrd('<%= foundCategory._id %>')"><img src="/images/icons8-search-30.png" alt=""
+                            height="20"></button>
+                </div>
+                <div class="categories border-bottom py-2">
+                    <h4>Categories : </h4>
+
+
+                    <div class="category-tab p-2" style="height: 180px;overflow-y: scroll;">
+                        <ul class="list-group">
+                            <% categoriesList.forEach(category=> { %>
+                                <% if (category.active) { %>
+                                    <button
+                                        style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                                        onclick="categorize('<%= category._id %>')">
+                                        <li class="list-unstyled">
+                                            <%= category.name %>
+                                        </li>
+                                    </button>
+                                    <% } %>
+                                        <% }) %>
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="price-filter  py-2">
+                    <h4>Filter Price Range</h4>
+                    <ul>
+                        <button type="submit"
+                            style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                            onclick="filter(0,99,'<%= foundCategory._id %>')">
+                            <li class="list-unstyled">Rs.0 - Rs.99</li>
+                        </button><br>
+                        <button type="submit"
+                            style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                            onclick="filter(100,999,'<%= foundCategory._id %>')">
+                            <li class="list-unstyled">Rs.100 - Rs.999</li>
+                        </button><br>
+                        <button type="submit"
+                            style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                            onclick="filter(1000,9999,'<%= foundCategory._id %>')">
+                            <li class="list-unstyled">Rs.1000 - Rs.9999</li>
+                        </button><br>
+                        <button type="submit"
+                            style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                            onclick="filter(9999,99999,'<%= foundCategory._id %>')">
+                            <li class="list-unstyled">Rs.9999 - More</li>
+                        </button>
+                    </ul>
+                </div>
+            </div>
+            <div class="products mx-3 w-100 ">
+                <div class="category-selector">
+
+                    <% if (foundCategory) { %>
+                        <h2>CATEGORY: <%= foundCategory.name %>
+                        </h2>
+                        <% } else { %>
+                            <h2>CATEGORY: None</h2>
+                            <% } %>
+                </div>
+                <!-- <div class="prd-tab-handle  d-flex justify-content-between" style="width: fit-content;">
+                <div class="cursor-spec">
+                    <p>showing 1 to 12 of 126 results</p>
+                </div>
+                <div class="prd-options d-flex ">
+                    <div class="prd-brand d-flex justify-content-center mx-4" style="width: fit-content;">
+                        <p>brand:</p>
+                        <select name="brand" id="" style="border: none;margin-bottom: 15px;">
+                            <option value="brand_name">boat</option>
+                            <option value="brand_name">boat</option>
+                            <option value="brand_name">boat</option>
+                            <option value="brand_name">boatrfdfsd</option>
+                        </select>
+                    </div>
+                    <div class="prd-sort d-flex  justify-content-center" style="width: fit-content;">
+
+                        <p>Sort By:</p>
+                        <select name="brand" id="" style="border: none;margin-bottom: 15px;">
+                            <option value="price-1">Price:Low to High</option>
+                            <option value="price-2">Price:High to Low</option>
+                            <option value="rating">Trending</option>
+                            <option value="date">Latest</option>
+                        </select>
+                    </div>
+                </div>
+            </div> -->
+
+                <div class="products-tab row">
+                    <% productsList.forEach(product=> { %>
+                        <% if (product.active) { %>
+                            <div class="shadow m-2 " style="width: 18rem;box-shadow: #F3F2EE;">
+                                <div style="height: 270px;padding: 15px;display: flex; justify-content: center;align-items: center;">
+                                    
+                                    <a href="/user/products/product-details/<%= product._id %>"><img
+                                        src="<%= product.prd_images[0] %>" class="card-img-top" alt="..." style="max-width: fit-content;max-height: 240px;"></a>
+                                </div>
+
+                                <div class="card-body p-3">
+
+                                    <h5 class="card-title text-truncate py-2">
+                                        <%= product.prd_name %>
+                                    </h5>
+                                    <div class="card-text my-3">
+                                        <s>
+                                            <%= product.mrp %>
+                                        </s>
+                                        <div class="price-disc-rating d-flex justify-content-between">
+                                            <div class="price-disc d-flex">
+                                                <h5 class="mx-2">
+                                                    <%= Math.floor(product.mrp-((product.mrp*product.discount)/100)) %>
+                                                        /-
+                                                </h5>
+                                                <i class="text-danger">
+                                                    <% if (product.discount) { %>
+                                                        <%= product.discount %>%Off
+                                                            <% } %>
+                                                </i>
+                                            </div>
+                                            <div class="rating d-flex ">
+                                                <h6>
+                                                    <% if (product.reviews.length) { %>
+                                                        <% let sum=0 %>
+                                                            <% product.reviews.forEach(review=> { %>
+                                                                <% sum+=review.rating %>
+                                                                    <% }) %>
+                                                                        <%= sum/product.reviews.length %>
+                                                                            <img src="/images/icons8-rating-30.png"
+                                                                                alt="" height="23">
+                                                                            <% } %>
+                                                </h6>
+                                            </div>
+                                        </div>
+                                        <i>
+                                            <% if (product.stock) { %>
+                                                <%= product.stock %> piece Left-
+                                                    <% } else { %>
+                                                        <b class="text-danger">No Stock Left</b>
+                                                        <% } %>
+
+                                        </i>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } %>
+
+                                <% }) %>
+
+                </div>
+                <!-- <div class="cursor d-flex p-2 justify-content-between mt-4 px-3">
+                <div class="cursor-prev">
+                    <img src="/images/icons8-back-30.png" alt="" height="20">
+                    <i>prev</i>
+                </div>
+                <div class="cursor-next">
+                    <i>next</i>
+                    <img src="/images/icons8-next-30.png" alt="" height="20">
+                </div>
+            </div> -->
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/userFooter.ejs') %>
