@@ -8,32 +8,34 @@ const router = express.Router();
 
 
 //signin
-router.get('/',controller.loadSignIn);
+router.get('/',middle.notlogged,controller.loadAdminSignIn);
+router.post('/',middle.notlogged,controller.postAdminSignIn)
 
 //dashboard
-router.get('/dashboard',controller.loadDashboard);
+router.get('/dashboard',middle.loggedIn,controller.loadDashboard);
+router.get('/users-management',middle.loggedIn, controller.loadUsersManagement);
 
 //users management
-router.get('/users-management',controller.loadUsersManagement);
 
-router.patch('/users-management/block-user/:user',controller.blockUser)
-router.patch('/users-management/unblock-user/:user',controller.unblockUser)
+router.patch('/users-management/block-user/:user',middle.loggedIn,controller.blockUser)
+router.patch('/users-management/unblock-user/:user',middle.loggedIn,controller.unblockUser)
 
 //products management
-router.get('/products-management',controller.loadProductsManagement);
+router.get('/products-management',middle.loggedIn,controller.loadProductsManagement);
 
-router.patch('/products-management/active/:id', controller.activateProduct)
-router.patch('/products-management/deactive/:id', controller.deactivateProdcut)
+router.patch('/products-management/active/:id',middle.loggedIn, controller.activateProduct)
+router.patch('/products-management/deactive/:id',middle.loggedIn, controller.deactivateProdcut)
 
-router.patch('/products-management/deactiveCategory/:id', controller.deactivateCategory)
-router.patch('/products-management/activeCategory/:id', controller.activateCategory)
+router.patch('/products-management/deactiveCategory/:id',middle.loggedIn, controller.deactivateCategory)
+router.patch('/products-management/activeCategory/:id',middle.loggedIn, controller.activateCategory)
 
 router.post("/products-management/uploadImage", middle.uploadImage,controller.uploadPrdImage)
 
-router.post('/products-management/update-prd', controller.updateProducts)
-router.post('/products-management/updateCategory', controller.updateCategories)
+router.post('/products-management/update-prd',middle.loggedIn, controller.updateProducts)
+router.post('/products-management/updateCategory',middle.loggedIn, controller.updateCategories)
 
-
+//logout
+router.get('/logout',middle.loggedIn,controller.adminlogOut)
 
 
 module.exports = router;

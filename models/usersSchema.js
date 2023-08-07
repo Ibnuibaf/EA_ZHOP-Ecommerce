@@ -38,14 +38,13 @@ const usersSchema=new mongoose.Schema({
         }]
     },
     wallet:{
-        type:{
+    
             balance:{
                 type:decimal128,
                 default:0.0
             },
             transactions:[String]
-        },
-        required:true
+        
     },
     cart:[{ prd_id:ObjectId, qty:Number}],
     wishlist:[ObjectID],

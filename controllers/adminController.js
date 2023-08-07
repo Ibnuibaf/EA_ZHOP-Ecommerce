@@ -1,13 +1,41 @@
 const mongoose = require('mongoose')
 const admin = require('../models/adminSchema')
+
 const usersCollection = require('../models/usersSchema')
 const productsCollection = require('../models/productsSchema')
 const categories = require('../models/categorySchema')
 const cloudinary = require('cloudinary').v2;
 
 module.exports = {
-    loadSignIn: (req, res) => {
-        res.render('adminSignin')
+    loadAdminSignIn: (req, res) => {
+        let error
+
+        if (req.query.validation) {
+            error = req.query.validation
+        }
+        res.render('adminSignin', { error })
+    },
+    postAdminSignIn: async (req, res) => {
+        try {
+            const { username, password } = req.body
+            const isAdmin = await admin.findOne({ username: username })
+            console.log(isAdmin)
+            if (isAdmin) {
+                if (password == isAdmin.password) {
+                    req.session.admin = isAdmin.username
+                    console.log(req.session.admin);
+                    res.redirect('/admin/dashboard?AdminLogged=Admin Logged In!')
+
+                } else {
+                    return res.redirect('/admin?validation=Password is Incorrect! Try Again')
+                }
+            } else {
+                return res.redirect(`/admin?validation=Admin Details Doesn't exist!`)
+            }
+        } catch (error) {
+            console.log(error.message);
+            res.render('error')
+        }
     },
     loadDashboard: (req, res) => {
         res.render('dashboard')
@@ -15,15 +43,17 @@ module.exports = {
     loadUsersManagement: async (req, res) => {
 
         try {
+            
             const searchQuery = req.query.search
-            let usersList = await usersCollection.find()
-            if (searchQuery) {
-                const searchRegex = new RegExp(searchQuery, 'i');
-                usersList = usersList.filter(user => searchRegex.test(user.first_name))
-            }
+            let usersList = await usersCollection.find({})
+            // if (searchQuery) {
+            //     const searchRegex = new RegExp(searchQuery, 'i');
+            //     usersList = usersList.filter(user => searchRegex.test(user.first_name))
+            // }
             res.render('adminUsers', { usersList })
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     blockUser: async (req, res) => {
@@ -33,6 +63,7 @@ module.exports = {
             res.send(200)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     unblockUser: async (req, res) => {
@@ -42,6 +73,7 @@ module.exports = {
             res.send(200)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     loadProductsManagement: async (req, res) => {
@@ -58,6 +90,7 @@ module.exports = {
             res.render('adminProducts', { productsList, categoriesList })
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     activateProduct: async (req, res) => {
@@ -67,6 +100,7 @@ module.exports = {
             res.send(200)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     deactivateProdcut: async (req, res) => {
@@ -76,6 +110,7 @@ module.exports = {
             res.send(200)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     deactivateCategory: async (req, res) => {
@@ -85,6 +120,7 @@ module.exports = {
             res.send(200)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     activateCategory: async (req, res) => {
@@ -94,11 +130,12 @@ module.exports = {
             res.send(200)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     updateProducts: async (req, res) => {
         try {
-            console.log(req.body);
+
             const prd = req.body
 
             if (prd.prd_id && prd.prd_name) {
@@ -146,6 +183,7 @@ module.exports = {
 
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     updateCategories: async (req, res) => {
@@ -165,6 +203,7 @@ module.exports = {
 
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
     },
     uploadPrdImage: async (req, res) => {
@@ -176,7 +215,21 @@ module.exports = {
             res.json(result.secure_url)
         } catch (error) {
             console.log(error.message);
+            res.render('error')
         }
 
     },
+    adminlogOut: (req, res) => {
+        try {
+            req.session.destroy((err) => {
+                console.log(err);
+                res.render('error')
+            })
+            res.clearCookie('connect.sid')
+            res.redirect('/?message=User has been Logged Out!')
+        } catch (error) {
+            console.log(error.message);
+            res.render('error')
+        }
+    }
 }

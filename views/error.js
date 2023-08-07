@@ -1,13 +1,7 @@
-<%- include('partials/userHeader.ejs') %>
-
-
-<div class="container-fluid tab-name ">
-    <h3 class="p-3 ">SignIn&GreaterGreater;</h3>
-</div>
 <div class="col-12 d-flex justify-content-center py-5">
     <div class="signup  my-5 p-5  fs-5 " style="background-color: #F3F2EE;">
-        <form action="/signin" method="post" class="form-group">
-            <h2 class="text-center" fs-3>SignIn</h2>
+        <form action="/admin" method="post" class="form-group">
+            <h2 class="text-center" fs-3>ADMIN SignIn</h2>
             <% if (error) { %>
              
                 <div class="error fs-6 m-3 p-2 bg-secondary text-center " style="max-width: 24vw;">
@@ -18,23 +12,19 @@
                 </div>
             <% } %>
             <div class="form-group mt-2">
-                <label for="email">Enter your Email:</label><br>
-                <input type="email"  id="email" placeholder="sample@eazhop.com.." name="email"  >
+                <label for="Username">User Name:</label><br>
+                <input type="email"  id="username" placeholder="Admin Username.." name="username"  >
             </div>
             
+
             <div class="form-group my-3">
                 <label for="password">Password:</label><br>
-                <input type="password"  id="password" placeholder="Enter your password.." name="password" >
+                <input type="password"  id="password" placeholder="Admin password.." name="password" >
             </div>
-            
-            <div class="acc-exist text-center fs-6 mt-5 ">
-                <p>Doesn't have an Account?<br> <a href="/signup" class="text-secondary">Create Account</a></p>
-            </div>
+       
             <div class="signup text-center">
                 <button type="submit" class="btn btn-dark px-5 ">SignIn</button>
             </div>
         </form>
     </div>
 </div>
-
-<%- include('partials/userFooter.ejs') %>

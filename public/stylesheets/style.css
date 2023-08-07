@@ -76,6 +76,12 @@
   /* Add a scroll bar when content overflows */
 
 }
+
+section{
+  min-height: 100vh !important;
+}
+
+
 .dlt{
   border-style:solid;
   border-radius: 5px;

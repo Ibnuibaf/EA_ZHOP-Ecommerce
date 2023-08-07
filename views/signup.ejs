@@ -7,19 +7,26 @@
 <div class="col-12 d-flex justify-content-center py-5">
     <div class="signup  my-5 p-5  fs-5 " style="background-color: #F3F2EE;">
         <form action="/signup" method="post" class="form-group">
-            <h2 class="text-center" fs-3>SignUp</h2>
-            <div class="error mt-5">
-                
-                <i class="text-warning"></i>
-                
+            <h2 class="text-center my-3" >SignUp</h2>
+            <div class="d-flex justify-content-center">
+
             </div>
+            <% if (error) { %>
+             
+                <div class="error fs-6 m-3 p-2 bg-secondary text-center " style="max-width: 24vw;">
+    
+                    <i class="text-warning"><%= error %></i>
+                    
+                  
+                </div>
+            <% } %>
             <div class="form-group mt-2">
                 <label for="first_name">First Name:</label><br>
                 <input type="text"  id="first_name" placeholder="Enter your First Name.." name="first_name"  >
             </div>
             <div class="form-group mt-2">
                 <label for="last_name">Last Name:</label><br>
-                <input type="text"  id="last_name" placeholder="Enter email@gmail.com" name="last_name"  >
+                <input type="text"  id="last_name" placeholder="Enter your Last Name.." name="last_name"  >
             </div>
 
 
@@ -62,24 +69,11 @@
             </div>
 
 
-            <div class="error">
-                
-                <i class="text-warning"></i>
-               
-            </div>
-            <div class="form-group my-3">
-                <label for="otp">OTP:</label><br>
-                <input type="text"  id="otp" placeholder="Enter OTP Received" name="otp" >
-            </div>
-            <div class="otp-btn text-end">
-                <button class="btn btn-dark">Send OTP</button>
-            </div>
-
             <div class="acc-exist text-center fs-6">
                 <p>Already have an Account?<br> <a href="/signin" class="text-secondary">SignIn</a></p>
             </div>
             <div class="signup text-center">
-                <button type="submit" class="btn btn-dark px-5 ">SignUp</button>
+                <button type="submit" class="btn btn-dark px-5 ">Send OTP</button>
             </div>
         </form>
     </div>
