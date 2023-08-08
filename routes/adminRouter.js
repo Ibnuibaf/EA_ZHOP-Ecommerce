@@ -29,7 +29,7 @@ router.patch('/products-management/deactive/:id',middle.loggedIn, controller.dea
 router.patch('/products-management/deactiveCategory/:id',middle.loggedIn, controller.deactivateCategory)
 router.patch('/products-management/activeCategory/:id',middle.loggedIn, controller.activateCategory)
 
-router.post("/products-management/uploadImage", middle.uploadImage,controller.uploadPrdImage)
+router.post("/products-management/uploadImage",middle.uploadImage, controller.uploadPrdImage)
 
 router.post('/products-management/update-prd',middle.loggedIn, controller.updateProducts)
 router.post('/products-management/updateCategory',middle.loggedIn, controller.updateCategories)

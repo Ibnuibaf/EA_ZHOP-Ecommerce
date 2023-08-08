@@ -46,10 +46,10 @@ module.exports = {
             
             const searchQuery = req.query.search
             let usersList = await usersCollection.find({})
-            // if (searchQuery) {
-            //     const searchRegex = new RegExp(searchQuery, 'i');
-            //     usersList = usersList.filter(user => searchRegex.test(user.first_name))
-            // }
+            if (searchQuery) {
+                const searchRegex = new RegExp(searchQuery, 'i');
+                usersList = usersList.filter(user => searchRegex.test(user.first_name))
+            }
             res.render('adminUsers', { usersList })
         } catch (error) {
             console.log(error.message);
@@ -209,7 +209,7 @@ module.exports = {
     uploadPrdImage: async (req, res) => {
         try {
 
-            const result = await cloudinary.v2.uploader.upload(`./images/${req.file.originalname}`, {
+            const result = await cloudinary.uploader.upload(`./images/${req.file.originalname}`, {
                 public_id: req.file.originalname
             })
             res.json(result.secure_url)
