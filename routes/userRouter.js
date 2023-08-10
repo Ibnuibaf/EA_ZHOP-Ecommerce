@@ -20,7 +20,7 @@ router.get('/signup',middle.notLogged,controller.loadSignUp);
 router.post('/signup',middle.notLogged,controller.registerUser)
 
 //otp
-router.get('/verification',middle.notLogged,controller.loadVerificationPanel)
+router.get('/verification',middle.verificationPanel,controller.loadVerificationPanel)
 
 router.post('/otp',middle.notLogged,controller.verifyEmail)
 

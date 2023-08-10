@@ -227,9 +227,8 @@ async function uploadImage(file, id) {
     console.log(img);
 
 }
-function submitImg() {
-    fetch()
-}
+
+
 function getQueryParam(name) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(name);
@@ -238,9 +237,9 @@ function getQueryParam(name) {
 // Display the alert box with the message from the 'message' query parameter
 window.addEventListener('load', function () {
     let message
-    if(getQueryParam('CreatedAccount')){ message = getQueryParam('CreatedAccount');}
-    else if(getQueryParam('UserLogged')){message = getQueryParam('UserLogged');}
-    else if(getQueryParam('message')){message = getQueryParam('message')}
+    if (getQueryParam('CreatedAccount')) { message = getQueryParam('CreatedAccount'); }
+    else if (getQueryParam('UserLogged')) { message = getQueryParam('UserLogged'); }
+    else if (getQueryParam('message')) { message = getQueryParam('message') }
     if (message) {
         alert(message);
     }

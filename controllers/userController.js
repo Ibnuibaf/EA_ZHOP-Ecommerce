@@ -39,7 +39,7 @@ const sendVerificationOTP = async (user, email) => {
             user: email,
             otp: hashOTP,
             createdAt: Date.now(),
-            expiresAt: Date.now() + 3600000
+            expiresAt: Date.now() + 60000
         })
 
         transporter.sendMail(mailOptions, (err) => {
@@ -54,14 +54,14 @@ const sendVerificationOTP = async (user, email) => {
         })
     } catch (error) {
         console.log(error.message);
-        
+
         res.render('error')
     }
 }
 
 module.exports = {
     loadHome: (req, res) => {
-        
+
         res.render('home')
     },
     loadSignIn: (req, res) => {
@@ -69,18 +69,19 @@ module.exports = {
         if (req.query.validation) {
             error = req.query.validation
         }
-        res.render('signin',{error})
+    
+        res.render('signin', { error })
     },
     postSignin: async (req, res) => {
         try {
             const { email, password } = req.body
             const user = await usersCollection.findOne({ email: email }, { email: 1, password: 1, blocked: 1 })
             if (user) {
-                const isPass=await bcrypt.compare(password, user.password)
+                const isPass = await bcrypt.compare(password, user.password)
                 if (isPass) {
                     if (!user.blocked) {
                         req.session.user = user.email
-                        res.redirect('/?UserLogged=User Logged In!')
+                        res.redirect('/')
                     } else {
                         return res.redirect('/signin?validation=Your Account have been Blocked by Admin,Contact for Details')
                     }
@@ -122,17 +123,23 @@ module.exports = {
             } else {
                 return res.redirect('/signup/?validation=Enter a valid Mobile Number')
             }
-            if (req.body.email.length && req.body.dob.length) {
+            if (req.body.email.length ) {
                 email = req.body.email
-                dob = req.body.dob
             } else {
-                return res.redirect('/signup/?validation=Fill all the required fields')
+                return res.redirect('/signup/?validation=Enter a valid Email')
             }
-            if (passwordRegex.test(req.body.password)) {
-                password = await securePass(req.body.password)
+
+            if (req.body.confirmPassword == req.body.password) {
+                if (passwordRegex.test(req.body.password)) {
+                    password = await securePass(req.body.password)
+                } else {
+                    return res.redirect('/signup/?validation=Password should contain *At least one uppercase or lowercase letter *At least one digit *At least one special character from the set @$!%*#?& *A minimum length of 8 characters')
+                }
             } else {
-                return res.redirect('/signup/?validation=Password should contain *At least one uppercase or lowercase letter *At least one digit *At least one special character from the set @$!%*#?& *A minimum length of 8 characters')
+                return res.redirect('/signup/?validation=Password Doesnt Matches')
             }
+
+
 
             req.session.frst_name = frst_name
             req.session.lst_name = lst_name
@@ -151,6 +158,7 @@ module.exports = {
             } else {
                 console.log(email);
                 await sendVerificationOTP(frst_name, email)
+                req.session.otpStage=true
                 res.redirect('/verification')
             }
 
@@ -165,6 +173,7 @@ module.exports = {
         if (req.query.error) {
             error = req.query.error
         }
+       
         res.render("OTPverify", { email, error })
     },
     verifyEmail: async (req, res) => {
@@ -182,12 +191,13 @@ module.exports = {
             const expiresAt = otps.expiresAt;
             const hashedOTP = otps.otp;
 
-            if (expiresAt < Date.now()) {
+            if (Date.now()>expiresAt) {
                 await otpVerification.deleteMany({ user: email });
                 return res.redirect('/verification?error=OTP has expired, try again!');
             }
 
             const otpValid = await bcrypt.compare(otp, hashedOTP);
+            console.log(otpValid);
             if (!otpValid) {
                 return res.redirect('/verification?error=OTP is not matching');
             }
@@ -197,12 +207,12 @@ module.exports = {
                 last_name: req.session.lst_name,
                 mobile_number: req.session.mobile,
                 email: req.session.email,
-                dob: req.session.dob,
                 password: req.session.password
             });
 
             if (userCreated) {
-                req.session.user=userCreated.email
+                req.session.user = userCreated.email
+                req.session.otpStage=false
                 return res.redirect('/?CreatedAccount=User Account have been Created');
             }
         } catch (error) {
@@ -264,7 +274,7 @@ module.exports = {
         try {
             const prd_id = req.params.id
             const user = req.session.user
-            if(user){
+            if (user) {
                 await usersCollection.updateOne({ email: user }, { $pull: { wishlist: prd_id } })
                 res.send(200)
             }
@@ -277,7 +287,7 @@ module.exports = {
         try {
             const prd_id = req.params.id
             const user = req.session.user
-            if(user){
+            if (user) {
                 await usersCollection.updateOne({ email: user }, { $push: { wishlist: prd_id } })
                 res.send(200)
             }
@@ -286,9 +296,9 @@ module.exports = {
             res.render('error')
         }
     },
-    logOut:(req,res)=>{
+    logOut: (req, res) => {
         try {
-            req.session.destroy((err)=>{
+            req.session.destroy((err) => {
                 console.log(err);
                 res.render('error')
             })
