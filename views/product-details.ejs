@@ -71,7 +71,7 @@
 
                 <div class="add-wish my-3 fs-5 d-flex align-items-center">
                     <label for="add-wishlist">Add to Wishlist</label>
-                    <% if (wishlist) { %>
+                    <% if (isWishlist) { %>
                     <button id="" type="submit"  onclick="remWishlist('<%= productDetails._id %>')"><img
                                 src="/images/icons8-heart-30 wished.png" alt="" class="rounded-pill"></button>
                         <% } else { %>
@@ -82,9 +82,13 @@
 
                 </div>
                 <div class="add-buy-prd d-flex border shadow" style="max-width: fit-content;cursor: pointer;">
-                    <a class="addcart-link" href="">
-                        Add To Cart
-                    </a>
+                    <% if (isCart) { %>
+                        <a class="addcart-link" href="">
+                            Go To Cart
+                        </a>
+                    <% } else { %>
+                        <a class="addcart-link" href="" onclick="addCart('<%= productDetails._id %>')">Add To Cart</a>
+                    <% } %>
                     <a class="order-link" href="">
                         Order Now
                     </a>

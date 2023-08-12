@@ -107,3 +107,29 @@ section{
   outline: none;
   max-width: min-content;
 }
+.form-input {
+  border-color: #E1E1E1;
+  border-style: solid;
+  border-radius: 5px;
+  padding-left: 10px;
+  padding-block: 7px;
+  outline: none;
+  width: 100%;
+}
+.wallet-card{
+  background-image: url(/images/card-bg.jpg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 27vh;
+  width: 25vw;
+
+  
+}
+.wallet-tab-area{
+  height: 250px;
+  overflow: auto;
+}
+.add-coupen input::placeholder{
+  color: #F3F2EE;
+}

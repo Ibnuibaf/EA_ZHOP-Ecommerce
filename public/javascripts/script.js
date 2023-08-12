@@ -6,7 +6,7 @@ let img = []
 
 function remWishlist(id) {
     // console.log(id, "This is the id and thuis function is being called");
-    fetch(`/user/products/product-details/rem-wishlist/${id}`, {
+    fetch(`/user/rem-wishlist/${id}`, {
         method: 'DELETE',
     }).then(() => {
 
@@ -18,7 +18,7 @@ function remWishlist(id) {
 }
 function addWishlist(id) {
 
-    fetch(`/user/products/product-details/add-wishlist/${id}`, {
+    fetch(`/user/add-wishlist/${id}`, {
         method: 'PATCH',
     }).then(() => {
         window.location.reload()
@@ -26,6 +26,43 @@ function addWishlist(id) {
         console.error('Error deleting product:', error);
         // Optionally handle error and show error message to the user
     });
+}
+function addCart(id) {
+
+    fetch(`/user/add-cart/${id}`, {
+        method: 'PATCH',
+    }).then(() => {
+        window.location.reload()
+    }).catch((error) => {
+        console.error('Error deleting product:', error);
+        // Optionally handle error and show error message to the user
+    });
+}
+function removeCart(id) {
+
+    fetch(`/user/rem-cart/${id}`, {
+        method: 'DELETE',
+    }).then(() => {
+        window.location.reload()
+    }).catch((error) => {
+        console.error('Error deleting product:', error);
+        // Optionally handle error and show error message to the user
+    });
+}
+function checkout(){
+    const dlv_charge=document.getElementById("dlv-charge").value
+    const prd_os=document.getElementById("prd-os").value
+    let data={
+        dlv_charge,
+        prd_os
+    }
+    fetch(`/user/checkout`, {
+        method:'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body:JSON.stringify(data)
+    })
 }
 function filter(from, to, cat) {
     window.location.href = `/user/products?min=${from}&max=${to}&category=${cat}`
@@ -241,6 +278,9 @@ window.addEventListener('load', function () {
     else if (getQueryParam('UserLogged')) { message = getQueryParam('UserLogged'); }
     else if (getQueryParam('message')) { message = getQueryParam('message') }
     if (message) {
-        alert(message);
+        const modal = new bootstrap.Modal(document.getElementById("myModal"));
+        const modalMessage = document.getElementById("modalMessage");
+        modalMessage.textContent = message;
+        modal.show();
     }
 });

@@ -1,0 +1,156 @@
+<%- include('partials/userHeader.ejs') %>
+
+
+    <div class="container-fluid tab-name d-flex justify-content-between align-items-center">
+        <h3 class="p-3 ">My Cart&GreaterGreater;</h3>
+        <div class="navs mx-5">
+            <button type="button" class="btn rounded-pill border border-2 d-flex align-items-center"
+                data-bs-toggle="modal" data-bs-target="#wishlistModal">
+                <img src="/images/icons8-heart-30.png" alt="">&nbsp;WishList
+            </button>
+        </div>
+    </div>
+    <div class="row m-4">
+        <div class="col-md-8">
+            <div class="cart">
+                <p class="fs-3 text-center fw-medium">Cart Items</p>
+                <div class="tab table-responsive">
+                    <table class="table text-center">
+                        <thead style="position: sticky;top: 0;">
+                            <tr>
+                                <th scope="col" colspan="2" style="background-color: #444444;color: #F3F2EE;">Product
+                                </th>
+                                <th scope="col" style="background-color: #444444;color: #F3F2EE;">Quantity</th>
+                                <th scope="col" style="background-color: #444444;color: #F3F2EE;">Price</th>
+                                <th scope="col" style="background-color: #444444;color: #F3F2EE;"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="">
+                            <% if (userItems.length) { %>
+                                <% userItems[0].cartProducts.forEach(item=> { %>
+                                    <tr>
+                                        <td><img src="<%= item.prd_images[0] %>" alt="" height="70"></td>
+                                        <td class="text-start">
+                                            <%= item.prd_name %><br>
+                                            <% if (item.stock<1) { %>
+                                                <i class="text-danger fw-medium">OutOfStock</i>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="quantity" id="quantity" style="max-width: 70px;"
+                                                class="text-center" value="1">
+                                        </td>
+                                        <td>₹<%=Math.floor(item.mrp-((item.mrp*item.discount) /100)) %>/-</td>
+                                        <td><button class="bg-transparent border-0 "
+                                                onclick="removeCart(`<%= item._id %>`)"><img
+                                                    src="/images/icons8-delete-30.png" alt="" height="30"></button></td>
+                                    </tr>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td class="text-warning text-center fs-5"><i>Login to your Account for Your Cart</i></td>
+                                                <td class="text-warning text-center fs-5"></td>
+                                                <td class="text-warning text-center fs-5"></td>
+                                                <td class="text-warning text-center fs-5"></td>
+                                            </tr>
+                                            <% } %>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <% if (userItems.length) { %>
+                <div class="checkout-details px-5 py-3" style="background-color: #F3F2EE;">
+                    <p class="fs-5 fw-bold text-center border-bottom border-3">Cart Details</p>
+                    <p>Amount of items: <%= userItems[0].cartProducts.length %></p>
+                    <% let pos=0 %>
+                    <% userItems[0].cartProducts.forEach(item => { %>
+                        <% if (item.stock<1) { %>
+                            <% pos++ %>
+                        <% } %>
+                    <% }) %>
+                        <input type="hidden" id="prd-os" value="<%= pos %>">
+                        <p class="fs-6">Items Out of Stock: <b class="text-danger"><%= pos %></b></p>
+                    <% let dlcharge=(userItems[0].cartProducts.length)*17 %>
+                    <% if (dlcharge<80) { %>
+                        <input type="hidden" id="dlv-charge" value="<%= dlcharge %>">
+                        <i class="fs-6" >Delivery Charge: ₹<%= dlcharge %>/-</i><br>
+                        <% } else { %>
+                        <i class="fs-6">Delivery Charge: <b class="text-danger">Free</b></i><br>
+                    <% } %>
+                    <div class="text-center">
+                        <button class=" btn btn-dark px-5 my-3 rounded-0 " onclick="checkout()">Proceed To Checkout</button>
+                    </div>
+                </div>
+                <div class="razor-secure text-center mt-4">
+                    <img src="/images/razerpay.png" alt="" height="30"><br>
+                    <i>Guaranteed Safe Checkout</i>
+                </div>
+            <% } %>
+
+        </div>
+    </div>
+
+    <div class="wishlist col-md-5">
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="wishlistModal" tabindex="-1" aria-labelledby="wishlistModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="wishlistModalLabel">Wish List</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tab table-responsive">
+                            <table class="table text-center">
+                                <thead style="position: sticky;top: 0;">
+                                    <tr>
+                                        <th scope="col" colspan="2" style="background-color: #F3F2EE;color: #444444;">
+                                            Product
+                                        </th>
+                                        <th scope="col" style="background-color: #F3F2EE;color: #444444;">Price</th>
+                                        <th scope="col" colspan="2" style="background-color: #F3F2EE;color: #444444;">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="">
+                                    <% if (userItems.length) { %>
+                                        <% userItems[0].wishlistProducts.forEach(item=> { %>
+                                            <tr>
+                                                <td><img src="<%= item.prd_images[0] %>" alt="" height="70"></td>
+                                                <td class="text-start">
+                                                    <%= item.prd_name %>
+                                                </td>
+                                                <td>₹<%=Math.floor(item.mrp-((item.mrp*item.discount) /100)) %>/-</td>
+                                                <td><button class="btn btn-dark" onclick="addCart('<%= item._id %>')">Add
+                                                        Cart</button></td>
+                                                <td><button class="bg-transparent border-0 " onclick="remWishlist('<%= item._id %>')"><img
+                                                            src="/images/icons8-delete-30.png" alt="" height="30"></button>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                     <% } else { %>
+                                        <tr>
+                                            <td class="text-warning text-center fs-5"><i>Login to your Account for Wishlist</i></td>
+                                            
+                                        </tr>
+                                        <% } %>
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/userFooter.ejs') %>

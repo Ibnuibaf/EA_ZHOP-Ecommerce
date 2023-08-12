@@ -6,6 +6,7 @@ const productsCollection = require("../models/productsSchema")
 const usersCollection = require("../models/usersSchema");
 const categories = require('../models/categorySchema');
 const otpVerification = require('../models/otpSchema')
+const { ObjectId } = require('mongoose').Types;
 
 const securePass = async (pass) => {
     try {
@@ -13,7 +14,8 @@ const securePass = async (pass) => {
         return hashedPass
     } catch (error) {
         console.log(error.message);
-        res.render('error')
+        const statusCode = error.status || 500;
+        res.status(statusCode).send(error.message);
     }
 }
 const sendVerificationOTP = async (user, email) => {
@@ -31,7 +33,7 @@ const sendVerificationOTP = async (user, email) => {
             to: email,
             subject: "Verify Your Email in EA_ZHOP",
             html: `<p>Hey ${user} Here is your Verification OTP: <br> Your OTP is <b>${otp}</b> </p><br>
-                    <i>Otp will Expire in 1 Hour</i>`
+                    <i>Otp will Expire in 1 Minute</i>`
         }
 
         const hashOTP = await bcrypt.hash(otp, 10)
@@ -46,7 +48,8 @@ const sendVerificationOTP = async (user, email) => {
             if (err) {
                 console.log("Error occured");
                 console.log(err);
-                res.render('error')
+                const statusCode = err.status || 500;
+                res.status(statusCode).send(err.message);
             }
             else {
                 console.log('code is sent');
@@ -55,7 +58,8 @@ const sendVerificationOTP = async (user, email) => {
     } catch (error) {
         console.log(error.message);
 
-        res.render('error')
+        const statusCode = error.status || 500;
+        res.status(statusCode).send(error.message);
     }
 }
 
@@ -69,7 +73,7 @@ module.exports = {
         if (req.query.validation) {
             error = req.query.validation
         }
-    
+
         res.render('signin', { error })
     },
     postSignin: async (req, res) => {
@@ -93,7 +97,8 @@ module.exports = {
             }
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
     },
     loadSignUp: (req, res) => {
@@ -123,7 +128,7 @@ module.exports = {
             } else {
                 return res.redirect('/signup/?validation=Enter a valid Mobile Number')
             }
-            if (req.body.email.length ) {
+            if (req.body.email.length) {
                 email = req.body.email
             } else {
                 return res.redirect('/signup/?validation=Enter a valid Email')
@@ -158,13 +163,14 @@ module.exports = {
             } else {
                 console.log(email);
                 await sendVerificationOTP(frst_name, email)
-                req.session.otpStage=true
+                req.session.otpStage = true
                 res.redirect('/verification')
             }
 
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
     },
     loadVerificationPanel: (req, res) => {
@@ -173,7 +179,7 @@ module.exports = {
         if (req.query.error) {
             error = req.query.error
         }
-       
+
         res.render("OTPverify", { email, error })
     },
     verifyEmail: async (req, res) => {
@@ -191,7 +197,7 @@ module.exports = {
             const expiresAt = otps.expiresAt;
             const hashedOTP = otps.otp;
 
-            if (Date.now()>expiresAt) {
+            if (Date.now() > expiresAt) {
                 await otpVerification.deleteMany({ user: email });
                 return res.redirect('/verification?error=OTP has expired, try again!');
             }
@@ -212,16 +218,20 @@ module.exports = {
 
             if (userCreated) {
                 req.session.user = userCreated.email
-                req.session.otpStage=false
+                req.session.otpStage = false
                 return res.redirect('/?CreatedAccount=User Account have been Created');
             }
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
     },
-    loadProfile: (req, res) => {
+    loadProfiles: (req, res) => {
         res.render('profile')
+    },
+    loadOrders: (req, res) => {
+        res.render('myorders')
     },
     loadProductView: async (req, res) => {
         try {
@@ -249,7 +259,8 @@ module.exports = {
 
         } catch (error) {
             console.log(error.stack);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
     },
     loadProductDetails: async (req, res) => {
@@ -258,15 +269,23 @@ module.exports = {
             const user = req.session.user
             const productDetails = await productsCollection.findOne({ _id: prd_id })
             const userDetails = await usersCollection.findOne({ email: user })
-            let wishlist = false
+            let isWishlist
+            let isCart
             if (userDetails) {
-                wishlist = userDetails.wishlist.find((prd) => prd == prd_id)
+                isWishlist = userDetails.wishlist.find((prd) => prd == prd_id)
+                userDetails.cart.forEach(item => {
+                    if (item == prd_id) {
+                        isCart = true
+                        return
+                    }
+                });
             }
 
-            res.render('product-details', { productDetails, wishlist })
+            res.render('product-details', { productDetails, isWishlist, isCart })
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
 
     },
@@ -274,39 +293,102 @@ module.exports = {
         try {
             const prd_id = req.params.id
             const user = req.session.user
-            if (user) {
-                await usersCollection.updateOne({ email: user }, { $pull: { wishlist: prd_id } })
-                res.send(200)
-            }
+
+            const result = await usersCollection.updateOne({ email: user }, { $pull: { wishlist: prd_id } })
+
+
+
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
     },
     addToWishlist: async (req, res) => {
         try {
             const prd_id = req.params.id
             const user = req.session.user
-            if (user) {
-                await usersCollection.updateOne({ email: user }, { $push: { wishlist: prd_id } })
-                res.send(200)
-            }
+
+            const result = await usersCollection.updateOne({ email: user }, { $push: { wishlist: prd_id } })
+
+
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
+    },
+    addToCart: async (req, res) => {
+        try {
+            const prd_id = req.params.id
+            const user = req.session.user
+            const result = await usersCollection.updateOne({ email: user }, {$push:{cart:prd_id}})
+            res.send(200)
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
+    },
+    loadCart: async (req, res) => {
+        try {
+            const user = req.session.user
+            const userItems = await usersCollection.aggregate([
+                { $match: { email: user } },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "cart",
+                        foreignField: "_id",
+                        as: "cartProducts"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "wishlist",
+                        foreignField: "_id",
+                        as: "wishlistProducts"
+                    }
+                },
+            ])
+            console.log(userItems);
+            res.render('cart', { userItems })
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
+    },
+    removeFromCart: async (req, res) => {
+        try {
+            const prd_id = req.params.id
+            const user = req.session.user
+            const result = await usersCollection.updateOne({ email: user }, {$pull:{cart:prd_id}})
+            res.send(200)
+
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
+    },
+    loadCheckout: (req, res) => {
+        res.render('checkout')
     },
     logOut: (req, res) => {
         try {
             req.session.destroy((err) => {
                 console.log(err);
-                res.render('error')
+                const statusCode = err.status || 500;
+                res.status(statusCode).send(err.message);
             })
             res.clearCookie('connect.sid')
             res.redirect('/?message=User has been Logged Out!')
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
         }
     }
 }

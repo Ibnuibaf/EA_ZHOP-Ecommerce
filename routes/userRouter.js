@@ -25,13 +25,24 @@ router.get('/verification',middle.verificationPanel,controller.loadVerificationP
 router.post('/otp',middle.notLogged,controller.verifyEmail)
 
 //profile
-router.get('/user/profile',middle.loggedIn,controller.loadProfile)
+router.get('/user/profile',middle.loggedIn,controller.loadProfiles)
 
 //products-view
 router.get('/user/products', controller.loadProductView);
 router.get('/user/products/product-details/:id', controller.loadProductDetails)
-router.delete('/user/products/product-details/rem-wishlist/:id',middle.loggedIn,controller.removeFromWishlist)
-router.patch('/user/products/product-details/add-wishlist/:id',middle.loggedIn,controller.addToWishlist)
+router.patch('/user/add-wishlist/:id',middle.loggedIn,controller.addToWishlist)
+router.delete('/user/rem-wishlist/:id',middle.loggedIn,controller.removeFromWishlist)
+router.patch('/user/add-cart/:id',controller.addToCart)
+router.delete('/user/rem-cart/:id',controller.removeFromCart)
+
+//cart
+router.get('/user/cart',controller.loadCart)
+
+//orders
+router.get('/user/orders',middle.loggedIn,controller.loadOrders)
+
+//checkout
+router.post('/user/checkout',middle.loggedIn,controller.loadCheckout)
 
 //logout
 router.get('/logout',middle.loggedIn,controller.logOut)

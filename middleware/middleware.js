@@ -5,13 +5,14 @@ module.exports = {
         res.locals.error = req.app.get('env') === 'development' ? err : {};
 
         // render the error page
-        res.status(err.status || 500);
-        res.render('error');
+        const errStatus=err.status || 500
+        const errMessage=err.message
+        res.render('error', { errStatus,errMessage });
     },
     err404handle: function (req, res, next) {
         next(createError(404));
     },
-    portHandle:()=>{
+    portHandle: () => {
         console.log("Server Running on http://localhost:8888/");
     }
 

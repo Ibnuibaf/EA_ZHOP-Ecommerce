@@ -26,7 +26,7 @@
         <a class="navbar-brand mx-3" href="#">
           <img src="/images/EA_ZHOP_copyu.png" alt="Bootstrap" width="45" height="45" class="rounded-pill">
         </a>
-        
+
         <div class="collapse navbar-collapse " id="navbarNav">
           <ul class="nav-links navbar-nav mx-5  nav-justified">
             <li class="nav-item ">
@@ -36,7 +36,7 @@
               <a class="nav-link btn" href="/user/profile">Profile</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link btn" href="/user/products">Products</a>
+              <a class="nav-link btn" href="/user/products">Store</a>
             </li>
             <li class="nav-item">
               <a class="nav-link btn" href="/user/cart">Cart</a>
@@ -53,7 +53,7 @@
             </a>
           </div>
           <div class="wishlist">
-            <a href="/user/cart/#wishlist">
+            <a href="/user/cart">
               <img src="/images/icons8-wishlist-30.png" alt="" width="20" height="20">
             </a>
           </div>
@@ -75,4 +75,20 @@
       </div>
     </nav>
   </header>
-  <section >
+  <section>
+    <!-- Button to trigger the modal -->
+    <button id="openModalButton" style="display: none;">Open Modal</button>
+
+    <div class="modal" tabindex="-1" id="myModal">
+      <div class="modal-dialog">
+        <div class="modal-content" style="background-color: #F3F2EE;">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p id="modalMessage" class=""></p>
+          </div>
+        </div>
+      </div>
+    </div>

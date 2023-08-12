@@ -1,10 +1,242 @@
 <%- include('partials/userHeader.ejs') %>
 
-<div class="dashboard " style="max-width: fit-content;">
-    <h2>User Profile Details will be visible HERE!</h2>
-</div>
-<div class="col-12 logout m-5 "  style="max-width: fit-content;">
-    <a href="/logout" class="login btn btn-dark text-light ">logout</a>
-</div>
+    <div class="container-fluid tab-name d-flex align-items-center justify-content-between">
+        <h3 class="p-3 ">Profile&GreaterGreater;</h3>
+        <div class="nav-btn d-flex">
+            <div class=" orders  mx-4" style="max-width: fit-content;">
+                <a href="/user/orders" class="login btn btn-dark px-3">My Orders</a>
+            </div>
+            <div class=" logout  mx-4" style="max-width: fit-content;">
+                <a href="/logout" class="login btn btn-dark text-danger ">logout</a>
+            </div>
+        </div>
+    </div>
+    <div class="row m-4 justify-content-between">
+        <div class="user-info  col-md-8 ">
+            <div class="tab-header border-bottom border-secondary border-3 fs-4 fw-medium text-center ">PERSONAL DETAILS
+            </div>
+            <div class="profile-tab border-bottom border-secondary border-3">
+                <form action="/user/profile-update" method="post">
+                    <div class=" my-3 d-flex">
+                        <div class="first_name col mx-2">
+                            <label for="first_name" class="form-label">First Name</label><br>
+                            <input type="text" id="first_name" class="form-input" name="first_name">
+                        </div>
+                        <div class="last_name col mx-2">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-input" id="last_name" name="last_name">
+                        </div>
 
-<%- include('partials/userFooter.ejs') %>
+                    </div>
+                    <div class="my-3 d-flex">
+                        <div class="mobile_number col mx-2">
+                            <label for="mobile_number" class="form-label">Phone Number</label>
+                            <input type="text" class="form-input" id="mobile_number" name="mobile_number">
+                        </div>
+                        <div class="email col mx-2">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-input" id="email" name="email">
+                        </div>
+
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-dark px-5 ">Update Details</button>
+                    </div>
+                </form>
+                <div class="password-tab m-4 " style="width: fit-content;">
+                    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#change_password">
+                        Change Password
+                    </button>
+                
+                    <!-- Modal -->
+                    <div class="modal fade" id="change_password" tabindex="-1" aria-labelledby="change_passwordLabel" aria-hidden="true">
+                        <div class="modal-dialog ">
+                            <div class="modal-content " style="background-color: #F3F2EE;">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5 fw-bolder text-decoration-underline" id="change_password">Change Password</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="old_passwored col mx-2">
+                                        <label for="old_passwored" class="form-label">Old Password</label>
+                                        <input type="password" class="form-input" id="old_passwored" name="old_passwored">
+                                    </div>
+                                    <div class="new_password col mx-2 mt-5">
+                                        <label for="new_password" class="form-label">New Password</label>
+                                        <input type="password" class="form-input" id="new_password" name="new_password">
+                                    </div>
+                                    <div class="confirm_password col mx-2">
+                                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                        <input type="text" class="form-input" id="confirm_password" name="confirm_password">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-dark  " data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-dark text-warning ">Update Password</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="address row mt-4">
+                <div class="col-md-4">
+
+                    <div class="exist-address-box  bg-secondary text-light rounded p-4" style="height: fit-content;">
+                        <p class="fs-5 text-center my-2 text-decoration-underline">Your Addresses</p>
+                        <div class="each-address d-flex  text-truncate">
+                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
+                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
+                        </div>
+                        <div class="each-address d-flex  text-truncate">
+                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
+                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
+                        </div>
+                        <div class="each-address d-flex  text-truncate">
+                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
+                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
+                        </div>
+                        <div class="each-address d-flex  text-truncate">
+                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
+                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="address-tab col-md-8 border rounded p-2">
+
+                    <form action="/user/profile-update" method="post">
+
+                        <div class="local_address col mx-2">
+                            <label for="local_address" class="form-label">Address</label><br>
+                            <textarea id="local_address" class="form-input" name="local_address" rows="4"
+                                style="resize: none;"></textarea>
+                        </div>
+
+                        <div class="my-3 d-flex">
+                            <div class="Country col mx-2">
+                                <label for="Country" class="form-label">Country</label>
+                                <input type="text" class="form-input" id="Country" name="Country">
+                            </div>
+                            <div class="city col mx-2">
+                                <label for="city" class="form-label">Town/City</label>
+                                <input type="text" class="form-input" id="city" name="city">
+                            </div>
+
+                        </div>
+                        <div class="my-3 d-flex">
+                            <div class="District col mx-2">
+                                <label for="District" class="form-label">District</label>
+                                <input type="text" class="form-input" id="District" name="District">
+                            </div>
+                            <div class="State col mx-2">
+                                <label for="State" class="form-label">State</label>
+                                <input type="text" class="form-input" id="State" name="State">
+                            </div>
+
+                        </div>
+                        <div class="my-3 d-flex">
+                            <div class="postcode col mx-2">
+                                <label for="postcode" class="form-label">Postcode/ZIP</label>
+                                <input type="text" class="form-input" id="postcode" name="postcode">
+                            </div>
+                            <div class="altr_number col mx-2">
+                                <label for="altr_number" class="form-label">Alternative Phone Number</label>
+                                <input type="text" class="form-input" id="altr_number" name="altr_number">
+                            </div>
+
+                        </div>
+                        <div class="">
+                            <button type="submit" class="btn btn-dark px-5 ">Save Address</button>
+                            <input type="reset" value="Reset" class="btn btn-dark  ">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="wallet col mx-3  rounded shadow" style="background-color: #F3F2EE;height: fit-content;width: fit-content;">
+            <div class="d-flex justify-content-center">
+                <div class="wallet-card shadow-lg m-3 text-light p-3 rounded  ">
+                    <div class="wallet-header d-flex justify-content-between p-2 ">
+                        <p class="h3">Wallet</p>
+                        <div class="wallet-logo">
+                            <img src="/images/EA_ZHOP_copyu.png" alt="" height="50" class="rounded-pill">
+                        </div>
+                    </div>
+                    <div class="wallet-body d-flex justify-content-between opacity-75 mt-3">
+                        <div class="wallet-bal ">
+                            <label for="" class="opacity-25">Credit :</label>
+                            <h4>₹500/-</h4>
+                        </div>
+                        <div class="wallet-name ">
+                            <label for="" class="opacity-25">Name:</label>
+                            <h5>JOHN THOMAS</h5>
+                        </div>
+                    </div>
+                    <div class="wallet-footer ">
+                        <div class="razor-pay float-end">
+                            <img src="/images/razerpay.png" alt="" height="20">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="wallet-records py-4 ">
+                <div class="wallet-tab-area mx-5 shadow">
+
+                    <table class="table ">
+                        <thead class="text-center " style="position: sticky;top: 0;">
+                            <tr>
+
+                                <th scope="col " colspan="2" style="background-color: #444444;color: #F3F2EE;">
+                                    Transactions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
+                                <td style="background: transparent;">Mark</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
+                                <td style="background: transparent;">Mark</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
+                                <td style="background: transparent;">Mark</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
+                                <td style="background: transparent;">Mark</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
+                                <td style="background: transparent;">Mark</td>
+                            </tr>
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/user/products" class="btn btn-dark px-5 ">SHOP NOW</a>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    
+    <div class="account-deactivate-tab mt-5" style="width: fit-content;">
+        <div class="m-4 ">
+            <p class="fs-5 fw-bolder text-decoration-underline">Deactivate Account:</p>
+            <i class="text-warning fw-medium">*warining: You wallet will be <br>cleared and account can't be
+                recovered</i><br>
+            <button type="" class="btn btn-dark fs-5 mt-2 text-danger rounded-0">DEACTIVATE</button>
+        </div>
+    </div>
+
+
+    <%- include('partials/userFooter.ejs') %>
