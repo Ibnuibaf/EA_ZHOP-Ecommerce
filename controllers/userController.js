@@ -227,7 +227,7 @@ module.exports = {
             res.status(statusCode).send(error.message);
         }
     },
-    loadProfiles: (req, res) => {
+    loadProfile: (req, res) => {
         res.render('profile')
     },
     loadOrders: (req, res) => {
@@ -274,7 +274,7 @@ module.exports = {
             if (userDetails) {
                 isWishlist = userDetails.wishlist.find((prd) => prd == prd_id)
                 userDetails.cart.forEach(item => {
-                    if (item == prd_id) {
+                    if (item.prd_id == prd_id) {
                         isCart = true
                         return
                     }
@@ -322,7 +322,10 @@ module.exports = {
         try {
             const prd_id = req.params.id
             const user = req.session.user
-            const result = await usersCollection.updateOne({ email: user }, {$push:{cart:prd_id}})
+            const exist=await usersCollection.findOne({ email: user,"cart.prd_id":prd_id })
+            if(!exist){
+                const result = await usersCollection.updateOne({ email: user }, { $push: { cart: { prd_id } } })
+            }
             res.send(200)
         } catch (error) {
             console.log(error.message);
@@ -333,38 +336,114 @@ module.exports = {
     loadCart: async (req, res) => {
         try {
             const user = req.session.user
-            const userItems = await usersCollection.aggregate([
+            const cartItems = await usersCollection.aggregate([
                 { $match: { email: user } },
+                {
+                    $unwind: "$cart"
+                },
                 {
                     $lookup: {
                         from: "products",
-                        localField: "cart",
+                        localField: "cart.prd_id",
                         foreignField: "_id",
-                        as: "cartProducts"
+                        as: "cartProduct"
                     }
+                },
+                {
+                    $unwind: "$cartProduct"
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        email: 1,
+                        "cartProduct.prd_name": 1,
+                        "cartProduct.price": 1,
+                        "cartProduct.prd_images": 1,
+                        "cartProduct.mrp": 1,
+                        "cartProduct.discount": 1,
+                        "cartProduct._id": 1,
+                        "cartProduct.stock": 1,
+                        "cart.qty": 1
+                    }
+                }
+            ])
+            const wishlistItems = await usersCollection.aggregate([
+                { $match: { email: user } },
+                {
+                    $unwind: "$wishlist"
                 },
                 {
                     $lookup: {
                         from: "products",
                         localField: "wishlist",
                         foreignField: "_id",
-                        as: "wishlistProducts"
+                        as: "wishlistProduct"
                     }
                 },
+                {
+                    $unwind: "$wishlistProduct"
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        email: 1,
+                        "wishlistProduct.prd_name": 1,
+                        "wishlistProduct.prd_images": 1,
+                        "wishlistProduct._id": 1,
+                        "wishlistProduct.mrp": 1,
+                        "wishlistProduct.discount": 1,
+                    }
+                }
             ])
-            console.log(userItems);
-            res.render('cart', { userItems })
+            console.log(cartItems,wishlistItems);
+            res.render('cart', { cartItems,wishlistItems })
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
             res.status(statusCode).send(error.message);
         }
     },
+    updateQty: async (req, res) => {
+        const user = req.session.user
+        const productId = req.body.productId;
+        const action = req.body.action;
+
+        try {
+            const filter = {
+                "email": user,
+                "cart.prd_id": productId
+            };
+            
+            const update = {};
+            if (action == "increase") {
+                update.$inc = { "cart.$.qty": 1 }; // Increment quantity by 1
+            } else if (action == "decrease") {
+                update.$inc = { "cart.$.qty": -1 }; // Decrement quantity by 1
+            }
+            
+            const options = {
+                returnOriginal: false // Return the updated document
+            };
+            
+            const updatedDocument = await usersCollection.findOneAndUpdate(filter, update, options);
+            if (updatedDocument) {
+                console.log(updatedDocument);
+                const updatedCartItem = updatedDocument.cart.find(item => item.prd_id == productId);
+                const updatedQty = updatedCartItem ? updatedCartItem.qty : 0;
+                res.status(200).json({ quantity: updatedQty });
+            } else {
+                res.status(404).json({ message: "Product not found in cart." });
+            }
+        } catch (error) {
+            console.error("Error updating cart:", error);
+            res.status(500).json({ message: "Internal server error." });
+        }
+    },
     removeFromCart: async (req, res) => {
         try {
             const prd_id = req.params.id
             const user = req.session.user
-            const result = await usersCollection.updateOne({ email: user }, {$pull:{cart:prd_id}})
+            const result = await usersCollection.updateOne({ email: user }, { $pull: { cart: { prd_id } } })
             res.send(200)
 
         } catch (error) {

@@ -43,7 +43,13 @@ const usersSchema = new mongoose.Schema({
         transactions: [String]
 
     },
-    cart: [mongoose.Types.ObjectId],
+    cart: [{
+        prd_id:mongoose.Types.ObjectId,
+        qty:{
+            type:Number,
+            default:1
+        }
+    }],
     wishlist: [mongoose.Types.ObjectId],
     orders: [mongoose.Types.ObjectId],
     blocked: {

@@ -25,7 +25,7 @@ router.get('/verification',middle.verificationPanel,controller.loadVerificationP
 router.post('/otp',middle.notLogged,controller.verifyEmail)
 
 //profile
-router.get('/user/profile',middle.loggedIn,controller.loadProfiles)
+router.get('/user/profile',middle.loggedIn,controller.loadProfile)
 
 //products-view
 router.get('/user/products', controller.loadProductView);
@@ -37,6 +37,7 @@ router.delete('/user/rem-cart/:id',controller.removeFromCart)
 
 //cart
 router.get('/user/cart',controller.loadCart)
+router.patch('/user/cart/update-qty',controller.updateQty)
 
 //orders
 router.get('/user/orders',middle.loggedIn,controller.loadOrders)

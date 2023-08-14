@@ -2,7 +2,18 @@
 
 let img = []
 
+$(document).ready(function () {
+    $(".qty-inc").on("click", function () {
+        let productId = $(this).data("product-id");
+        updateQty(productId, "increase");
+    });
 
+    $(".qty-dec").on("click", function () {
+        let productId = $(this).data("product-id");
+        updateQty(productId, "decrease");
+    });
+
+});
 
 function remWishlist(id) {
     // console.log(id, "This is the id and thuis function is being called");
@@ -47,6 +58,20 @@ function removeCart(id) {
     }).catch((error) => {
         console.error('Error deleting product:', error);
         // Optionally handle error and show error message to the user
+    });
+}
+function updateQty(productId, action) {
+    $.ajax({
+        url: "/user/cart/update-qty",
+        method: "PATCH",
+        data: { productId: productId, action: action },
+        success: (response) => {
+            $(".quantity[data-product-id='" + productId + "']").val(response.quantity);
+            console.log("Cart updated successfully.");
+        },
+        error: function (error) {
+            console.error("Error updating cart: ", error);
+        }
     });
 }
 function checkout(){
