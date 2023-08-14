@@ -37,12 +37,13 @@ const sendVerificationOTP = async (user, email) => {
         }
 
         const hashOTP = await bcrypt.hash(otp, 10)
+        await otpVerification.deleteMany({ user: email });
         const otph = await otpVerification.create({
             user: email,
             otp: hashOTP,
             createdAt: Date.now(),
-            expiresAt: Date.now() + 60000
-        })
+            expiresAt: Date.now() + (60000 * 10) // Expires in 10 minutes
+        });
 
         transporter.sendMail(mailOptions, (err) => {
             if (err) {
@@ -101,6 +102,19 @@ module.exports = {
             res.status(statusCode).send(error.message);
         }
     },
+    forgetPass:(req,res)=>{
+
+    },
+    // newPass:(req,res)=>{
+    //     try {
+    //         const email=req.query.email
+    //         res.render('newpassword-tab',{email})
+    //     } catch (error) {
+    //         console.log(error.message);
+    //         const statusCode = error.status || 500;
+    //         res.status(statusCode).send(error.message);
+    //     }
+    // },
     loadSignUp: (req, res) => {
         let error
         if (req.query.validation) {
@@ -113,7 +127,7 @@ module.exports = {
     },
     registerUser: async (req, res) => {
         try {
-            req.session.paths = "signup"
+            req.session.paths = "registerUser"
             const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
             let frst_name, lst_name, mobile, email, dob, password
             if (req.body.first_name.length && req.body.last_name.length) {
@@ -182,6 +196,20 @@ module.exports = {
 
         res.render("OTPverify", { email, error })
     },
+    resendOTP:async(req,res)=>{
+        try {
+            const email=req.query.email
+            if(email){
+                sendVerificationOTP(email,email)
+            }else{
+                res.redirect('/signin?message=Specify your email')
+            }
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
+    },
     verifyEmail: async (req, res) => {
         try {
             let { email, otp } = req.body;
@@ -190,6 +218,7 @@ module.exports = {
             }
 
             const otps = await otpVerification.findOne({ user: email });
+            console.log(otps);
             if (!otps) {
                 return res.redirect(`/verification?error=Account record doesn't exist or has been verified already!`);
             }
@@ -207,28 +236,162 @@ module.exports = {
             if (!otpValid) {
                 return res.redirect('/verification?error=OTP is not matching');
             }
-
-            const userCreated = await usersCollection.create({
-                first_name: req.session.frst_name,
-                last_name: req.session.lst_name,
-                mobile_number: req.session.mobile,
-                email: req.session.email,
-                password: req.session.password
-            });
-
-            if (userCreated) {
-                req.session.user = userCreated.email
+            let userCreated
+            if (req.session.paths == "registerUser") {
+                userCreated = await usersCollection.create({
+                    first_name: req.session.frst_name,
+                    last_name: req.session.lst_name,
+                    mobile_number: req.session.mobile,
+                    email: req.session.email,
+                    password: req.session.password
+                });
                 req.session.otpStage = false
+                req.session.user = userCreated.email
                 return res.redirect('/?CreatedAccount=User Account have been Created');
+            } else if (req.session.paths == "emailUpdate") {
+                req.session.otpStage = false
+                const updated = await usersCollection.updateOne({ email: req.session.user },
+                    {
+                        $set: {
+                            first_name: req.session.frst_name,
+                            last_name: req.session.lst_name,
+                            mobile_number: req.session.mobile,
+                            email: req.session.email
+                        }
+                    })
+                if (updated.modifiedCount) {
+                    req.session.user = req.session.email
+                    return res.redirect('/user/profile?message=Profile Updated Successfully')
+                } else {
+                    throw new Error('unable to update user now! Try again Later')
+                }
+            } else if (req.session.paths == "forgetPass") {
+                req.session.otpStage = false
+                return res.redirect('/user/new-password')
+            } else {
+                return res.redirect('/')
             }
+
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
             res.status(statusCode).send(error.message);
         }
     },
-    loadProfile: (req, res) => {
-        res.render('profile')
+    loadProfile: async (req, res) => {
+        const userDetails = req.userDetails
+
+        res.render('profile', { userDetails })
+    },
+    updateProfile: async (req, res) => {
+        try {
+            const updatedDetails = req.body
+            if (updatedDetails.email != req.session.user) {
+                const email = updatedDetails.email
+                req.session.paths = "emailUpdate"
+                req.session.otpStage = true
+                req.session.frst_name = updatedDetails.first_name
+                req.session.lst_name = updatedDetails.last_name
+                req.session.mobile = updatedDetails.mobile_number
+                req.session.email = updatedDetails.email
+                sendVerificationOTP(email, email)
+                return res.redirect('/verification')
+            }
+            const updated = await usersCollection.updateOne({ _id: updatedDetails.user_id },
+                {
+                    $set: {
+                        first_name: updatedDetails.first_name,
+                        last_name: updatedDetails.last_name,
+                        mobile_number: updatedDetails.mobile_number,
+                        email: updatedDetails.email
+                    }
+                })
+            if (updated.modifiedCount) {
+                req.session.user = updatedDetails.email
+                res.redirect('/user/profile?message=Profile Updated Successfully')
+            } else {
+                res.send(500)
+            }
+        } catch (error) {
+            console.log(error);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
+    },
+    updatePassword: async (req, res) => {
+        try {
+            const passDetails = req.body
+            const userDetails = req.userDetails
+            const isMatch = await bcrypt.compare(passDetails.old_password, userDetails.password)
+            if (isMatch) {
+                if (passDetails.new_password == passDetails.confirm_password) {
+                    const hashedPass = await securePass(passDetails.new_password)
+                    await usersCollection.updateOne({ _id: userDetails._id }, { $set: { password: hashedPass } })
+                    res.redirect('/user/profile?message=Password Updated!')
+                } else {
+                    res.redirect('/user/profile?message=both password does not matches')
+                }
+            } else {
+                res.redirect('/user/profile?message=Old password does not matches')
+            }
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.send(statusCode, error.message)
+        }
+    },
+    uploadAddress: async (req, res) => {
+        try {
+            const userDetails = req.userDetails
+            const address = req.body
+            if (address.local_address && address.Country && address.city && address.District && address.State && address.postcode) {
+                if (userDetails.address.length >= 4) {
+                    await usersCollection.updateOne({ _id: userDetails._id }, { $pop: { address: -1 } })
+                }
+                await usersCollection.updateOne({ _id: userDetails._id },
+                    {
+                        $push: {
+                            address: {
+                                locality: address.local_address,
+                                country: address.Country,
+                                city: address.city,
+                                district: address.District,
+                                state: address.State,
+                                postcode: address.postcode,
+                                altr_number: address.altr_number
+                            }
+                        }
+                    }
+                )
+                res.redirect('/user/profile?message=Added new Address')
+            } else {
+                res.redirect('/user/profile?message=Fill all the address field')
+            }
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.send(statusCode, error.message)
+        }
+    },
+    deleteAddress: async (req, res) => {
+        try {
+            const address = req.params.id
+            const userDetails = req.userDetails
+            await usersCollection.updateOne({ _id: userDetails._id },
+                {
+                    $pull: {
+                        address: {
+                            _id: address
+                        }
+                    }
+                }
+            )
+            res.send(200)
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.send(statusCode, error.message)
+        }
     },
     loadOrders: (req, res) => {
         res.render('myorders')
@@ -295,6 +458,7 @@ module.exports = {
             const user = req.session.user
 
             const result = await usersCollection.updateOne({ email: user }, { $pull: { wishlist: prd_id } })
+            res.send(200)
 
 
 
@@ -310,7 +474,7 @@ module.exports = {
             const user = req.session.user
 
             const result = await usersCollection.updateOne({ email: user }, { $push: { wishlist: prd_id } })
-
+            res.send(200)
 
         } catch (error) {
             console.log(error.message);
@@ -321,10 +485,15 @@ module.exports = {
     addToCart: async (req, res) => {
         try {
             const prd_id = req.params.id
+            const prdDetails=await productsCollection.findOne({_id:prd_id})
+            console.log(prdDetails);
+
             const user = req.session.user
-            const exist=await usersCollection.findOne({ email: user,"cart.prd_id":prd_id })
-            if(!exist){
-                const result = await usersCollection.updateOne({ email: user }, { $push: { cart: { prd_id } } })
+            const exist = await usersCollection.findOne({ email: user, "cart.prd_id": prd_id })
+            if (!exist) {
+                const unit_prize=Math.floor(prdDetails.mrp-((prdDetails.mrp*prdDetails.discount)/100))
+                const total_prize=unit_prize
+                const result = await usersCollection.updateOne({ email: user }, { $push: { cart: { prd_id ,unit_prize,total_prize} } })
             }
             res.send(200)
         } catch (error) {
@@ -363,7 +532,9 @@ module.exports = {
                         "cartProduct.discount": 1,
                         "cartProduct._id": 1,
                         "cartProduct.stock": 1,
-                        "cart.qty": 1
+                        "cart.qty": 1,
+                        "cart.unit_prize": 1,
+                        "cart.total_prize": 1,
                     }
                 }
             ])
@@ -395,8 +566,8 @@ module.exports = {
                     }
                 }
             ])
-            console.log(cartItems,wishlistItems);
-            res.render('cart', { cartItems,wishlistItems })
+            console.log(cartItems, wishlistItems);
+            res.render('cart', { cartItems, wishlistItems })
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
@@ -404,33 +575,33 @@ module.exports = {
         }
     },
     updateQty: async (req, res) => {
-        const user = req.session.user
+        const user = req.session.user;
         const productId = req.body.productId;
         const action = req.body.action;
-
+    
         try {
             const filter = {
                 "email": user,
                 "cart.prd_id": productId
             };
-            
+    
             const update = {};
             if (action == "increase") {
-                update.$inc = { "cart.$.qty": 1 }; // Increment quantity by 1
+                update.$inc = { "cart.$.qty": 1 };
             } else if (action == "decrease") {
-                update.$inc = { "cart.$.qty": -1 }; // Decrement quantity by 1
+                update.$inc = { "cart.$.qty": -1 };
             }
-            
+            const cartItem = await usersCollection.findOne(filter, { "cart.$": 1 });
+            const updatedQty = cartItem.cart[0].qty + (action == "increase" ? 1 : -1);
+            const totalPrize = updatedQty * cartItem.cart[0].unit_prize;
+            update.$set = { "cart.$.total_prize": totalPrize };
             const options = {
-                returnOriginal: false // Return the updated document
+                returnOriginal: false
             };
-            
             const updatedDocument = await usersCollection.findOneAndUpdate(filter, update, options);
             if (updatedDocument) {
-                console.log(updatedDocument);
                 const updatedCartItem = updatedDocument.cart.find(item => item.prd_id == productId);
-                const updatedQty = updatedCartItem ? updatedCartItem.qty : 0;
-                res.status(200).json({ quantity: updatedQty });
+                res.status(200).json({ quantity: updatedQty, total_prize:updatedCartItem.total_prize });
             } else {
                 res.status(404).json({ message: "Product not found in cart." });
             }
@@ -459,8 +630,7 @@ module.exports = {
         try {
             req.session.destroy((err) => {
                 console.log(err);
-                const statusCode = err.status || 500;
-                res.status(statusCode).send(err.message);
+                res.status(500)
             })
             res.clearCookie('connect.sid')
             res.redirect('/?message=User has been Logged Out!')
@@ -469,5 +639,15 @@ module.exports = {
             const statusCode = error.status || 500;
             res.status(statusCode).send(error.message);
         }
+    },
+    deactivateAccount:async(req,res)=>{
+        const userDetails = req.userDetails
+        await usersCollection.updateOne({ _id: userDetails._id },{$set:{blocked:true}})
+        req.session.destroy((err) => {
+            console.log(err);
+            res.status(500)
+        })
+        res.clearCookie('connect.sid')
+        res.redirect('/?message=Your Account has been destroyed')
     }
 }

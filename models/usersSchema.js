@@ -5,30 +5,26 @@ const decimal128 = require('mongoose/lib/types/decimal128')
 
 const usersSchema = new mongoose.Schema({
     first_name: {
-        type: String,
-        required: true
+        type: String
     },
     last_name: {
-        type: String,
-        required: true
+        type: String
     },
     mobile_number: {
-        type: Number,
-        required: true
+        type: Number
     },
     email: {
-        type: String,
-        required: true
+        type: String
     },
     password: {
-        type: String,
-        required: true
+        type: String
     },
     address: {
         type: [{
             locality: String,
             country: String,
             district: String,
+            state:String,
             city: String,
             altr_number: Number,
             postcode: Number
@@ -48,7 +44,14 @@ const usersSchema = new mongoose.Schema({
         qty:{
             type:Number,
             default:1
-        }
+        },
+        unit_prize:{
+            type:Number
+        },
+        total_prize:{
+            type:Number
+        },
+
     }],
     wishlist: [mongoose.Types.ObjectId],
     orders: [mongoose.Types.ObjectId],
@@ -57,7 +60,7 @@ const usersSchema = new mongoose.Schema({
         default: false
     }
 }, {
-    suppressWarning: true // Set suppressWarning option to true
+    suppressWarning: true 
 })
 
 

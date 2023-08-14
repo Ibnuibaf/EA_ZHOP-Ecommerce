@@ -43,7 +43,7 @@ module.exports = {
     loadUsersManagement: async (req, res) => {
 
         try {
-            
+
             const searchQuery = req.query.search
             let usersList = await usersCollection.find({})
             if (searchQuery) {
@@ -194,6 +194,10 @@ module.exports = {
                     name: cat.cat_name,
                 }, { upsert: true })
                 return res.redirect('/admin/products-management')
+            }
+            const existName = await categories.findOne({ name: cat.cat_name })
+            if (existName) {
+                return res.redirect('/admin/products-management?message=category exist')
             }
             await categories.create({
                 name: cat.cat_name

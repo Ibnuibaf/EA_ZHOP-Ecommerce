@@ -20,64 +20,82 @@
                     <div class=" my-3 d-flex">
                         <div class="first_name col mx-2">
                             <label for="first_name" class="form-label">First Name</label><br>
-                            <input type="text" id="first_name" class="form-input" name="first_name">
+                            <input type="text" id="first_name" class="form-input profile-details" name="first_name"
+                                value="<%= userDetails.first_name %>">
                         </div>
                         <div class="last_name col mx-2">
                             <label for="last_name" class="form-label">Last Name</label>
-                            <input type="text" class="form-input" id="last_name" name="last_name">
+                            <input type="text" class="form-input profile-details" id="last_name" name="last_name"
+                                value="<%= userDetails.last_name %>">
                         </div>
 
                     </div>
                     <div class="my-3 d-flex">
                         <div class="mobile_number col mx-2">
                             <label for="mobile_number" class="form-label">Phone Number</label>
-                            <input type="text" class="form-input" id="mobile_number" name="mobile_number">
+                            <input type="text" class="form-input profile-details" id="mobile_number"
+                                name="mobile_number" value="<%= userDetails.mobile_number %>">
                         </div>
                         <div class="email col mx-2">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-input" id="email" name="email">
+                            <input type="email" class="form-input profile-details" id="email" name="email"
+                                value="<%= userDetails.email %>">
                         </div>
-
+                        <input type="hidden" class="form-input profile-details" id="user_id" name="user_id"
+                            value="<%= userDetails._id %>">
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-dark px-5 ">Update Details</button>
+                        <button type="submit" class="btn btn-dark px-5 " id="profile-submit"
+                            style="display: none;">Update Details</button>
                     </div>
                 </form>
                 <div class="password-tab m-4 " style="width: fit-content;">
-                    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#change_password">
+                    <button type="button" class="btn btn-dark " data-bs-toggle="modal"
+                        data-bs-target="#change_password">
                         Change Password
                     </button>
-                
+
                     <!-- Modal -->
-                    <div class="modal fade" id="change_password" tabindex="-1" aria-labelledby="change_passwordLabel" aria-hidden="true">
+                    <div class="modal fade" id="change_password" tabindex="-1" aria-labelledby="change_passwordLabel"
+                        aria-hidden="true">
                         <div class="modal-dialog ">
                             <div class="modal-content " style="background-color: #F3F2EE;">
                                 <div class="modal-header">
-                                    <h1 class="modal-title fs-5 fw-bolder text-decoration-underline" id="change_password">Change Password</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <h1 class="modal-title fs-5 fw-bolder text-decoration-underline"
+                                        id="change_password">Change Password</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <div class="old_passwored col mx-2">
-                                        <label for="old_passwored" class="form-label">Old Password</label>
-                                        <input type="password" class="form-input" id="old_passwored" name="old_passwored">
-                                    </div>
-                                    <div class="new_password col mx-2 mt-5">
-                                        <label for="new_password" class="form-label">New Password</label>
-                                        <input type="password" class="form-input" id="new_password" name="new_password">
-                                    </div>
-                                    <div class="confirm_password col mx-2">
-                                        <label for="confirm_password" class="form-label">Confirm New Password</label>
-                                        <input type="text" class="form-input" id="confirm_password" name="confirm_password">
-                                    </div>
+                                    <form action="/user/update-password" method="post">
+                                        <div class="old_passwored col mx-2">
+                                            <label for="old_passwored" class="form-label">Old Password</label>
+                                            <input type="password" class="form-input " id="old_passwored"
+                                                name="old_password">
+                                        </div>
+                                        <div class="new_password col mx-2 mt-5">
+                                            <label for="new_password" class="form-label">New Password</label>
+                                            <input type="password" class="form-input " id="new_password"
+                                                name="new_password">
+                                        </div>
+                                        <div class="confirm_password col mx-2">
+                                            <label for="confirm_password" class="form-label">Confirm New
+                                                Password</label>
+                                            <input type="text" class="form-input" id="confirm_password"
+                                                name="confirm_password">
+                                            <input type="hidden" class="form-input profile-details" id="user_id"
+                                                name="user_id" value="<%= userDetails._id %>">
+                                        </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-dark  " data-bs-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn btn-dark text-warning ">Update Password</button>
+                                    <button type="submit" class="btn btn-dark text-warning ">Update Password</button>
                                 </div>
+                                </form>
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
             <div class="address row mt-4">
@@ -85,65 +103,74 @@
 
                     <div class="exist-address-box  bg-secondary text-light rounded p-4" style="height: fit-content;">
                         <p class="fs-5 text-center my-2 text-decoration-underline">Your Addresses</p>
-                        <div class="each-address d-flex  text-truncate">
-                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
-                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                        </div>
-                        <div class="each-address d-flex  text-truncate">
-                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
-                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                        </div>
-                        <div class="each-address d-flex  text-truncate">
-                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
-                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                        </div>
-                        <div class="each-address d-flex  text-truncate">
-                            <a href=""><img src="/images/icons8-delete-30.png" alt="" height="20"></a>
-                            <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                        </div>
-
+                        <% if (userDetails.address.length) { %>
+                            <% userDetails.address.forEach(address=> { %>
+                                <div class="each-address d-flex   text-truncate">
+                                    <button  class="border-0 bg-transparent p-0"  onclick="removeAddress('<%= address._id %>')"><img src="/images/icons8-delete-30.png" alt="" height="20"></button>
+                                    <p class="px-2 ">
+                                        <%= address.locality %>,
+                                        <%= address.city %>,
+                                        <%= address.district %>,
+                                        <%= address.state %>,
+                                        <%= address.country %>,
+                                        <%=address.altr_number %>,
+                                        <%= address.postcode %>,
+                                    </p>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div class="each-address d-flex justify-content-center text-truncate">
+                                            <p class="px-2 text-warning">No Address Details Saved</p>
+                                        </div>
+                                        <% } %>
                     </div>
                 </div>
                 <div class="address-tab col-md-8 border rounded p-2">
 
-                    <form action="/user/profile-update" method="post">
+                    <form action="/user/add-address" method="post">
 
                         <div class="local_address col mx-2">
                             <label for="local_address" class="form-label">Address</label><br>
                             <textarea id="local_address" class="form-input" name="local_address" rows="4"
-                                style="resize: none;"></textarea>
+                                style="resize: none;" placeholder="Enter your address"></textarea>
                         </div>
 
                         <div class="my-3 d-flex">
                             <div class="Country col mx-2">
                                 <label for="Country" class="form-label">Country</label>
-                                <input type="text" class="form-input" id="Country" name="Country">
+                                <input type="text" class="form-input" id="Country" name="Country"
+                                    placeholder="Enter your country">
                             </div>
                             <div class="city col mx-2">
                                 <label for="city" class="form-label">Town/City</label>
-                                <input type="text" class="form-input" id="city" name="city">
+                                <input type="text" class="form-input" id="city" name="city"
+                                    placeholder="Enter your town/city">
                             </div>
 
                         </div>
                         <div class="my-3 d-flex">
                             <div class="District col mx-2">
                                 <label for="District" class="form-label">District</label>
-                                <input type="text" class="form-input" id="District" name="District">
+                                <input type="text" class="form-input" id="District" name="District"
+                                    placeholder="Enter your district">
                             </div>
                             <div class="State col mx-2">
                                 <label for="State" class="form-label">State</label>
-                                <input type="text" class="form-input" id="State" name="State">
+                                <input type="text" class="form-input" id="State" name="State"
+                                    placeholder="Enter your state">
                             </div>
 
                         </div>
                         <div class="my-3 d-flex">
                             <div class="postcode col mx-2">
                                 <label for="postcode" class="form-label">Postcode/ZIP</label>
-                                <input type="text" class="form-input" id="postcode" name="postcode">
+                                <input type="text" class="form-input" id="postcode" name="postcode"
+                                    placeholder="Enter your postcode/ZIP">
                             </div>
                             <div class="altr_number col mx-2">
                                 <label for="altr_number" class="form-label">Alternative Phone Number</label>
-                                <input type="text" class="form-input" id="altr_number" name="altr_number">
+                                <input type="text" class="form-input" id="altr_number" name="altr_number"
+                                    placeholder="Enter an alternative phone number">
                             </div>
 
                         </div>
@@ -155,7 +182,8 @@
                 </div>
             </div>
         </div>
-        <div class="wallet col mx-3  rounded shadow" style="background-color: #F3F2EE;height: fit-content;width: fit-content;">
+        <div class="wallet col mx-3  rounded shadow"
+            style="background-color: #F3F2EE;height: fit-content;width: fit-content;">
             <div class="d-flex justify-content-center">
                 <div class="wallet-card shadow-lg m-3 text-light p-3 rounded  ">
                     <div class="wallet-header d-flex justify-content-between p-2 ">
@@ -167,11 +195,13 @@
                     <div class="wallet-body d-flex justify-content-between opacity-75 mt-3">
                         <div class="wallet-bal ">
                             <label for="" class="opacity-25">Credit :</label>
-                            <h4>₹500/-</h4>
+                            <h4>₹ <%= userDetails.wallet.balance %> /-</h4>
                         </div>
                         <div class="wallet-name ">
                             <label for="" class="opacity-25">Name:</label>
-                            <h5>JOHN THOMAS</h5>
+                            <h5>
+                                <%= userDetails.first_name %>_<%= userDetails.last_name %>
+                            </h5>
                         </div>
                     </div>
                     <div class="wallet-footer ">
@@ -193,29 +223,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
-                                <td style="background: transparent;">Mark</td>
-                            </tr>
-                            <tr>
-                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
-                                <td style="background: transparent;">Mark</td>
-                            </tr>
-                            <tr>
-                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
-                                <td style="background: transparent;">Mark</td>
-                            </tr>
-                            <tr>
-                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
-                                <td style="background: transparent;">Mark</td>
-                            </tr>
-                            <tr>
-                                <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
-                                <td style="background: transparent;">Mark</td>
-                            </tr>
-
-
-
+                            <% if (userDetails.wallet.transactions.length) { %>
+                                <% userDetails.wallet.transactions.forEach(transaction=> { %>
+                                    <tr>
+                                        <td style="width: 10px;background: transparent;">&GreaterGreater;</td>
+                                        <td style="background: transparent;">
+                                            <%= transaction %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td style="width: 10px;background: transparent;"></td>
+                                                <td style="background: transparent;" class="text-warning">No
+                                                    Transactions Yet!</td>
+                                            </tr>
+                                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -223,18 +246,18 @@
                     <a href="/user/products" class="btn btn-dark px-5 ">SHOP NOW</a>
                 </div>
             </div>
-            
+
         </div>
-        
+
     </div>
-    
-    
+
+
     <div class="account-deactivate-tab mt-5" style="width: fit-content;">
         <div class="m-4 ">
             <p class="fs-5 fw-bolder text-decoration-underline">Deactivate Account:</p>
             <i class="text-warning fw-medium">*warining: You wallet will be <br>cleared and account can't be
                 recovered</i><br>
-            <button type="" class="btn btn-dark fs-5 mt-2 text-danger rounded-0">DEACTIVATE</button>
+                <a href="/deactivate-user" id="deactivateLink" class="btn btn-dark fs-5 mt-2 text-danger rounded-0">DEACTIVATE</a>
         </div>
     </div>
 

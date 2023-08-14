@@ -34,20 +34,27 @@
                                             <%= item.cartProduct.prd_name %><br>
                                                 <% if (item.cartProduct.stock<1) { %>
                                                     <i class="text-danger fw-medium">OutOfStock</i>
-                                                    <% } %>
+                                                    <% } else { %>
+                                                        <i class=" "><b>
+                                                                <%= item.cartProduct.stock %>
+                                                            </b> peice left</i>
+                                                        <% } %><br>
+                                                            <i class="fw-medium">₹<%=Math.floor(item.cartProduct.mrp-((item.cartProduct.mrp*item.cartProduct.discount) /100))%>/-</i>
                                         </td>
                                         <td>
                                             <div class="d-flex ">
                                                 <button class="fs-5 btn btn-dark mx-1 p-1 qty-inc"
                                                     data-product-id="<%= item.cartProduct._id %>">+</button>
-                                                <input type="number" class="form-input text-center quantity"
-                                                    style="max-width: 50px;" data-product-id="<%= item.cartProduct._id %>"
+                                                <input type="text" class="form-input text-center quantity"
+                                                    style="max-width: 50px;"
+                                                    data-product-id="<%= item.cartProduct._id %>"
                                                     value="<%= item.cart.qty %>" readonly>
                                                 <button class="fs-5 btn btn-dark mx-1 p-1 qty-dec"
                                                     data-product-id="<%= item.cartProduct._id %>">-</button>
                                             </div>
                                         </td>
-                                        <td>₹<%=Math.floor(item.cartProduct.mrp-((item.cartProduct.mrp*item.cartProduct.discount) /100)) %>/-</td>
+                                        <td class="priceForQty fw-bold fs-5 text-end" data-product-id="<%= item.cartProduct._id %>">
+                                            ₹<%= item.cart.total_prize %>/-</td>
                                         <td><button class="bg-transparent border-0 "
                                                 onclick="removeCart(`<%= item.cartProduct._id %>`)"><img
                                                     src="/images/icons8-delete-30.png" alt="" height="30"></button></td>
@@ -135,11 +142,13 @@
                                     <% if (wishlistItems.length) { %>
                                         <% wishlistItems.forEach(item=> { %>
                                             <tr>
-                                                <td><img src="<%= item.wishlistProduct.prd_images[0] %>" alt="" height="70"></td>
+                                                <td><img src="<%= item.wishlistProduct.prd_images[0] %>" alt=""
+                                                        height="70"></td>
                                                 <td class="text-start">
                                                     <%= item.wishlistProduct.prd_name %>
                                                 </td>
-                                                <td>₹<%=Math.floor(item.wishlistProduct.mrp-((item.wishlistProduct.mrp*item.wishlistProduct.discount) /100)) %>/-</td>
+                                                <td>₹<%=Math.floor(item.wishlistProduct.mrp-((item.wishlistProduct.mrp*item.wishlistProduct.discount)
+                                                        /100)) %>/-</td>
                                                 <td><button class="btn btn-dark"
                                                         onclick="addCart('<%= item.wishlistProduct._id %>')">Add
                                                         Cart</button></td>
@@ -152,7 +161,8 @@
                                             <% }) %>
                                                 <% } else { %>
                                                     <tr>
-                                                        <td class="text-warning text-center fs-5"><i>Add Items to Wishlist</i></td>
+                                                        <td class="text-warning text-center fs-5"><i>Add Items to
+                                                                Wishlist</i></td>
 
                                                     </tr>
                                                     <% } %>

@@ -15,6 +15,18 @@ $(document).ready(function () {
 
 });
 
+
+const inputFields = document.querySelectorAll('.profile-details');
+const submitButton = document.getElementById('profile-submit');
+
+inputFields.forEach(input => {
+    input.addEventListener('input', () => {
+        submitButton.style.display = 'block';
+    });
+});
+
+
+
 function remWishlist(id) {
     // console.log(id, "This is the id and thuis function is being called");
     fetch(`/user/rem-wishlist/${id}`, {
@@ -67,6 +79,7 @@ function updateQty(productId, action) {
         data: { productId: productId, action: action },
         success: (response) => {
             $(".quantity[data-product-id='" + productId + "']").val(response.quantity);
+            $(".priceForQty[data-product-id='" + productId + "']").text("₹" + response.total_prize + "/-")
             console.log("Cart updated successfully.");
         },
         error: function (error) {
@@ -74,20 +87,33 @@ function updateQty(productId, action) {
         }
     });
 }
-function checkout(){
-    const dlv_charge=document.getElementById("dlv-charge").value
-    const prd_os=document.getElementById("prd-os").value
-    let data={
+function removeAddress(id) {
+    fetch(`/user/rem-address/${id}`, {
+        method: 'DELETE',
+    }).then(() => {
+        window.location.reload()
+    }).catch((error) => {
+        console.error('Error remove address:', error);
+    });
+}
+function checkout() {
+    const dlv_charge = document.getElementById("dlv-charge").value
+    const prd_os = document.getElementById("prd-os").value
+    let data = {
         dlv_charge,
         prd_os
     }
     fetch(`/user/checkout`, {
-        method:'POST',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body:JSON.stringify(data)
+        body: JSON.stringify(data)
     })
+}
+function resendOTP(){
+    const email=document.getElementById("email")
+    window.location.href=`/forgetpassword?email=${email}`
 }
 function filter(from, to, cat) {
     window.location.href = `/user/products?min=${from}&max=${to}&category=${cat}`
@@ -302,10 +328,17 @@ window.addEventListener('load', function () {
     if (getQueryParam('CreatedAccount')) { message = getQueryParam('CreatedAccount'); }
     else if (getQueryParam('UserLogged')) { message = getQueryParam('UserLogged'); }
     else if (getQueryParam('message')) { message = getQueryParam('message') }
+    console.log(message);
     if (message) {
         const modal = new bootstrap.Modal(document.getElementById("myModal"));
         const modalMessage = document.getElementById("modalMessage");
         modalMessage.textContent = message;
         modal.show();
+    }
+});
+
+document.getElementById("deactivateLink").addEventListener("click", function (event) {
+    if (!confirm("Deactivate your account Permanently?")) {
+        event.preventDefault();
     }
 });
