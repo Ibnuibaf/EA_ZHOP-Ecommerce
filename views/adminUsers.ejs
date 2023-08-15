@@ -24,50 +24,57 @@
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Name</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Email</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Phone Number</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Orders</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Wallet</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% usersList.forEach(user => { %>
-                        <% if (!user.blocked) { %>
-                            <tr class="data-row ">
-                                <td><button class="btn btn-dark p-1" onclick="confirms(event,blockUser('<%= user._id %>'))">Block User</button></td>
-                                <td><%= user.first_name %>_<%= user.last_name %></td>
-                                <td><%= user.email %></td>
-                                <td><%= user.mobile_number %></td>
-                                <td><%= user.orders.length%></td>
-                                <td><%= user.wallet.balance %></td>
-                            </tr>
-                        <% } %>
-                    <% }) %>
+                    <% usersList.forEach(user=> { %>
+
+                        <tr class="data-row ">
+                            <% if (user.blocked) { %>
+                                <td><button class="btn btn-dark p-1"
+                                        onclick="confirms(event,unblockUser('<%= user._id %>'))">UnBlock User</button>
+                                </td>
+
+                                <% } else { %>
+                                    <td><button class="btn btn-dark p-1"
+                                            onclick="confirms(event,blockUser('<%= user._id %>'))">Block User</button>
+                                    </td>
+
+                                    <% } %>
+                                        <td>
+                                            <%= user.first_name %>_<%= user.last_name %>
+                                        </td>
+                                        <td>
+                                            <%= user.email %>
+                                        </td>
+                                        <td>
+                                            <%= user.mobile_number %>
+                                        </td>
+                                        <td>
+                                            <%= user.wallet.balance %>
+                                        </td>
+                        </tr>
+
+                        <% }) %>
 
                 </tbody>
             </table>
         </div>
     </div>
-    <div class="blocked-user m-5 col-6" style="border: none;background-color: #F3F2EE;">
+    <!-- <div class="blocked-user m-5 col-6" style="border: none;background-color: #F3F2EE;">
         <div class="tab-hea  border-bottom border-2 my-3">
             <h3>Blocked Users</h3>
         </div>
-        <div class="tab px-3" >
+        <div class="tab px-3">
             <table class="table ">
                 <tbody>
 
-                    <% usersList.forEach(user => { %>
-                        <% if (user.blocked) { %>
-                            <tr class="data-row ">
-                                <td><%= user.first_name %>_<%= user.last_name %></td>
-                                <td><%= user.email %></td>
-                                <td><%= user.mobile_number %></td>
-                                <td><button class="btn btn-dark p-1" onclick="confirms(event,unblockUser('<%= user._id %>'))">UnBlock User</button></td>
-                            </tr>
-                        <% } %>
-                    <% }) %>
+                   
 
                 </tbody>
             </table>
         </div>
-    </div>
+    </div> -->
 
     <%- include('partials/adminFooter.ejs') %>

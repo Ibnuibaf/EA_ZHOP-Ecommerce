@@ -97,22 +97,14 @@ function removeAddress(id) {
     });
 }
 function checkout() {
-    const dlv_charge = document.getElementById("dlv-charge").value
-    const prd_os = document.getElementById("prd-os").value
-    let data = {
-        dlv_charge,
-        prd_os
-    }
-    fetch(`/user/checkout`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
+    window.location.href=`/user/checkout`
 }
 function resendOTP(){
-    const email=document.getElementById("email")
+    const email=document.getElementById("email").value
+    window.location.href=`/resend-otp?email=${email}`
+}
+function forgetPass(){
+    const email=document.getElementById("email").value
     window.location.href=`/forgetpassword?email=${email}`
 }
 function filter(from, to, cat) {
@@ -206,6 +198,33 @@ function editProduct(prd) {
         console.log(error.message);
     }
 
+}
+function cancelOrder(id){
+    const isConfirm=confirm("Do you really want to cancel the order")
+    if(isConfirm){
+        window.location.href=`/user/cancel-order?order=${id}`
+    }
+}
+function returnOrder(id){
+    const isConfirm=confirm("Do you really want to return the order")
+    if(isConfirm){
+        window.location.href=`/user/return-order?order=${id}`
+    }
+}
+function selectAddress(address){
+    console.log(address);
+    try {
+        const addressDetails=JSON.parse(address)
+        document.getElementById("local_address").value=addressDetails.locality
+        document.getElementById("Country").value=addressDetails.country
+        document.getElementById("District").value=addressDetails.district
+        document.getElementById("State").value=addressDetails.state
+        document.getElementById("city").value=addressDetails.city
+        document.getElementById("altr_number").value=addressDetails.altr_number
+        document.getElementById("postcode").value=addressDetails.postcode
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
 function deactivateCategory(id) {

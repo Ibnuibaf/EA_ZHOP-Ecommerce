@@ -14,6 +14,9 @@ router.get('/signin',middle.notLogged, controller.loadSignIn);
 
 router.post('/signin',middle.notLogged,controller.postSignin)
 
+router.get('/forgetpassword',controller.forgetPass)
+router.post('/user/new-password',controller.newPass)
+
 //signup
 router.get('/signup',middle.notLogged,controller.loadSignUp);
 
@@ -21,7 +24,7 @@ router.post('/signup',middle.notLogged,controller.registerUser)
 
 //otp
 router.get('/verification',middle.verificationPanel,controller.loadVerificationPanel)
-// router.get('/forgetpassword',controller.resendOTP)
+router.get('/resend-otp',controller.resendOTP)
 
 router.post('/otp',middle.verificationPanel,controller.verifyEmail)
 
@@ -46,9 +49,12 @@ router.patch('/user/cart/update-qty',controller.updateQty)
 
 //orders
 router.get('/user/orders',middle.loggedIn,controller.loadOrders)
+router.get('/user/cancel-order',middle.loggedIn,controller.cancelOrder)
+router.get('/user/return-order',middle.loggedIn,controller.returnOrder)
 
 //checkout
-router.post('/user/checkout',middle.loggedIn,controller.loadCheckout)
+router.get('/user/checkout',middle.loggedIn,controller.loadCheckout)
+router.post('/user/confirm-order',middle.loggedIn,controller.confirmOrder)
 
 //logout
 router.get('/logout',middle.loggedIn,controller.logOut)

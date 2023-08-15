@@ -44,7 +44,7 @@
                                         <td>
                                             <div class="d-flex ">
                                                 <button class="fs-5 btn btn-dark mx-1 p-1 qty-inc"
-                                                    data-product-id="<%= item.cartProduct._id %>">+</button>
+                                                    data-product-id="<%= item.cartProduct._id %>" >+</button>
                                                 <input type="text" class="form-input text-center quantity"
                                                     style="max-width: 50px;"
                                                     data-product-id="<%= item.cartProduct._id %>"
@@ -79,7 +79,7 @@
             <% if (cartItems.length) { %>
                 <div class="checkout-details px-5 py-3" style="background-color: #F3F2EE;">
                     <p class="fs-5 fw-bold text-center border-bottom border-3">Cart Details</p>
-                    <p>Amount of items: <%= cartItems.length %>
+                    <p>Count of items: <%= cartItems.length %>
                     </p>
                     <% let pos=0 %>
                         <% cartItems.forEach(item=> { %>

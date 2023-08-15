@@ -1,40 +1,56 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose')
 const { Date } = require('mongoose/lib/schema/index')
 
-const orderSchema=new mongoose.Schema({
-    prd_id:{
-        type:mongoose.Types.ObjectId,
-        required:true
+const orderSchema = new mongoose.Schema({
+    prd_id: {
+        type: mongoose.Types.ObjectId,
+        required: true
     },
-    date:{
-        type:Date
+    date: {
+        type: Date
     },
-    status:{
-        type:String,
-        default:"delivery-period"
+    address: {
+        locality: String,
+        country: String,
+        district: String,
+        state: String,
+        city: String,
+        altr_number: Number,
+        postcode: Number
     },
-    returned:{
-        type:Boolean,
-        default:false
+    status: {
+        type: String,
+        default: "delivery-period"
     },
-    amount:{
+    returned: {
+        type: Boolean,
+        default: false
+    },
+    amount: {
+        type: Number,
+        required: true
+    },
+    consumer: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    },
+    mobile_number:{
         type:Number,
         required:true
     },
-    consumer:{
-        type:String,
-        required:true
+    payment: {
+        type: String,
+        required: true
     },
-    payment:{
-        type:String,
-        required:true
+    refunded: {
+        type: Boolean,
+        default: false
     },
-    refunded:{
-        type:Boolean,
-        default:false
-    },
-    qty:{
-        type:Number,
-        required:true
+    qty: {
+        type: Number,
+        required: true
     }
 })
+
+const orders=new mongoose.model('order',orderSchema)
+module.exports=orders

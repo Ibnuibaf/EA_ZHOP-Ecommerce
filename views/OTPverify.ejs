@@ -17,7 +17,7 @@
             <% } %>
             
             <div class="form-group mt-2">
-                <label for="email">Email:</label>
+                <label for="email">Email:</label><br>
                 <input type="email" name="email" id="email" value="<%= email %>" readonly>
             </div>
             
@@ -27,10 +27,10 @@
             </div>
 
             <div class="signup text-center">
-                <button  class="btn btn-dark px-5 " onclick="resendOTP()">Resend OTP</button>
                 <button type="submit" class="btn btn-dark px-5 ">Verify Email</button>
             </div>
         </form>
+        <button  class="btn btn-dark fs-6  mt-3" onclick="resendOTP()">Resend OTP</button>
     </div>
 </div>
 

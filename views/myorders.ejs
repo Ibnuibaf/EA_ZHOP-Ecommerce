@@ -12,38 +12,60 @@
             <table class="table ">
                 <thead class="fs-4 " style="position: sticky;top: 0;">
                     <tr>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Status</th>
                         <th scope="col" colspan="2" style="font-weight: 500;background-color: #E5E5E5;">Product Details
                         </th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Ordered</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Quantity</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Price</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Rating</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Status</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
                     </tr>
                 </thead>
                 <tbody>
 
-                    
+                    <% orderDetails.forEach(order => { %>
+                         
                         <tr class="data-row ">
+                            <td >
+                               
+                                <% if (order.status=="delivery-period") { %>
+                                    <b class="text-warning">Delivery Soon </b><br>
+                                    <small><i>Within 7 days after Order</i></small>
+                                    <% } else if (order.status=="canceled") { %>
+                                        Canceled Order
+                                    <% } else  { %>
+                                        Delivered
+                                    <% } %>
+                            </td>
                             <td id="prd_image">
-                                <img src="/images/EA_ZHOP_copyu.png" alt=""
+                                <img src="<%= order.prd_images[0] %>" alt=""
                                     style="max-width: 50px; max-height: 50px;">
                             </td>
                             <td>
-                                klhhj
+                                <%= order.prd_name %>
                             </td>
                             <td>
-                                QTY:5
+                                <%= order.date.toLocaleDateString() %>
                             </td>
                             <td>
-                                <a href="/user/products" class="text-dark">Review & Rating</a>
+                                <%= order.qty %>
                             </td>
                             <td>
-                                delivered
+                                <%= order.amount %>
                             </td>
                             <td>
-                                fhggfhdh
+                                <a href="/user/products/product-details/<%= order.prd_id %>" class="text-dark">Review & Rating</a>
+                            </td>
+                            <td>
+                                <% if (order.status=="delivery-period") { %>
+                                    <button class="btn btn-dark text-warning"  onclick="cancelOrder('<%= order._id %>')">Cancel</button>
+                                    <% } else if (order.status=="return-period") { %>
+                                        <button class="btn btn-dark text-warning"  onclick="returnOrder('<%= order._id %>')">Return</button>
+                                    <% } %>
                             </td>
                         </tr>
+                    <% }) %>
 
                         
 

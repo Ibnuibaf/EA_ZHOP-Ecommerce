@@ -54,7 +54,6 @@ const usersSchema = new mongoose.Schema({
 
     }],
     wishlist: [mongoose.Types.ObjectId],
-    orders: [mongoose.Types.ObjectId],
     blocked: {
         type: Boolean,
         default: false

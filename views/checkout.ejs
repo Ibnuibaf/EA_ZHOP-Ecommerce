@@ -9,28 +9,34 @@
             <div class="exist-address-box  bg-secondary text-light rounded p-4 mb-5"
                 style="height: fit-content;width: fit-content ;">
                 <p class="fs-5 text-center my-2 text-decoration-underline">Your Addresses</p>
-                <div class="each-address d-flex  text-truncate my-2 ">
-                    <button class="btn btn-dark">Select</button>
-                    <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                </div>
-                <div class="each-address d-flex  text-truncate my-2">
-                    <button class="btn btn-dark">Select</button>
-                    <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                </div>
-                <div class="each-address d-flex  text-truncate my-2">
-                    <button class="btn btn-dark">Select</button>
-                    <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                </div>
-                <div class="each-address d-flex  text-truncate my-2 ">
-                    <button class="btn btn-dark">Select</button>
-                    <p class="px-2">Kilari Road, Avenue Road,Bangalore,Karnataka,08022381347,560053,India</p>
-                </div>
+                <% if (userDetails.address.length) { %>
+                    <% userDetails.address.forEach(address=> { %>
+                        <div class="each-address d-flex   text-truncate">
+                            <button class="btn btn-dark mb-2" value="<%= JSON.stringify(address) %>"
+                                onclick="selectAddress(event.target.value)">Select</button>
+                            <p class="px-2 ">
+                                <%= address.locality %>,
+                                    <%= address.city %>,
+                                        <%= address.district %>,
+                                            <%= address.state %>,
+                                                <%= address.country %>,
+                                                    <%=address.altr_number %>,
+                                                        <%= address.postcode %>,
+                            </p>
+                        </div>
+                        <% }) %>
+                            <% } else { %>
+                                <div class="each-address d-flex justify-content-center text-truncate">
+                                    <p class="px-2 text-warning">No Address Details Saved</p>
+                                </div>
+                                <% } %>
+
 
 
             </div>
             <div class="address-tab col-md-8 border rounded p-2 shadow-lg">
 
-                <form action="/user/profile-update" method="post">
+                <form action="/user/confirm-order" method="post">
 
                     <div class="local_address col mx-2">
                         <label for="local_address" class="form-label">Address</label><br>
@@ -41,7 +47,7 @@
                     <div class="my-3 d-flex">
                         <div class="Country col mx-2">
                             <label for="Country" class="form-label">Country</label>
-                            <input type="text" class="form-input" id="Country" name="Country">
+                            <input type="text" class="form-input" id="Country" name="country">
                         </div>
                         <div class="city col mx-2">
                             <label for="city" class="form-label">Town/City</label>
@@ -52,11 +58,11 @@
                     <div class="my-3 d-flex">
                         <div class="District col mx-2">
                             <label for="District" class="form-label">District</label>
-                            <input type="text" class="form-input" id="District" name="District">
+                            <input type="text" class="form-input" id="District" name="district">
                         </div>
                         <div class="State col mx-2">
                             <label for="State" class="form-label">State</label>
-                            <input type="text" class="form-input" id="State" name="State">
+                            <input type="text" class="form-input" id="State" name="state">
                         </div>
 
                     </div>
@@ -72,7 +78,6 @@
 
                     </div>
 
-                </form>
             </div>
         </div>
         <div class="col-md-4">
@@ -80,53 +85,109 @@
                 <p class="fs-5 fw-bold text-center border-bottom border-3">Proceed CheckOut</p>
                 <div class="products-tab  border-bottom border-3 " style="height: 170px;overflow: auto;">
                     <ol class="fs-6">
-                        <li class="d-flex justify-content-between fw-medium" style="position: sticky;top: 0;background-color: #F3F2EE;"><label for="">Products</label><i>Total</i></li>
-                        <li class="d-flex justify-content-between"><label for="">product 1</label><i>₹754</i></li>
-                        <li class="d-flex justify-content-between"><label for="">product 2</label><i>₹754</i></li>
-                        <li class="d-flex justify-content-between"><label for="">product 3</label><i>₹754</i></li>
-                        <li class="d-flex justify-content-between"><label for="">product 4</label><i>₹754</i></li>
-                        <li class="d-flex justify-content-between"><label for="">product 5</label><i>₹754</i></li>
+                        <li class="d-flex justify-content-between fw-medium"
+                            style="position: sticky;top: 0;background-color: #F3F2EE;"><label
+                                for="">Products</label><i>Total</i></li>
+                        <% if (productDetails.length) { %>
+                            <% productDetails.forEach(prd => { %>
+                                <li class="d-flex justify-content-between ">&GreaterGreater;
+                                    <label for="" class="text-truncate" style="max-width: 10vw;"><%= prd.prd_name %> <%= prd.unit_prize %></label>
+                                    <i class="mx-2">₹<%= prd.unit_prize %>/-</i>
+                                    <i class="fw-medium ">₹<%= prd.total_prize %>/-</i>
+                                </li>
+                                <input type="hidden" name="prd_id" value="<%= prd.prd_id %>">
+                                <input type="hidden" name="qty" value="<%= prd.qty %>">
+                                <input type="hidden" name="stock" value="<%= prd.stock %>">
+                                <input type="hidden" name="total_price" value="<%= prd.total_prize %>">
+                            <% }) %>
+                            <% } else if (productDetails) { %>
+                                <li class="d-flex justify-content-between">
+                                    <label for=""><%= productDetails.prd_name %></label>
+                                    <i><%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %></i>
+                                </li>
+                                <input type="hidden" name="prd_id" value="<%= productDetails._id %>">
+                                <input type="hidden" name="qty" value="1">
+                                <input type="hidden" name="stock" value="<%= productDetails.stock %>">
+                                <input type="hidden" name="total_price" value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
+                        <% } %>
                     </ol>
                 </div>
-                <div class="add-coupen my-4 bg-secondary d-flex align-items-center justify-content-between px-2">
-                    <input type="text" name="coupen" id="coupen" class="bg-transparent border-0 px-3 py-2 " placeholder="Add Coupen" style="outline: none;color: #F3F2EE;">
-                    <button class="bg-transparent border-0  fs-5 text-light">+  verify</button>
-                </div>
-                <div class="wallet-option d-flex justify-content-between align-items-center fs-5 border-bottom border-3">
+
+                <!-- Add Coupen Feature -->
+                <!-- <div class="add-coupen my-4 bg-secondary d-flex align-items-center justify-content-between px-2">
+                    <input type="text" name="coupen" id="coupen" class="bg-transparent border-0 px-3 py-2 "
+                        placeholder="Add Coupen" style="outline: none;color: #F3F2EE;">
+                    <button class="bg-transparent border-0  fs-5 text-light">+ verify</button>
+                </div> -->
+
+                <!-- Wallet Use Feature -->
+                <!-- <div
+                    class="wallet-option d-flex justify-content-between align-items-center fs-5 border-bottom border-3">
                     <div class="laabels d-flex justify-content-between align-items-center ">
-                        <input type="checkbox" name="wallet_balance" id="wallet_balance" style="height: 20px;width: 20px;" >
+                        <input type="checkbox" name="wallet_balance" id="wallet_balance"
+                            style="height: 20px;width: 20px;">
                         <label for="wallet-option">Use Wallet Balance:</label>
                     </div>
-                    <i >₹87/-</i>
-                </div>
+                    <i>₹87/-</i>
+                </div> -->
+                
                 <div class="checkout-details">
-                    <div class="grand-total d-flex justify-content-between">
+                    <div class="grand-total d-flex justify-content-between fs-5">
                         <label>Grand Total:</label>
-                        <i><s>₹798</s></i>
+                        <% if (productDetails.length) { %>
+                                <% let grandtotal=0 %>
+                                <% productDetails.forEach(prd => { %>
+                                    <% grandtotal+=(prd.mrp*prd.qty) %>
+                                <% }) %>
+                                <i><s>₹ <%= grandtotal %> /-</s></i>
+                            <% } else if (productDetails) { %>
+                                <i><s>₹ <%= productDetails.mrp %> /-</s></i>
+                        <% } %>
                     </div>
-                    <div class="saved d-flex justify-content-between">
-                        <label>Saved </label>
-                        <p>₹79</p>
+                    <div class="saved d-flex justify-content-end text-danger">
+                        <label>Saved </label> &nbsp;
+                        <% if (productDetails.length) { %>
+                            <% let actualprize=0 %>
+                            <% let grandtotal=0 %>
+                            <% productDetails.forEach(prd => { %>
+                                <% actualprize+=(prd.unit_prize*prd.qty) %>
+                                <% grandtotal+=(prd.mrp*prd.qty) %>
+                            <% }) %>
+                            <p class=" fw-bold"><i>₹<%= (grandtotal-actualprize) %>/-</i></p>
+                        <% } else if (productDetails) { %>
+                            <p>₹ <%= Math.floor((productDetails.mrp * productDetails.discount) / 100) %> /-</p>
+                        <% } %>
                     </div>
                     <div class="rate d-flex justify-content-between align-items-center">
                         <label>Amount to be Paid:</label>
-                        <p class="text-danger fw-bold fs-5">₹450</p>
+                        <% if (productDetails.length) { %>
+                            <% let actualprize=0 %>
+                            <% productDetails.forEach(prd => { %>
+                                <% actualprize+=(prd.unit_prize*prd.qty) %>
+                            <% }) %>
+                            <p class="text-danger fw-bold fs-5"><i>₹<%= actualprize %>/-</i></p>
+                        <% } else if (productDetails) { %>
+                            <p class="text-danger fw-bold fs-5">₹ <%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %> /-</p>
+                        <% } %>
                     </div>
                 </div>
                 <div class="pay-methods border border-3 p-3 rounded ">
                     <p class="fs-5">Payment Methods</p>
                     <div class="cod d-flex align-items-center">
-                        <input type="radio" name="pay-methods" id="cod" style="height: 20px;width: 20px; margin-inline: 5px;">
+                        <input type="radio" name="pay_methods" id="cod"
+                            style="height: 20px;width: 20px; margin-inline: 5px;" value="cod">
                         <label for="COD">Cash on Delivery</label>
                     </div>
                     <div class="razor d-flex align-items-center">
-                        <input type="radio" name="pay-methods" id="razorpay" style="height: 20px;width: 20px; margin-inline: 5px;">
+                        <input type="radio" name="pay_methods" id="razorpay"
+                            style="height: 20px;width: 20px; margin-inline: 5px;" value="razor_pay">
                         <label for="razorpay">Razor Pay</label>
                     </div>
                 </div>
                 <div class="text-center ">
-                    <button class=" btn btn-dark px-5 my-3 rounded-0 fs-5">Confirm Order</button>
+                    <button class=" btn btn-dark px-5 my-3 rounded-0 fs-5" type="submit">Confirm Order</button>
                 </div>
+                </form>
             </div>
             <div class="razor-secure text-center mt-3">
                 <img src="/images/razerpay.png" alt="" height="30"><br>

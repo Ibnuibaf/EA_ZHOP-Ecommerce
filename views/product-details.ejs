@@ -89,7 +89,7 @@
                     <% } else { %>
                         <a class="addcart-link" href="" onclick="addCart('<%= productDetails._id %>')">Add To Cart</a>
                     <% } %>
-                    <a class="order-link" href="">
+                    <a class="order-link" href="/user/checkout?item=<%= productDetails._id %>">
                         Order Now
                     </a>
                 </div>

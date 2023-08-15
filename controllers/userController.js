@@ -6,6 +6,7 @@ const productsCollection = require("../models/productsSchema")
 const usersCollection = require("../models/usersSchema");
 const categories = require('../models/categorySchema');
 const otpVerification = require('../models/otpSchema')
+const orders = require('../models/ordersSchema')
 const { ObjectId } = require('mongoose').Types;
 
 const securePass = async (pass) => {
@@ -49,8 +50,7 @@ const sendVerificationOTP = async (user, email) => {
             if (err) {
                 console.log("Error occured");
                 console.log(err);
-                const statusCode = err.status || 500;
-                res.status(statusCode).send(err.message);
+                res.send(500)
             }
             else {
                 console.log('code is sent');
@@ -102,19 +102,47 @@ module.exports = {
             res.status(statusCode).send(error.message);
         }
     },
-    forgetPass:(req,res)=>{
-
+    forgetPass: async (req, res) => {
+        try {
+            const email = req.query.email
+            const userExist = await usersCollection.findOne({ email })
+            if (userExist) {
+                if (email) {
+                    req.session.email = email
+                    req.session.paths = "forgetPass"
+                    req.session.otpStage = true
+                    await sendVerificationOTP(email, email)
+                    res.redirect('/verification')
+                } else {
+                    return res.redirect('/signin?validation=Enter your Email')
+                }
+            } else {
+                return res.redirect(`/signin?validation=User Doesn't exist!`)
+            }
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
     },
-    // newPass:(req,res)=>{
-    //     try {
-    //         const email=req.query.email
-    //         res.render('newpassword-tab',{email})
-    //     } catch (error) {
-    //         console.log(error.message);
-    //         const statusCode = error.status || 500;
-    //         res.status(statusCode).send(error.message);
-    //     }
-    // },
+    newPass: async (req, res) => {
+        try {
+            const passDetails = req.body
+
+            if (passDetails.new_password == passDetails.confirm_password) {
+                const hashedPass = await securePass(passDetails.new_password)
+                await usersCollection.updateOne({ email: passDetails.user }, { $set: { password: hashedPass } })
+                res.redirect('/signin?message=Password Updated!')
+            } else {
+                res.send(400).json({ message: "Both password does not match" })
+            }
+
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
+    },
     loadSignUp: (req, res) => {
         let error
         if (req.query.validation) {
@@ -196,12 +224,14 @@ module.exports = {
 
         res.render("OTPverify", { email, error })
     },
-    resendOTP:async(req,res)=>{
+    resendOTP: async (req, res) => {
         try {
-            const email=req.query.email
-            if(email){
-                sendVerificationOTP(email,email)
-            }else{
+            const email = req.query.email
+            console.log(email);
+            if (email) {
+                await sendVerificationOTP(email, email)
+                res.redirect('/verification?message=Resend OTP to your email')
+            } else {
                 res.redirect('/signin?message=Specify your email')
             }
         } catch (error) {
@@ -267,7 +297,8 @@ module.exports = {
                 }
             } else if (req.session.paths == "forgetPass") {
                 req.session.otpStage = false
-                return res.redirect('/user/new-password')
+                const user = req.session.email
+                return res.render('newpassword-tab', { user })
             } else {
                 return res.redirect('/')
             }
@@ -393,8 +424,61 @@ module.exports = {
             res.send(statusCode, error.message)
         }
     },
-    loadOrders: (req, res) => {
-        res.render('myorders')
+    loadOrders: async(req, res) => {
+        try {
+            const userDetails=req.userDetails
+            const orderDetails = await orders.aggregate([
+                { $match: { consumer: userDetails._id } },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "prd_id",
+                        foreignField: "_id",
+                        as: "order_detials"
+                    }
+                },
+                {$unwind:"$order_detials"},
+                {$project:{
+                    prd_id:1,
+                    date:1,
+                    address:1,
+                    status:1,
+                    returned:1,
+                    amount:1,
+                    mobile_number:1,
+                    payment:1,
+                    qty:1,
+                    prd_name:"$order_detials.prd_name",
+                    prd_images:"$order_detials.prd_images",
+                }}
+            ])
+            res.render('myorders',{orderDetails})
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.send(statusCode, error.message)
+        }
+    },
+    cancelOrder:async(req,res)=>{
+        try {
+            const order=req.query.order;
+            const isUpdated=await orders.updateOne({_id:order},{$set:{status:"canceled"}})
+            res.redirect('/user/orders')
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.send(statusCode, error.message)
+        }
+    },
+    returnOrder:async(req,res)=>{
+        try {
+            const order=req.query.order
+            await orders.updateOne({_id:order},{$set:{returned:true}})
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.send(statusCode, error.message)
+        }
     },
     loadProductView: async (req, res) => {
         try {
@@ -485,15 +569,15 @@ module.exports = {
     addToCart: async (req, res) => {
         try {
             const prd_id = req.params.id
-            const prdDetails=await productsCollection.findOne({_id:prd_id})
+            const prdDetails = await productsCollection.findOne({ _id: prd_id })
             console.log(prdDetails);
 
             const user = req.session.user
             const exist = await usersCollection.findOne({ email: user, "cart.prd_id": prd_id })
             if (!exist) {
-                const unit_prize=Math.floor(prdDetails.mrp-((prdDetails.mrp*prdDetails.discount)/100))
-                const total_prize=unit_prize
-                const result = await usersCollection.updateOne({ email: user }, { $push: { cart: { prd_id ,unit_prize,total_prize} } })
+                const unit_prize = Math.floor(prdDetails.mrp - ((prdDetails.mrp * prdDetails.discount) / 100))
+                const total_prize = unit_prize
+                const result = await usersCollection.updateOne({ email: user }, { $push: { cart: { prd_id, unit_prize, total_prize } } })
             }
             res.send(200)
         } catch (error) {
@@ -578,13 +662,13 @@ module.exports = {
         const user = req.session.user;
         const productId = req.body.productId;
         const action = req.body.action;
-    
+
         try {
             const filter = {
                 "email": user,
                 "cart.prd_id": productId
             };
-    
+
             const update = {};
             if (action == "increase") {
                 update.$inc = { "cart.$.qty": 1 };
@@ -601,7 +685,7 @@ module.exports = {
             const updatedDocument = await usersCollection.findOneAndUpdate(filter, update, options);
             if (updatedDocument) {
                 const updatedCartItem = updatedDocument.cart.find(item => item.prd_id == productId);
-                res.status(200).json({ quantity: updatedQty, total_prize:updatedCartItem.total_prize });
+                res.status(200).json({ quantity: updatedQty, total_prize: updatedCartItem.total_prize });
             } else {
                 res.status(404).json({ message: "Product not found in cart." });
             }
@@ -623,8 +707,130 @@ module.exports = {
             res.status(statusCode).send(error.message);
         }
     },
-    loadCheckout: (req, res) => {
-        res.render('checkout')
+    loadCheckout: async (req, res) => {
+        const itemSpecified = req.query.item
+        const userDetails = req.userDetails
+        let productDetails
+        if (itemSpecified) {
+            productDetails = await productsCollection.findById(itemSpecified)
+
+        } else {
+            productDetails = await usersCollection.aggregate([
+                { $match: { _id: userDetails._id } },
+                {
+                    $unwind: "$cart"
+                },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "cart.prd_id",
+                        foreignField: "_id",
+                        as: "cartProduct"
+                    }
+                },
+                {
+                    $unwind: "$cartProduct"
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        email: 1,
+                        prd_name: "$cartProduct.prd_name",
+                        prd_images: "$cartProduct.prd_images",
+                        mrp: "$cartProduct.mrp",
+                        discount: "$cartProduct.discount",
+                        prd_id: "$cartProduct._id",
+                        stock: "$cartProduct.stock",
+                        qty: "$cart.qty",
+                        unit_prize: "$cart.unit_prize",
+                        total_prize: "$cart.total_prize",
+                    }
+                }
+            ])
+        }
+        res.render('checkout', { productDetails, userDetails })
+    },
+    confirmOrder: async (req, res) => {
+        try {
+            const data = req.body
+            const userDetails = req.userDetails
+            if (!data.pay_methods) {
+                return res.redirect('/user/checkout?message=Choose any of Payment Methods')
+            }
+            if (data.local_address && data.country && data.postcode && data.city && data.district && data.state && data.altr_number) {
+                console.log(data);
+                if (data.pay_methods == "cod") {
+                    if (Array.isArray(data.prd_id)) {
+                        
+                            for (let index = 0; index < data.prd_id.length; index++) {
+                                if ( parseInt(data.qty[index]) > parseInt(data.stock[index])) {
+                                    // console.log(index,data.qty[index],data.stock[index]);
+                                    return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
+                                }
+                
+                                const order = {
+                                    prd_id: data.prd_id[index],
+                                    address: {
+                                        locality: data.local_address,
+                                        country: data.country,
+                                        district: data.district,
+                                        state: data.state,
+                                        city: data.city,
+                                        altr_number: data.altr_number,
+                                        postcode: data.postcode
+                                    },
+                                    date: Date.now(),
+                                    amount: parseFloat(data.total_price[index]),
+                                    consumer: userDetails._id,
+                                    mobile_number: userDetails.mobile_number,
+                                    payment: data.pay_methods,
+                                    qty: parseInt(data.qty[index])
+                                };
+                
+                                await orders.create(order); 
+                                await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
+                            }
+                            
+                            
+
+                    } else {
+                        if (data.qty > data.stock) {
+                            return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
+                        }
+
+                        const order = {
+                            prd_id: data.prd_id,
+                            address: {
+                                locality: data.local_address,
+                                country: data.country,
+                                district: data.district,
+                                state: data.state,
+                                city: data.city,
+                                altr_number: data.altr_number,
+                                postcode: data.postcode
+                            },
+                            date: Date.now(),
+                            amount: parseFloat(data.total_price),
+                            consumer: userDetails._id,
+                            mobile_number: userDetails.mobile_number,
+                            payment: data.pay_methods,
+                            qty: parseInt(data.qty)
+                        }
+                        await orders.create(order)
+                        await productsCollection.updateOne({_id:data.prd_id},{$inc:{stock:-1}})
+                    }
+
+                    res.redirect('/user/profile?message=Order Placed Successfuly!')
+                } else {
+                    res.redirect('/user/checkout?message=The selected payment method is not available now')
+                }
+            } else {
+                return res.redirect('/user/checkout?message=Fill the Address order to be delivered')
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(500).send("Internal Server Error");
+        }
     },
     logOut: (req, res) => {
         try {
@@ -640,9 +846,9 @@ module.exports = {
             res.status(statusCode).send(error.message);
         }
     },
-    deactivateAccount:async(req,res)=>{
+    deactivateAccount: async (req, res) => {
         const userDetails = req.userDetails
-        await usersCollection.updateOne({ _id: userDetails._id },{$set:{blocked:true}})
+        await usersCollection.updateOne({ _id: userDetails._id }, { $set: { blocked: true } })
         req.session.destroy((err) => {
             console.log(err);
             res.status(500)
