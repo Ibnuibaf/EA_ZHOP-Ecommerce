@@ -95,17 +95,22 @@
                         <input type="hidden" id="product_id" name="product_id">
 
                         <div class="form-group mt-2">
-
+                            <div id="imagePreview " >
+                                <img src="" alt="prd_image" id="product_image1" style="width: 7vw;height: 14vh;">
+                                <img src="" alt="prd_image" id="product_image2" style="width: 7vw;height: 14vh;"><br>
+                                <img src="" alt="prd_image" id="product_image3" style="width: 7vw;height: 14vh;">
+                                <img src="" alt="prd_image" id="product_image4" style="width: 7vw;height: 14vh;">
+                            </div>
                             <label for="first_name">Add Images:</label><br>
                             
                             <input type="file" class="my-1" name="product_img1" id="img-1" accept=".png,.jpeg,.webp"
-                                onchange="uploadImage(event.target.files[0])">
+                                onchange="uploadImage(event.target.files)" multiple  >
                             <button style="border: none;background: transparent;" onclick="(()=>{
                                 let file=document.getElementById('img-1');
                                 file.value=''
                                 })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button><br>
 
-                            <input type="file" class="my-1" name="product_img2" id="img-2" accept=".png,.jpeg,.webp"
+                            <!-- <input type="file" class="my-1" name="product_img2" id="img-2" accept=".png,.jpeg,.webp"
                                 onchange="uploadImage(event.target.files[0])">
                             <button style="border: none;background: transparent;" onclick="(()=>{
                                 let file=document.getElementById('img-2');
@@ -124,7 +129,7 @@
                             <button style="border: none;background: transparent;" onclick="(()=>{
                                 let file=document.getElementById('img-4');
                                 file.value=''
-                                })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button>
+                                })()"><img src="/images/icons8-delete-30.png" alt="" height="20"></button> -->
                         </div>
 
 

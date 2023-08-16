@@ -97,15 +97,15 @@ function removeAddress(id) {
     });
 }
 function checkout() {
-    window.location.href=`/user/checkout`
+    window.location.href = `/user/checkout`
 }
-function resendOTP(){
-    const email=document.getElementById("email").value
-    window.location.href=`/resend-otp?email=${email}`
+function resendOTP() {
+    const email = document.getElementById("email").value
+    window.location.href = `/resend-otp?email=${email}`
 }
-function forgetPass(){
-    const email=document.getElementById("email").value
-    window.location.href=`/forgetpassword?email=${email}`
+function forgetPass() {
+    const email = document.getElementById("email").value
+    window.location.href = `/forgetpassword?email=${email}`
 }
 function filter(from, to, cat) {
     window.location.href = `/user/products?min=${from}&max=${to}&category=${cat}`
@@ -179,6 +179,10 @@ function editProduct(prd) {
         const product = JSON.parse(prd); // Parse the JSON string back to an object
 
         document.getElementById("product_id").value = product._id;
+        document.getElementById("product_image1").src = product.prd_images[0];
+        document.getElementById("product_image2").src = product.prd_images[1];
+        document.getElementById("product_image3").src = product.prd_images[2];
+        document.getElementById("product_image4").src = product.prd_images[3];
         document.getElementById("product_name").value = product.prd_name;
         document.getElementById("product_desc").value = product.description;
         document.getElementById("additional_info").value = product.additional_info;
@@ -199,29 +203,60 @@ function editProduct(prd) {
     }
 
 }
-function cancelOrder(id){
-    const isConfirm=confirm("Do you really want to cancel the order")
-    if(isConfirm){
-        window.location.href=`/user/cancel-order?order=${id}`
+function cancelOrder(id) {
+    const isConfirm = confirm("Do you really want to cancel the order")
+    if (isConfirm) {
+        window.location.href = `/user/cancel-order?order=${id}`
     }
 }
-function returnOrder(id){
-    const isConfirm=confirm("Do you really want to return the order")
-    if(isConfirm){
-        window.location.href=`/user/return-order?order=${id}`
+function cancelOrderAsAdmin(id) {
+    const isConfirm = confirm("Do you really want to cancel the order")
+    if (isConfirm) {
+        window.location.href = `/admin/orders-management/cancel-order?order=${id}`
     }
 }
-function selectAddress(address){
+function updateOrderStatus(orderId, newStatus) {
+    fetch(`/admin/update-order-status/${orderId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+        .then(response => response.json())
+        .then(data => {
+            window.location.reload()
+        })
+        .catch(error => {
+            console.error("Error updating order status:", error);
+        });
+}
+
+const statusSelects = document.querySelectorAll(".status-select");
+statusSelects.forEach(select => {
+    select.addEventListener("change", function () {
+        const orderId = this.getAttribute("data-order-id");
+        const newStatus = this.value;
+        updateOrderStatus(orderId, newStatus);
+    });
+});
+function returnOrder(id) {
+    const isConfirm = confirm("Do you really want to return the order")
+    if (isConfirm) {
+        window.location.href = `/user/return-order?order=${id}`
+    }
+}
+function selectAddress(address) {
     console.log(address);
     try {
-        const addressDetails=JSON.parse(address)
-        document.getElementById("local_address").value=addressDetails.locality
-        document.getElementById("Country").value=addressDetails.country
-        document.getElementById("District").value=addressDetails.district
-        document.getElementById("State").value=addressDetails.state
-        document.getElementById("city").value=addressDetails.city
-        document.getElementById("altr_number").value=addressDetails.altr_number
-        document.getElementById("postcode").value=addressDetails.postcode
+        const addressDetails = JSON.parse(address)
+        document.getElementById("local_address").value = addressDetails.locality
+        document.getElementById("Country").value = addressDetails.country
+        document.getElementById("District").value = addressDetails.district
+        document.getElementById("State").value = addressDetails.state
+        document.getElementById("city").value = addressDetails.city
+        document.getElementById("altr_number").value = addressDetails.altr_number
+        document.getElementById("postcode").value = addressDetails.postcode
     } catch (error) {
         console.log(error.message);
     }
@@ -317,21 +352,22 @@ function confirms(event, fn) {
     fn()
 }
 async function uploadImage(file, id) {
-    console.log(file);
-    const formData = new FormData()
+    console.log(file[0]);
+    for (const index in file) {
+        const formData = new FormData()
 
-    formData.append("file", file)
+        formData.append("file", file[index])
 
-    let a = await fetch("/admin/products-management/uploadImage", {
-        method: "POST",
-        body: formData
-    }).then((res => {
-        return res.json()
-    }))
+        let a = await fetch("/admin/products-management/uploadImage", {
+            method: "POST",
+            body: formData
+        }).then((res => {
+            return res.json()
+        }))
 
-    img.push(a)
+        img.push(a)
 
-    console.log(img);
+    }
 
 }
 

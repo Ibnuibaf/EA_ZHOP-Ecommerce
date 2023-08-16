@@ -34,6 +34,11 @@ router.post("/products-management/uploadImage",middle.uploadImage, controller.up
 router.post('/products-management/update-prd',middle.loggedIn, controller.updateProducts)
 router.post('/products-management/updateCategory',middle.loggedIn, controller.updateCategories)
 
+//orders management
+router.get('/orders-management',middle.loggedIn,controller.loadOrdersManagement)
+router.get('/orders-management/cancel-order',middle.loggedIn,controller.cancelOrder)
+router.patch('/update-order-status/:id',middle.loggedIn,controller.updateOrderStatus)
+
 //logout
 router.get('/logout',middle.loggedIn,controller.adminlogOut)
 

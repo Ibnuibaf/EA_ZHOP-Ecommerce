@@ -1,50 +1,41 @@
-<%- include('partials/userHeader.ejs') %>
+<%- include('partials/adminHeader.ejs') %>
 
 
     <div class="container-fluid tab-name ">
-        <h3 class="p-3 ">My Orders&GreaterGreater;</h3>
+        <h3 class="p-3 ">Orders Management&GreaterGreater;</h3>
     </div>
     <div class="details mx-5 border-bottom border-3" id="#products-details">
         <div class="tab-hea  border-bottom border-2 my-3">
-            <h3>Orders History</h3>
+            <h3>Orders Details</h3>
         </div>
         <div class="tab  my-5">
             <table class="table ">
                 <thead class="fs-4 " style="position: sticky;top: 0;">
                     <tr>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Status</th>
                         <th scope="col" colspan="2" style="font-weight: 500;background-color: #E5E5E5;">Product Details
                         </th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Consumer</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Ordered</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Quantity</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Price</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Rating</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Status</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
                     </tr>
                 </thead>
                 <tbody>
 
-                    <% orderDetails.forEach(order=> { %>
+                    <% orderList.forEach(order=> { %>
 
                         <tr class="data-row ">
-                            <td>
 
-                                <% if (order.status=="delivery-period" ) { %>
-                                    <b class="text-warning">Delivery Soon </b><br>
-                                    <small><i>Within 7 days after Order</i></small>
-                                    <% } else if (order.status=="canceled" ) { %>
-                                        Canceled Order
-                                        <% } else if (order.returned) { %>
-                                            Order Returned
-                                            <% } else { %>
-                                                Delivered
-                                                <% } %>
-                            </td>
                             <td id="prd_image">
                                 <img src="<%= order.prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;">
                             </td>
                             <td>
                                 <%= order.prd_name %>
+                            </td>
+                            <td>
+                                <%= order.user %>
                             </td>
                             <td>
                                 <%= order.date.toLocaleDateString() %>
@@ -56,19 +47,23 @@
                                 <%= order.amount %>
                             </td>
                             <td>
-                                <a href="/user/products/product-details/<%= order.prd_id %>" class="text-dark">Review &
-                                    Rating</a>
+                                <select name="status" class="ea-input status-select" data-order-id="<%= order._id %>">
+                                    <option value="delivery-period" <%=order.status==='delivery-period' ? 'selected'
+                                        : '' %>>Delivery Period</option>
+                                    <option value="return-period" <%=order.status==='return-period' ? 'selected' : '' %>
+                                        >Return Period</option>
+                                    <option value="closed" <%=order.status==='closed' ? 'selected' : '' %>>Order Closed
+                                    </option>
+                                </select>
                             </td>
                             <td>
                                 <% if (order.status=="delivery-period" ) { %>
                                     <button class="btn btn-dark text-warning"
-                                        onclick="cancelOrder('<%= order._id %>')">Cancel</button>
-                                    <% } else if (order.status=="return-period" ) { %>
-                                        <% if (!order.returned) { %>
+                                        onclick="cancelOrderAsAdmin('<%= order._id %>')">Cancel</button>
+                                        <% } else if (order.returned) { %>
                                             <button class="btn btn-dark text-warning"
-                                                onclick="returnOrder('<%= order._id %>')">Return</button>
-                                            <% } %>
-                                        <% } %>
+                                            onclick="refundPayment('<%= order._id %>')">Refund</button>
+                                    <% } %>
                             </td>
                         </tr>
                         <% }) %>
@@ -82,4 +77,5 @@
         </div>
     </div>
 
-    <%- include('partials/userFooter.ejs') %>
+
+    <%- include('partials/adminFooter.ejs') %>

@@ -3,6 +3,7 @@ const admin = require('../models/adminSchema')
 
 const usersCollection = require('../models/usersSchema')
 const productsCollection = require('../models/productsSchema')
+const orders=require('../models/ordersSchema')
 const categories = require('../models/categorySchema')
 const cloudinary = require('cloudinary').v2;
 
@@ -222,6 +223,68 @@ module.exports = {
             res.render('error')
         }
 
+    },
+    loadOrdersManagement:async(req,res)=>{
+        try {
+            
+            const orderList = await orders.aggregate([
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "prd_id",
+                        foreignField: "_id",
+                        as: "order_detials"
+                    }
+                },
+                {$unwind:"$order_detials"},
+                {$lookup:{
+                    from:"users",
+                    localField:"consumer",
+                    foreignField:"_id",
+                    as:"user_details"
+                }},
+                {$unwind:"$user_details"},
+                {$project:{
+                    prd_id:1,
+                    date:1,
+                    address:1,
+                    status:1,
+                    returned:1,
+                    amount:1,
+                    mobile_number:1,
+                    payment:1,
+                    qty:1,
+                    prd_name:"$order_detials.prd_name",
+                    prd_images:"$order_detials.prd_images",
+                    user:"$user_details.email",
+                }}
+            ])
+            res.render('adminOrders',{orderList})
+        } catch (error) {
+            console.log(error.message);
+            res.render('error')
+        }
+    },
+    cancelOrder:async(req,res)=>{
+        try {
+            const order=req.query.order;
+            const isUpdated=await orders.updateOne({_id:order},{$set:{status:"canceled"}})
+            res.redirect('/admin/orders-management')
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    updateOrderStatus:async (req,res)=>{
+        try {
+            const updatedStatus=req.body.status
+            const orderId=req.params.id
+            await orders.updateOne({_id:orderId},{$set:{status:updatedStatus}})
+            res.send(200)
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
     },
     adminlogOut: (req, res) => {
         try {

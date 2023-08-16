@@ -474,6 +474,7 @@ module.exports = {
         try {
             const order=req.query.order
             await orders.updateOne({_id:order},{$set:{returned:true}})
+            res.redirect('/user/orders')
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
