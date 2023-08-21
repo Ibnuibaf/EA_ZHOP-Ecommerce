@@ -376,25 +376,45 @@ module.exports = {
             const userDetails = req.userDetails
             const address = req.body
             if (address.local_address && address.Country && address.city && address.District && address.State && address.postcode) {
-                if (userDetails.address.length >= 4) {
-                    await usersCollection.updateOne({ _id: userDetails._id }, { $pop: { address: -1 } })
-                }
-                await usersCollection.updateOne({ _id: userDetails._id },
-                    {
-                        $push: {
-                            address: {
-                                locality: address.local_address,
-                                country: address.Country,
-                                city: address.city,
-                                district: address.District,
-                                state: address.State,
-                                postcode: address.postcode,
-                                altr_number: address.altr_number
+                if (address.address_id) {
+                    await usersCollection.updateOne(
+                        {
+                            _id: userDetails._id,
+                            "address._id": address.address_id
+                        },
+                        {
+                            $set: {
+                                "address.$.locality": address.local_address,
+                                "address.$.country": address.Country,
+                                "address.$.city": address.city,
+                                "address.$.district": address.District,
+                                "address.$.state": address.State,
+                                "address.$.postcode": address.postcode,
+                                "address.$.altr_number": address.altr_number
                             }
                         }
+                    );
+                } else {
+                    if (userDetails.address.length >= 4) {
+                        await usersCollection.updateOne({ _id: userDetails._id }, { $pop: { address: -1 } })
                     }
-                )
-                res.redirect('/user/profile?message=Added new Address')
+                    await usersCollection.updateOne({ _id: userDetails._id },
+                        {
+                            $push: {
+                                address: {
+                                    locality: address.local_address,
+                                    country: address.Country,
+                                    city: address.city,
+                                    district: address.District,
+                                    state: address.State,
+                                    postcode: address.postcode,
+                                    altr_number: address.altr_number
+                                }
+                            }
+                        }
+                    )
+                }
+                res.redirect('/user/profile?message=Updated your Addresses')
             } else {
                 res.redirect('/user/profile?message=Fill all the address field')
             }
@@ -424,9 +444,9 @@ module.exports = {
             res.send(statusCode, error.message)
         }
     },
-    loadOrders: async(req, res) => {
+    loadOrders: async (req, res) => {
         try {
-            const userDetails=req.userDetails
+            const userDetails = req.userDetails
             const orderDetails = await orders.aggregate([
                 { $match: { consumer: userDetails._id } },
                 {
@@ -437,32 +457,34 @@ module.exports = {
                         as: "order_detials"
                     }
                 },
-                {$unwind:"$order_detials"},
-                {$project:{
-                    prd_id:1,
-                    date:1,
-                    address:1,
-                    status:1,
-                    returned:1,
-                    amount:1,
-                    mobile_number:1,
-                    payment:1,
-                    qty:1,
-                    prd_name:"$order_detials.prd_name",
-                    prd_images:"$order_detials.prd_images",
-                }}
+                { $unwind: "$order_detials" },
+                {
+                    $project: {
+                        prd_id: 1,
+                        date: 1,
+                        address: 1,
+                        status: 1,
+                        returned: 1,
+                        amount: 1,
+                        mobile_number: 1,
+                        payment: 1,
+                        qty: 1,
+                        prd_name: "$order_detials.prd_name",
+                        prd_images: "$order_detials.prd_images",
+                    }
+                }
             ])
-            res.render('myorders',{orderDetails})
+            res.render('myorders', { orderDetails })
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
             res.send(statusCode, error.message)
         }
     },
-    cancelOrder:async(req,res)=>{
+    cancelOrder: async (req, res) => {
         try {
-            const order=req.query.order;
-            const isUpdated=await orders.updateOne({_id:order},{$set:{status:"canceled"}})
+            const order = req.query.order;
+            const isUpdated = await orders.updateOne({ _id: order }, { $set: { status: "canceled" } })
             res.redirect('/user/orders')
         } catch (error) {
             console.log(error.message);
@@ -470,10 +492,10 @@ module.exports = {
             res.send(statusCode, error.message)
         }
     },
-    returnOrder:async(req,res)=>{
+    returnOrder: async (req, res) => {
         try {
-            const order=req.query.order
-            await orders.updateOne({_id:order},{$set:{returned:true}})
+            const order = req.query.order
+            await orders.updateOne({ _id: order }, { $set: { returned: true } })
             res.redirect('/user/orders')
         } catch (error) {
             console.log(error.message);
@@ -762,37 +784,37 @@ module.exports = {
                 console.log(data);
                 if (data.pay_methods == "cod") {
                     if (Array.isArray(data.prd_id)) {
-                        
-                            for (let index = 0; index < data.prd_id.length; index++) {
-                                if ( parseInt(data.qty[index]) > parseInt(data.stock[index])) {
-                                    // console.log(index,data.qty[index],data.stock[index]);
-                                    return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
-                                }
-                
-                                const order = {
-                                    prd_id: data.prd_id[index],
-                                    address: {
-                                        locality: data.local_address,
-                                        country: data.country,
-                                        district: data.district,
-                                        state: data.state,
-                                        city: data.city,
-                                        altr_number: data.altr_number,
-                                        postcode: data.postcode
-                                    },
-                                    date: Date.now(),
-                                    amount: parseFloat(data.total_price[index]),
-                                    consumer: userDetails._id,
-                                    mobile_number: userDetails.mobile_number,
-                                    payment: data.pay_methods,
-                                    qty: parseInt(data.qty[index])
-                                };
-                
-                                await orders.create(order); 
-                                await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
+
+                        for (let index = 0; index < data.prd_id.length; index++) {
+                            if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
+                                // console.log(index,data.qty[index],data.stock[index]);
+                                return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
                             }
-                            
-                            
+
+                            const order = {
+                                prd_id: data.prd_id[index],
+                                address: {
+                                    locality: data.local_address,
+                                    country: data.country,
+                                    district: data.district,
+                                    state: data.state,
+                                    city: data.city,
+                                    altr_number: data.altr_number,
+                                    postcode: data.postcode
+                                },
+                                date: Date.now(),
+                                amount: parseFloat(data.total_price[index]),
+                                consumer: userDetails._id,
+                                mobile_number: userDetails.mobile_number,
+                                payment: data.pay_methods,
+                                qty: parseInt(data.qty[index])
+                            };
+
+                            await orders.create(order);
+                            await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
+                        }
+
+
 
                     } else {
                         if (data.qty > data.stock) {
@@ -818,7 +840,7 @@ module.exports = {
                             qty: parseInt(data.qty)
                         }
                         await orders.create(order)
-                        await productsCollection.updateOne({_id:data.prd_id},{$inc:{stock:-1}})
+                        await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
                     }
 
                     res.redirect('/user/profile?message=Order Placed Successfuly!')

@@ -33,12 +33,12 @@
                         <tr class="data-row ">
                             <% if (user.blocked) { %>
                                 <td><button class="btn btn-dark p-1"
-                                        onclick="confirms(event,unblockUser('<%= user._id %>'))">UnBlock User</button>
+                                        onclick="confirms(event,function(){unblockUser('<%= user._id %>')})">UnBlock User</button>
                                 </td>
 
                                 <% } else { %>
                                     <td><button class="btn btn-dark p-1"
-                                            onclick="confirms(event,blockUser('<%= user._id %>'))">Block User</button>
+                                            onclick="confirms(event,function(){blockUser('<%= user._id %>')})">Block User</button>
                                     </td>
 
                                     <% } %>

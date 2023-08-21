@@ -12,6 +12,7 @@
             <table class="table ">
                 <thead class="fs-4 " style="position: sticky;top: 0;">
                     <tr>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order ID</th>
                         <th scope="col" colspan="2" style="font-weight: 500;background-color: #E5E5E5;">Product Details
                         </th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Consumer</th>
@@ -28,6 +29,9 @@
 
                         <tr class="data-row ">
 
+                            <td>
+                                <%= order._id %>
+                            </td>
                             <td id="prd_image">
                                 <img src="<%= order.prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;">
                             </td>
@@ -59,10 +63,10 @@
                             <td>
                                 <% if (order.status=="delivery-period" ) { %>
                                     <button class="btn btn-dark text-warning"
-                                        onclick="cancelOrderAsAdmin('<%= order._id %>')">Cancel</button>
+                                        onclick="confirms(event,function(){cancelOrderAsAdmin('<%= order._id %>')})">Cancel</button>
                                         <% } else if (order.returned) { %>
                                             <button class="btn btn-dark text-warning"
-                                            onclick="refundPayment('<%= order._id %>')">Refund</button>
+                                            onclick="confirms(event,function(){refundPayment('<%= order._id %>')})">Refund</button>
                                     <% } %>
                             </td>
                         </tr>

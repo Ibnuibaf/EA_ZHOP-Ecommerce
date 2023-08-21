@@ -105,9 +105,12 @@
                         <p class="fs-5 text-center my-2 text-decoration-underline">Your Addresses</p>
                         <% if (userDetails.address.length) { %>
                             <% userDetails.address.forEach(address=> { %>
-                                <div class="each-address d-flex   text-truncate">
+                                <div class="each-address   text-truncate mt-3">
                                     <button  class="border-0 bg-transparent p-0"  onclick="removeAddress('<%= address._id %>')"><img src="/images/icons8-delete-30.png" alt="" height="20"></button>
-                                    <p class="px-2 ">
+                                    <button type="button" class="btn btn-dark"
+                                    style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"value="<%= JSON.stringify(address) %>"
+                                        onclick="selectAddress(event.target.value)">edit</button>
+                                    <i class="px-2 ">
                                         <%= address.locality %>,
                                         <%= address.city %>,
                                         <%= address.district %>,
@@ -115,7 +118,7 @@
                                         <%= address.country %>,
                                         <%=address.altr_number %>,
                                         <%= address.postcode %>,
-                                    </p>
+                                    </i>
                                 </div>
                                 <% }) %>
                                     <% } else { %>
@@ -171,6 +174,7 @@
                                 <label for="altr_number" class="form-label">Alternative Phone Number</label>
                                 <input type="text" class="form-input" id="altr_number" name="altr_number"
                                     placeholder="Enter an alternative phone number">
+                                <input type="hidden" name="address_id" id="address_id">
                             </div>
 
                         </div>

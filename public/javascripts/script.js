@@ -13,7 +13,11 @@ $(document).ready(function () {
         updateQty(productId, "decrease");
     });
 
+
 });
+
+
+
 
 
 const inputFields = document.querySelectorAll('.profile-details');
@@ -78,9 +82,13 @@ function updateQty(productId, action) {
         method: "PATCH",
         data: { productId: productId, action: action },
         success: (response) => {
-            $(".quantity[data-product-id='" + productId + "']").val(response.quantity);
-            $(".priceForQty[data-product-id='" + productId + "']").text("₹" + response.total_prize + "/-")
-            console.log("Cart updated successfully.");
+            if(response.quantity<1){
+                return removeCart(productId)
+            }else{
+                $(".quantity[data-product-id='" + productId + "']").val(response.quantity);
+                $(".priceForQty[data-product-id='" + productId + "']").text("₹" + response.total_prize + "/-")
+                console.log("Cart updated successfully.");
+            }
         },
         error: function (error) {
             console.error("Error updating cart: ", error);
@@ -137,15 +145,6 @@ function unblockUser(id) {
         // Optionally handle error and show error message to the user
     });
 }
-function deleteUser(id) {
-    fetch(`/admin/users-management/delete-user/${id}`, {
-        method: 'DELETE',
-    }).then(() => {
-        window.location.reload()
-    }).catch((error) => {
-        console.error('Error blocking User:', error);
-    });
-}
 function searchUser() {
     const query = document.getElementById("search").value
     window.location.href = `/admin/users-management?search=${query}`
@@ -198,22 +197,22 @@ function editProduct(prd) {
         document.getElementById("product_stock").value = product.stock;
         document.getElementById("product_mrp").value = product.mrp;
         document.getElementById("product_discount").value = product.discount;
+        window.location.href='#product-category'
     } catch (error) {
         console.log(error.message);
     }
 
 }
 function cancelOrder(id) {
-    const isConfirm = confirm("Do you really want to cancel the order")
-    if (isConfirm) {
+    
         window.location.href = `/user/cancel-order?order=${id}`
-    }
+    
 }
 function cancelOrderAsAdmin(id) {
-    const isConfirm = confirm("Do you really want to cancel the order")
-    if (isConfirm) {
+    
+
         window.location.href = `/admin/orders-management/cancel-order?order=${id}`
-    }
+    
 }
 function updateOrderStatus(orderId, newStatus) {
     fetch(`/admin/update-order-status/${orderId}`, {
@@ -241,10 +240,9 @@ statusSelects.forEach(select => {
     });
 });
 function returnOrder(id) {
-    const isConfirm = confirm("Do you really want to return the order")
-    if (isConfirm) {
+    
         window.location.href = `/user/return-order?order=${id}`
-    }
+    
 }
 function selectAddress(address) {
     console.log(address);
@@ -257,6 +255,7 @@ function selectAddress(address) {
         document.getElementById("city").value = addressDetails.city
         document.getElementById("altr_number").value = addressDetails.altr_number
         document.getElementById("postcode").value = addressDetails.postcode
+        document.getElementById("address_id").value = addressDetails._id
     } catch (error) {
         console.log(error.message);
     }
@@ -286,7 +285,10 @@ function activateCategory(id) {
 function validateCategoryForm() {
     const cat_name = document.getElementById('cat_name').value;
     if (cat_name.trim() === '') {
-        alert("Enter new Category..")
+        const modal = new bootstrap.Modal(document.getElementById("adminMessageModal"));
+        const modalMessage = document.getElementById("modalAdminMessage");
+        modalMessage.textContent = "Enter new Category..";
+        modal.show();
         return false
     }
 }
@@ -346,11 +348,7 @@ function editCategory(cat) {
 
 }
 
-function confirms(event, fn) {
-    event.preventDefault();
-    alert("The Specified action is Done.!");
-    fn()
-}
+
 async function uploadImage(file, id) {
     console.log(file[0]);
     for (const index in file) {
@@ -370,7 +368,43 @@ async function uploadImage(file, id) {
     }
 
 }
+function confirms(event, fn) {
+    let modal = new bootstrap.Modal(document.getElementById("confirmationModal"));
 
+    event.preventDefault();
+    modal.show();
+
+    let confirmButton = document.getElementById("confirmButton");
+
+    confirmButton.addEventListener("click", function() {
+        modal.hide();
+        fn();
+    });
+
+    let cancelButton = document.querySelector("#confirmationModal .btn-secondary");
+    cancelButton.addEventListener("click", function() {
+        modal.hide();
+    });
+}
+
+function confirmsUser(event, fn) {
+    let modal = new bootstrap.Modal(document.getElementById("confirmationModalUser"));
+
+    event.preventDefault();
+    modal.show();
+
+    let confirmButton = document.getElementById("confirmButton");
+
+    confirmButton.addEventListener("click", function() {
+        modal.hide();
+        fn();
+    });
+
+    let cancelButton = document.querySelector("#confirmationModalUser .btn-secondary");
+    cancelButton.addEventListener("click", function() {
+        modal.hide();
+    });
+}
 
 function getQueryParam(name) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -380,20 +414,39 @@ function getQueryParam(name) {
 // Display the alert box with the message from the 'message' query parameter
 window.addEventListener('load', function () {
     let message
+    let adminMessage
     if (getQueryParam('CreatedAccount')) { message = getQueryParam('CreatedAccount'); }
     else if (getQueryParam('UserLogged')) { message = getQueryParam('UserLogged'); }
     else if (getQueryParam('message')) { message = getQueryParam('message') }
-    console.log(message);
+    else if (getQueryParam('adminMessage')) { adminMessage = getQueryParam('adminMessage') }
     if (message) {
         const modal = new bootstrap.Modal(document.getElementById("myModal"));
         const modalMessage = document.getElementById("modalMessage");
         modalMessage.textContent = message;
         modal.show();
+    }else if (adminMessage) {
+        const modal = new bootstrap.Modal(document.getElementById("adminMessageModal"));
+        const modalMessage = document.getElementById("modalAdminMessage");
+        modalMessage.textContent = adminMessage;
+        modal.show();
     }
 });
 
-document.getElementById("deactivateLink").addEventListener("click", function (event) {
-    if (!confirm("Deactivate your account Permanently?")) {
-        event.preventDefault();
-    }
+deactivateLink.addEventListener("click", function(event) {
+    let confirmationModalUser = new bootstrap.Modal(document.getElementById("confirmationModalUser"));
+    let confirmButton = document.getElementById("confirmButton");
+    let deactivateLink = document.getElementById("deactivateLink");
+    event.preventDefault();
+    confirmationModalUser.show();
+
+    confirmButton.addEventListener("click", function() {
+
+        confirmationModalUser.hide();
+        window.location.href = deactivateLink.getAttribute("href");
+    });
+
+    let cancelButton = document.querySelector("#confirmationModalUser .btn-secondary");
+    cancelButton.addEventListener("click", function() {
+        confirmationModalUser.hide();
+    });
 });

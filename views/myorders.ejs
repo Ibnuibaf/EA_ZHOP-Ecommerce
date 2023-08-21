@@ -62,11 +62,11 @@
                             <td>
                                 <% if (order.status=="delivery-period" ) { %>
                                     <button class="btn btn-dark text-warning"
-                                        onclick="cancelOrder('<%= order._id %>')">Cancel</button>
+                                        onclick="confirmsUser(event,function(){cancelOrder('<%= order._id %>')})">Cancel</button>
                                     <% } else if (order.status=="return-period" ) { %>
                                         <% if (!order.returned) { %>
                                             <button class="btn btn-dark text-warning"
-                                                onclick="returnOrder('<%= order._id %>')">Return</button>
+                                                onclick="confirmsUser(event,function(){returnOrder('<%= order._id %>')})">Return</button>
                                             <% } %>
                                         <% } %>
                             </td>

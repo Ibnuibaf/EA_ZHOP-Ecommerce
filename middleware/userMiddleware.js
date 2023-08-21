@@ -6,6 +6,14 @@ const loggedIn = async (req, res, next) => {
             const user = req.session.user;
             const userDetails = await usersCollection.findOne({ email: user });
             req.userDetails = userDetails;
+            if(userDetails.blocked){
+                req.session.destroy((err) => {
+                    console.log(err);
+                    res.status(500)
+                })
+                res.clearCookie('connect.sid')
+                res.redirect('/signin?message=Your account is blocked by administrator')
+            }
             next();
         } catch (error) {
             console.log(error);

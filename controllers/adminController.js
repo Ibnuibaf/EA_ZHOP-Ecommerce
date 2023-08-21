@@ -25,7 +25,7 @@ module.exports = {
                 if (password == isAdmin.password) {
                     req.session.admin = isAdmin.username
                     console.log(req.session.admin);
-                    res.redirect('/admin/dashboard?AdminLogged=Admin Logged In!')
+                    res.redirect('/admin/dashboard?adminMessage=Admin Logged In!')
 
                 } else {
                     return res.redirect('/admin?validation=Password is Incorrect! Try Again')
@@ -198,7 +198,7 @@ module.exports = {
             }
             const existName = await categories.findOne({ name: cat.cat_name })
             if (existName) {
-                return res.redirect('/admin/products-management?message=category exist')
+                return res.redirect('/admin/products-management?adminMessage=category exist')
             }
             await categories.create({
                 name: cat.cat_name
@@ -293,7 +293,7 @@ module.exports = {
                 res.render('error')
             })
             res.clearCookie('connect.sid')
-            res.redirect('/?message=User has been Logged Out!')
+            res.redirect('/?adminMessage')
         } catch (error) {
             console.log(error.message);
             res.render('error')

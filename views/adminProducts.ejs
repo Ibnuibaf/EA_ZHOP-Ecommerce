@@ -33,7 +33,8 @@
                     <% productsList.forEach(product=> { %>
                         <tr class="data-row ">
                             <td id="prd_image">
-                                <img src="<%= product.prd_images[0] %>" alt=""  style="max-width: 50px; max-height: 50px;" >
+                                <img src="<%= product.prd_images[0] %>" alt=""
+                                    style="max-width: 50px; max-height: 50px;">
 
                             </td>
                             <td>
@@ -60,10 +61,10 @@
                                     onclick="editProduct(event.target.value)">Edit</button>
                                 <% if (product.active) { %>
                                     <button class="btn btn-dark p-1"
-                                        onclick="confirms(event,deactivateProduct('<%= product._id %>'))">Deactivate</button>
+                                        onclick="confirms(event, function() {deactivateProduct('<%= product._id %>')})">Deactivate</button>
                                     <% } else { %>
                                         <button class="btn btn-dark p-1"
-                                            onclick="confirms(event,activateProduct('<%= product._id %>'))">Activate</button>
+                                            onclick="confirms(event, function() {activateProduct('<%= product._id %>')})">Activate</button>
                                         <% } %>
                             </td>
                         </tr>
@@ -80,7 +81,7 @@
         <div class="tab-hea  border-bottom border-2 py-3 text-center">
             <h3>PRODUCT & CATEGORY</h3>
         </div>
-        <div class="row">
+        <div class="row" id="product-category">
             <div class="col-md-6 px-3 d-flex justify-content-center" id="#product-tab">
                 <div class="prd-Tab border border-3 rounded p-2 m-2">
 
@@ -95,16 +96,16 @@
                         <input type="hidden" id="product_id" name="product_id">
 
                         <div class="form-group mt-2">
-                            <div id="imagePreview " >
+                            <div id="imagePreview ">
                                 <img src="" alt="prd_image" id="product_image1" style="width: 7vw;height: 14vh;">
                                 <img src="" alt="prd_image" id="product_image2" style="width: 7vw;height: 14vh;"><br>
                                 <img src="" alt="prd_image" id="product_image3" style="width: 7vw;height: 14vh;">
                                 <img src="" alt="prd_image" id="product_image4" style="width: 7vw;height: 14vh;">
                             </div>
                             <label for="first_name">Add Images:</label><br>
-                            
+
                             <input type="file" class="my-1" name="product_img1" id="img-1" accept=".png,.jpeg,.webp"
-                                onchange="uploadImage(event.target.files)" multiple  >
+                                onchange="uploadImage(event.target.files)" multiple>
                             <button style="border: none;background: transparent;" onclick="(()=>{
                                 let file=document.getElementById('img-1');
                                 file.value=''
@@ -281,10 +282,10 @@
                                                 onclick="editCategory(event.target.value)">Edit</button>
                                             <% if (category.active) { %>
                                                 <button class="btn btn-dark p-1"
-                                                    onclick="confirms(event,deactivateCategory('<%= category._id %>'))">Deactivate</button>
+                                                    onclick="confirms(event, function() {deactivateCategory('<%= category._id %>')})">Deactivate</button>
                                                 <% } else { %>
                                                     <button class="btn btn-dark p-1"
-                                                        onclick="confirms(event,activateCategory('<%= category._id %>'))">Activate</button>
+                                                        onclick="confirms(event, function() { activateCategory('<%= category._id %>'); })">Activate</button>
                                                     <% } %>
                                         </td>
                                     </tr>
