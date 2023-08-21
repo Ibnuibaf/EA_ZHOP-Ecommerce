@@ -1,0 +1,67 @@
+<%- include('partials/adminHeader.ejs') %>
+
+
+    <div class="container-fluid tab-name ">
+        <h3 class="p-3 ">Banners Management&GreaterGreater;</h3>
+    </div>
+    <div class=" p-5" style="background-color: #F3F2EE;">
+        <div class="createTab row d-flex justify-content-between">
+            <div class="col-md-6">
+                <p class="fs-3 fw-medium ">Create New Banners</p>
+                <div class="d-flex align-items-center h-75">
+
+                    <p class="fs-5 ">Add new offer banners on Available offers <br> on every category</p>
+                </div>
+            </div>
+            <div class="detailsTab px-5 col-md-6 border rounded p-3 fs-5 shadow">
+                <form action="/admin/create-banner" method="post" onsubmit="event.preventDefault();  validateCreateBanner()">
+                    <div class="m-2">
+                        <label for="title">Title</label><br>
+                        <input type="text" class="ea-input" id="title" name="title">
+                    </div>
+                    <div class="m-2">
+                        <label for="image">Select Banner</label><br>
+                        <input type="file" class="" id="image" name="image" accept=".png,.jpeg,.webp"
+                        onchange="uploadBannerImage(event.target.files)">
+                    </div>
+                    <div class="m-2">
+                        <label for="category">Category</label><br>
+                        <select name="category" class="ea-input" id="category">
+                            <% categoriesList.forEach(category=> { %>
+                                <option value="<%= category._id %>" class="ea-input">
+                                    <%= category.name %>
+                                </option>
+                                <% }) %>
+
+                        </select>
+                    </div>
+                    <div class="m-2">
+                        <button type="submit" class=" btn btn-dark">Add Banner</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <% if (bannerList.length) { %>
+        <div class=" tab m-5 border shadow">
+            <% bannerList.forEach(banner=> { %>
+
+                <div class="banner d-block w-100 col-12 col-md-6 img-fluid p-5 text-end "
+                    style="height: 70vh;background-image: url('<%= banner.banner %>');background-repeat: no-repeat;background-size: cover;">
+                    <title>
+                        <%= banner.title %>
+                    </title>
+                    <button class="btn btn-warning text-dark"  onclick="confirms(event,function(){removeBanner(`<%= banner._id %>`)})">delete</button>
+                </div>
+
+                <% }) %>
+        </div>
+        <% } %>
+
+
+
+
+
+            <%- include('partials/adminFooter.ejs') %>

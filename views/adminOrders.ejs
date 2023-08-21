@@ -26,50 +26,91 @@
                 <tbody>
 
                     <% orderList.forEach(order=> { %>
+                        <% if (order.status=="canceled") { %>
+                            <tr class="data-row ">
 
-                        <tr class="data-row ">
+                                <td class="bg-warning">
+                                    <%= order._id %>
+                                </td>
+                                <td id="prd_image" class="bg-warning">
+                                    <img src="<%= order.prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;">
+                                </td>
+                                <td class="bg-warning">
+                                    <%= order.prd_name %>
+                                </td>
+                                <td class="bg-warning">
+                                    <%= order.user %>
+                                </td>
+                                <td class="bg-warning"> 
+                                    <%= order.date.toLocaleDateString() %>
+                                </td >
+                                <td class="bg-warning">
+                                    <%= order.qty %>
+                                </td>
+                                <td class="bg-warning">
+                                    <%= order.amount %>
+                                </td>
+                                <td class="bg-warning">
+                                    <select name="status " class="ea-input status-select bg-warning"  data-order-id="<%= order._id %>">
+                                        <option >Order Canceled</option>
+                                    </select>
+                                </td>
+                                <td class="bg-warning">
+                                    <% if (order.status=="delivery-period" ) { %>
+                                        <button class="btn btn-dark text-warning"
+                                            onclick="confirms(event,function(){cancelOrderAsAdmin('<%= order._id %>')})">Cancel</button>
+                                            <% } else if (order.returned) { %>
+                                                <button class="btn btn-dark text-warning"
+                                                onclick="confirms(event,function(){refundPayment('<%= order._id %>')})">Refund</button>
+                                        <% } %>
+                                </td>
+                            </tr>
+                            <% } else { %>
+                                <tr class="data-row ">
 
-                            <td>
-                                <%= order._id %>
-                            </td>
-                            <td id="prd_image">
-                                <img src="<%= order.prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;">
-                            </td>
-                            <td>
-                                <%= order.prd_name %>
-                            </td>
-                            <td>
-                                <%= order.user %>
-                            </td>
-                            <td>
-                                <%= order.date.toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <%= order.qty %>
-                            </td>
-                            <td>
-                                <%= order.amount %>
-                            </td>
-                            <td>
-                                <select name="status" class="ea-input status-select" data-order-id="<%= order._id %>">
-                                    <option value="delivery-period" <%=order.status==='delivery-period' ? 'selected'
-                                        : '' %>>Delivery Period</option>
-                                    <option value="return-period" <%=order.status==='return-period' ? 'selected' : '' %>
-                                        >Return Period</option>
-                                    <option value="closed" <%=order.status==='closed' ? 'selected' : '' %>>Order Closed
-                                    </option>
-                                </select>
-                            </td>
-                            <td>
-                                <% if (order.status=="delivery-period" ) { %>
-                                    <button class="btn btn-dark text-warning"
-                                        onclick="confirms(event,function(){cancelOrderAsAdmin('<%= order._id %>')})">Cancel</button>
-                                        <% } else if (order.returned) { %>
+                                    <td>
+                                        <%= order._id %>
+                                    </td>
+                                    <td id="prd_image">
+                                        <img src="<%= order.prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;">
+                                    </td>
+                                    <td>
+                                        <%= order.prd_name %>
+                                    </td>
+                                    <td>
+                                        <%= order.user %>
+                                    </td>
+                                    <td>
+                                        <%= order.date.toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <%= order.qty %>
+                                    </td>
+                                    <td>
+                                        <%= order.amount %>
+                                    </td>
+                                    <td>
+                                        <select name="status" class="ea-input status-select" data-order-id="<%= order._id %>">
+                                            <option value="delivery-period" <%=order.status==='delivery-period' ? 'selected'
+                                                : '' %>>Delivery Period</option>
+                                            <option value="return-period" <%=order.status==='return-period' ? 'selected' : '' %>
+                                                >Return Period</option>
+                                            <option value="closed" <%=order.status==='closed' ? 'selected' : '' %>>Order Closed
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <% if (order.status=="delivery-period" ) { %>
                                             <button class="btn btn-dark text-warning"
-                                            onclick="confirms(event,function(){refundPayment('<%= order._id %>')})">Refund</button>
-                                    <% } %>
-                            </td>
-                        </tr>
+                                                onclick="confirms(event,function(){cancelOrderAsAdmin('<%= order._id %>')})">Cancel</button>
+                                                <% } else if (order.returned) { %>
+                                                    <button class="btn btn-dark text-warning"
+                                                    onclick="confirms(event,function(){refundPayment('<%= order._id %>')})">Refund</button>
+                                            <% } %>
+                                    </td>
+                                </tr>
+                        <% } %>
+                        
                         <% }) %>
 
 

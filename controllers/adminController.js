@@ -5,6 +5,7 @@ const usersCollection = require('../models/usersSchema')
 const productsCollection = require('../models/productsSchema')
 const orders=require('../models/ordersSchema')
 const categories = require('../models/categorySchema')
+const banners=require('../models/bannerSchema')
 const cloudinary = require('cloudinary').v2;
 
 module.exports = {
@@ -142,26 +143,33 @@ module.exports = {
             if (prd.prd_id && prd.prd_name) {
                 if (prd.prd_images.length) {
                     await productsCollection.updateOne({ _id: prd.prd_id }, {
-                        prd_name: prd.prd_name,
-                        description: prd.prd_desc,
-                        additional_info: prd.prd_addinfo,
-                        category: prd.prd_category,
-                        discount: prd.prd_discount,
-                        mrp: prd.prd_mrp,
-                        stock: prd.prd_stock,
-                        purchase: prd.prd_purchase,
-                        prd_images: prd.prd_images
+                        $set:{
+                            prd_name: prd.prd_name,
+                            description: prd.prd_desc,
+                            additional_info: prd.prd_addinfo,
+                            category: prd.prd_category,
+                            discount: prd.prd_discount,
+                            mrp: prd.prd_mrp,
+                            stock: prd.prd_stock,
+                            purchase: prd.prd_purchase,
+                            
+                        },
+                        $push: {
+                            prd_images: prd.prd_images
+                        }
                     }, { upsert: true })
                 } else {
                     await productsCollection.updateOne({ _id: prd.prd_id }, {
-                        prd_name: prd.prd_name,
-                        description: prd.prd_desc,
-                        additional_info: prd.prd_addinfo,
-                        category: prd.prd_category,
-                        discount: prd.prd_discount,
-                        mrp: prd.prd_mrp,
-                        stock: prd.prd_stock,
-                        purchase: prd.prd_purchase
+                        $set:{
+                            prd_name: prd.prd_name,
+                            description: prd.prd_desc,
+                            additional_info: prd.prd_addinfo,
+                            category: prd.prd_category,
+                            discount: prd.prd_discount,
+                            mrp: prd.prd_mrp,
+                            stock: prd.prd_stock,
+                            purchase: prd.prd_purchase
+                        }
                     }, { upsert: true })
                 }
                 return res.redirect('/admin/products-management')
@@ -211,19 +219,34 @@ module.exports = {
             res.render('error')
         }
     },
-    uploadPrdImage: async (req, res) => {
+    uploadImage: async (req, res) => {
         try {
-
             const result = await cloudinary.uploader.upload(`./images/${req.file.originalname}`, {
                 public_id: req.file.originalname
             })
             res.json(result.secure_url)
         } catch (error) {
             console.log(error.message);
-            res.render('error')
+            res.send(500)
         }
 
     },
+    removeImage: async (req, res) => {
+        try {
+          const prd_id = req.body.prd_id;
+          const image = req.body.image;
+            console.log(prd_id,image);
+          await productsCollection.updateOne(
+            { _id: prd_id },
+            { $pull: { prd_images: image } }
+          );
+      
+          res.sendStatus(200);
+        } catch (error) {
+          console.error(error.message);
+          res.sendStatus(500);
+        }
+      },
     loadOrdersManagement:async(req,res)=>{
         try {
             
@@ -257,7 +280,8 @@ module.exports = {
                     prd_name:"$order_detials.prd_name",
                     prd_images:"$order_detials.prd_images",
                     user:"$user_details.email",
-                }}
+                }},
+                {$sort:{_id:-1}}
             ])
             res.render('adminOrders',{orderList})
         } catch (error) {
@@ -280,6 +304,40 @@ module.exports = {
             const updatedStatus=req.body.status
             const orderId=req.params.id
             await orders.updateOne({_id:orderId},{$set:{status:updatedStatus}})
+            res.send(200)
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    loadBannersManagement:async(req,res)=>{
+        try {
+            const bannerList = await banners.find()
+            const categoriesList=await categories.find({active:true})
+            res.render('adminBanner',{bannerList,categoriesList})
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    createBanner:async(req,res)=>{
+        try {
+            const bannerDetails=req.body
+            let bannerExist=await banners.find({banner: bannerDetails.banner})
+            console.log(bannerExist);
+            if(!bannerExist.length){
+                await banners.create(bannerDetails)
+                res.send(200)
+            }
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    removeBanner:async(req,res)=>{
+        try {
+            const banner=req.params.id
+            const result=await banners.findByIdAndDelete(banner)
             res.send(200)
         } catch (error) {
             console.log(error.message);

@@ -5,9 +5,9 @@
     </div>
 
     <div class="row m-3 ">
-        <div class="d-flex">
+        <div class="d-flex ">
 
-            <div class="products-tab  d-none d-lg-block" >
+            <div class="products-tab  d-none d-lg-block">
                 <div class="search border px-2 py-1 d-flex" style="width: fit-content;">
                     <input type="text" id="search" placeholder="Search.." style="border: none;">
                     <button type="submit" style="border: none;background: transparent;max-width: fit-content;"
@@ -61,6 +61,9 @@
                     </ul>
                 </div>
             </div>
+
+
+
             <div class="products mx-3 w-100 ">
                 <div class="category-selector">
 
@@ -98,14 +101,16 @@
                 </div>
             </div> -->
 
-                <div class="products-tab row">
+                <div class="products-tab row  justify-content-center">
                     <% productsList.forEach(product=> { %>
                         <% if (product.active) { %>
                             <div class="shadow m-2 " style="width: 18rem;box-shadow: #F3F2EE;">
-                                <div style="height: 270px;padding: 15px;display: flex; justify-content: center;align-items: center;">
-                                    
+                                <div
+                                    style="height: 270px;padding: 15px;display: flex; justify-content: center;align-items: center;">
+
                                     <a href="/user/products/product-details/<%= product._id %>"><img
-                                        src="<%= product.prd_images[0] %>" class="card-img-top" alt="..." style="max-width: fit-content;max-height: 240px;"></a>
+                                            src="<%= product.prd_images[0] %>" class="card-img-top" alt="..."
+                                            style="max-width: fit-content;max-height: 240px;"></a>
                                 </div>
 
                                 <div class="card-body p-3">
@@ -120,7 +125,7 @@
                                         <div class="price-disc-rating d-flex justify-content-between">
                                             <div class="price-disc d-flex">
                                                 <h5 class="mx-2">
-                                                    ₹<%=Math.floor(product.mrp-((product.mrp*product.discount)/100)) %>
+                                                    ₹<%=Math.floor(product.mrp-((product.mrp*product.discount) /100)) %>
                                                         /-
                                                 </h5>
                                                 <i class="text-danger">
@@ -171,6 +176,7 @@
             </div> -->
             </div>
         </div>
+
     </div>
 
     <%- include('partials/userFooter.ejs') %>

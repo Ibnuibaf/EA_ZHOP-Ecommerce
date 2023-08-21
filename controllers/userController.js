@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer')
 const productsCollection = require("../models/productsSchema")
 const usersCollection = require("../models/usersSchema");
 const categories = require('../models/categorySchema');
+const banners=require('../models/bannerSchema')
 const otpVerification = require('../models/otpSchema')
 const orders = require('../models/ordersSchema')
 const { ObjectId } = require('mongoose').Types;
@@ -65,9 +66,37 @@ const sendVerificationOTP = async (user, email) => {
 }
 
 module.exports = {
-    loadHome: (req, res) => {
-
-        res.render('home')
+    loadHome: async (req, res) => {
+        try {
+            const latestProducts = await productsCollection.aggregate([
+                {
+                    $sort: { _id: -1 }
+                },
+                {
+                    $group: {
+                        _id: '$category',
+                        latestProduct: { $first: '$$ROOT' }
+                    }
+                },
+                {
+                  $lookup: {
+                    from: 'categories', // Collection name for categories
+                    localField: 'latestProduct.category',
+                    foreignField: '_id',
+                    as: 'categoryName'
+                  }
+                },
+                {
+                  $unwind: '$categoryName'
+                }
+            ]);
+           const bannersList=await banners.find()
+            res.render('home',{latestProducts,bannersList})
+        } catch (error) {
+            console.log(error.message);
+            const statusCode = error.status || 500;
+            res.status(statusCode).send(error.message);
+        }
     },
     loadSignIn: (req, res) => {
         let error
@@ -472,7 +501,8 @@ module.exports = {
                         prd_name: "$order_detials.prd_name",
                         prd_images: "$order_detials.prd_images",
                     }
-                }
+                },
+                {$sort:{_id:-1}}
             ])
             res.render('myorders', { orderDetails })
         } catch (error) {
@@ -510,7 +540,7 @@ module.exports = {
             const searchQuery = req.query.search
             const category = req.query.category
             const categoriesList = await categories.find()
-            let productsList = await productsCollection.find()
+            let productsList = await productsCollection.find().sort({_id:-1})
             let foundCategory = ''
 
             if (category) {

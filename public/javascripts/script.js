@@ -1,6 +1,7 @@
 
 
 let img = []
+let singleImage
 
 $(document).ready(function () {
     $(".qty-inc").on("click", function () {
@@ -173,10 +174,10 @@ function activateProduct(id) {
         // Optionally handle error and show error message to the user
     });
 }
+
 function editProduct(prd) {
     try {
         const product = JSON.parse(prd); // Parse the JSON string back to an object
-
         document.getElementById("product_id").value = product._id;
         document.getElementById("product_image1").src = product.prd_images[0];
         document.getElementById("product_image2").src = product.prd_images[1];
@@ -350,7 +351,6 @@ function editCategory(cat) {
 
 
 async function uploadImage(file, id) {
-    console.log(file[0]);
     for (const index in file) {
         const formData = new FormData()
 
@@ -367,6 +367,79 @@ async function uploadImage(file, id) {
 
     }
 
+}
+function removeImage(index){
+    const prd=document.getElementById('product_id').value
+    const image=document.getElementById(`product_image${index}`).src
+    if(prd){
+        fetch(`/admin/products-management/remove-image`,{
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({prd_id:prd,image})
+        }).then(()=>{
+            window.location.reload()
+        }).catch(error=>{
+            console.error('Error deleting image:', error);
+        })
+    }
+}
+async function uploadBannerImage(file, id) {
+
+        const formData = new FormData()
+
+        formData.append("file", file[0])
+        console.log(file[0]);
+        let result = await fetch("/admin/create-banner/uploadImage", {
+            method: "POST",
+            body: formData
+        }).then((res => {
+            return res.json()
+        }))
+
+        singleImage=result
+
+    
+
+}
+function validateCreateBanner() {
+    const title = document.getElementById('title').value;
+    const category = document.getElementById('category').value;
+
+    // Add other validation rules as needed
+
+
+    let data = {
+        title,
+        banner:singleImage,
+        category,
+    }
+
+    fetch("/admin/create-banner", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }).then(() => {
+
+        window.location.reload()
+    }).catch((error) => {
+        console.error('Error deleting product:', error);
+        // Optionally handle error and show error message to the user
+    })
+
+}
+function removeBanner(id){
+    fetch(`/admin/delete-banner/${id}`, {
+        method: 'DELETE',
+    }).then(() => {
+        window.location.reload()
+    }).catch((error) => {
+        console.error('Error deleting product:', error);
+        // Optionally handle error and show error message to the user
+    });
 }
 function confirms(event, fn) {
     let modal = new bootstrap.Modal(document.getElementById("confirmationModal"));
