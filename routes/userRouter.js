@@ -55,6 +55,7 @@ router.get('/user/return-order',middle.loggedIn,controller.returnOrder)
 //checkout
 router.get('/user/checkout',middle.loggedIn,controller.loadCheckout)
 router.post('/user/confirm-order',middle.loggedIn,controller.confirmOrder)
+router.post('/user/checkout/verify-payment',middle.loggedIn,controller.verifyPayment)
 
 //logout
 router.get('/logout',middle.loggedIn,controller.logOut)

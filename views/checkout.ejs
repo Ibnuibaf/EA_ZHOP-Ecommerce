@@ -36,18 +36,18 @@
             </div>
             <div class="address-tab col-md-8 border rounded p-2 shadow-lg">
 
-                <form action="/user/confirm-order" method="post">
+                <form action="/user/confirm-order" onsubmit="event.preventDefault();  confirmOrder()" method="post" id="checkoutForm">
 
                     <div class="local_address col mx-2">
                         <label for="local_address" class="form-label">Address</label><br>
-                        <textarea id="local_address" class="form-input" name="local_address" rows="4"
+                        <textarea id="local_address" class="form-input" name="local_address" id="local_address" rows="4"
                             style="resize: none;"></textarea>
                     </div>
 
                     <div class="my-3 d-flex">
                         <div class="Country col mx-2">
                             <label for="Country" class="form-label">Country</label>
-                            <input type="text" class="form-input" id="Country" name="country">
+                            <input type="text" class="form-input" id="country" name="country">
                         </div>
                         <div class="city col mx-2">
                             <label for="city" class="form-label">Town/City</label>
@@ -58,11 +58,11 @@
                     <div class="my-3 d-flex">
                         <div class="District col mx-2">
                             <label for="District" class="form-label">District</label>
-                            <input type="text" class="form-input" id="District" name="district">
+                            <input type="text" class="form-input" id="district" name="district">
                         </div>
                         <div class="State col mx-2">
                             <label for="State" class="form-label">State</label>
-                            <input type="text" class="form-input" id="State" name="state">
+                            <input type="text" class="form-input" id="state" name="state">
                         </div>
 
                     </div>
@@ -95,20 +95,20 @@
                                     <i class="mx-2">₹<%= prd.unit_prize %>/-</i>
                                     <i class="fw-medium ">₹<%= prd.total_prize %>/-</i>
                                 </li>
-                                <input type="hidden" name="prd_id" value="<%= prd.prd_id %>">
-                                <input type="hidden" name="qty" value="<%= prd.qty %>">
-                                <input type="hidden" name="stock" value="<%= prd.stock %>">
-                                <input type="hidden" name="total_price" value="<%= prd.total_prize %>">
+                                <input type="hidden" name="prd_id" id="prd_id" value="<%= prd.prd_id %>">
+                                <input type="hidden" name="qty" id="qty" value="<%= prd.qty %>">
+                                <input type="hidden" name="stock" id="stock" value="<%= prd.stock %>">
+                                <input type="hidden" name="total_price" id="total_price" value="<%= prd.total_prize %>">
                             <% }) %>
                             <% } else if (productDetails) { %>
                                 <li class="d-flex justify-content-between">
                                     <label for=""><%= productDetails.prd_name %></label>
                                     <i><%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %></i>
                                 </li>
-                                <input type="hidden" name="prd_id" value="<%= productDetails._id %>">
-                                <input type="hidden" name="qty" value="1">
-                                <input type="hidden" name="stock" value="<%= productDetails.stock %>">
-                                <input type="hidden" name="total_price" value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
+                                <input type="hidden" name="prd_id" id="prd_id" value="<%= productDetails._id %>">
+                                <input type="hidden" name="qty" id="qty" value="1">
+                                <input type="hidden" name="stock" id="stock" value="<%= productDetails.stock %>">
+                                <input type="hidden" name="total_price" id="total_price" value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
                         <% } %>
                     </ol>
                 </div>
@@ -166,7 +166,9 @@
                                 <% actualprize+=(prd.unit_prize*prd.qty) %>
                             <% }) %>
                             <p class="text-danger fw-bold fs-5"><i>₹<%= actualprize %>/-</i></p>
+                            <input type="hidden" name="amount" id="amount" value="<%= actualprize %>">
                         <% } else if (productDetails) { %>
+                            <input type="hidden" name="amount" id="amount" value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
                             <p class="text-danger fw-bold fs-5">₹ <%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %> /-</p>
                         <% } %>
                     </div>

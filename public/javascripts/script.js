@@ -3,6 +3,7 @@
 let img = []
 let singleImage
 
+
 $(document).ready(function () {
     $(".qty-inc").on("click", function () {
         let productId = $(this).data("product-id");
@@ -83,9 +84,9 @@ function updateQty(productId, action) {
         method: "PATCH",
         data: { productId: productId, action: action },
         success: (response) => {
-            if(response.quantity<1){
+            if (response.quantity < 1) {
                 return removeCart(productId)
-            }else{
+            } else {
                 $(".quantity[data-product-id='" + productId + "']").val(response.quantity);
                 $(".priceForQty[data-product-id='" + productId + "']").text("₹" + response.total_prize + "/-")
                 console.log("Cart updated successfully.");
@@ -198,22 +199,22 @@ function editProduct(prd) {
         document.getElementById("product_stock").value = product.stock;
         document.getElementById("product_mrp").value = product.mrp;
         document.getElementById("product_discount").value = product.discount;
-        window.location.href='#product-category'
+        window.location.href = '#product-category'
     } catch (error) {
         console.log(error.message);
     }
 
 }
 function cancelOrder(id) {
-    
-        window.location.href = `/user/cancel-order?order=${id}`
-    
+
+    window.location.href = `/user/cancel-order?order=${id}`
+
 }
 function cancelOrderAsAdmin(id) {
-    
 
-        window.location.href = `/admin/orders-management/cancel-order?order=${id}`
-    
+
+    window.location.href = `/admin/orders-management/cancel-order?order=${id}`
+
 }
 function updateOrderStatus(orderId, newStatus) {
     fetch(`/admin/update-order-status/${orderId}`, {
@@ -241,18 +242,18 @@ statusSelects.forEach(select => {
     });
 });
 function returnOrder(id) {
-    
-        window.location.href = `/user/return-order?order=${id}`
-    
+
+    window.location.href = `/user/return-order?order=${id}`
+
 }
 function selectAddress(address) {
     console.log(address);
     try {
         const addressDetails = JSON.parse(address)
         document.getElementById("local_address").value = addressDetails.locality
-        document.getElementById("Country").value = addressDetails.country
-        document.getElementById("District").value = addressDetails.district
-        document.getElementById("State").value = addressDetails.state
+        document.getElementById("country").value = addressDetails.country
+        document.getElementById("district").value = addressDetails.district
+        document.getElementById("state").value = addressDetails.state
         document.getElementById("city").value = addressDetails.city
         document.getElementById("altr_number").value = addressDetails.altr_number
         document.getElementById("postcode").value = addressDetails.postcode
@@ -368,39 +369,39 @@ async function uploadImage(file, id) {
     }
 
 }
-function removeImage(index){
-    const prd=document.getElementById('product_id').value
-    const image=document.getElementById(`product_image${index}`).src
-    if(prd){
-        fetch(`/admin/products-management/remove-image`,{
+function removeImage(index) {
+    const prd = document.getElementById('product_id').value
+    const image = document.getElementById(`product_image${index}`).src
+    if (prd) {
+        fetch(`/admin/products-management/remove-image`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({prd_id:prd,image})
-        }).then(()=>{
+            body: JSON.stringify({ prd_id: prd, image })
+        }).then(() => {
             window.location.reload()
-        }).catch(error=>{
+        }).catch(error => {
             console.error('Error deleting image:', error);
         })
     }
 }
 async function uploadBannerImage(file, id) {
 
-        const formData = new FormData()
+    const formData = new FormData()
 
-        formData.append("file", file[0])
-        console.log(file[0]);
-        let result = await fetch("/admin/create-banner/uploadImage", {
-            method: "POST",
-            body: formData
-        }).then((res => {
-            return res.json()
-        }))
+    formData.append("file", file[0])
+    console.log(file[0]);
+    let result = await fetch("/admin/create-banner/uploadImage", {
+        method: "POST",
+        body: formData
+    }).then((res => {
+        return res.json()
+    }))
 
-        singleImage=result
+    singleImage = result
 
-    
+
 
 }
 function validateCreateBanner() {
@@ -412,7 +413,7 @@ function validateCreateBanner() {
 
     let data = {
         title,
-        banner:singleImage,
+        banner: singleImage,
         category,
     }
 
@@ -431,7 +432,7 @@ function validateCreateBanner() {
     })
 
 }
-function removeBanner(id){
+function removeBanner(id) {
     fetch(`/admin/delete-banner/${id}`, {
         method: 'DELETE',
     }).then(() => {
@@ -441,6 +442,58 @@ function removeBanner(id){
         // Optionally handle error and show error message to the user
     });
 }
+function confirmOrder() {
+
+    $.ajax({
+        url:"/user/confirm-order",
+        method:"POST",
+        data:$('#checkoutForm').serialize(),
+        success:function(res){
+            if(res.codSuccess){
+                window.location.href="/user/orders?message=Order has been confirmed"
+            }else if(res.razorSuccess){
+                const order={
+                    "key":""+res.key_id+"",
+                    "amount":""+res.amount+"",
+                    "currency":"INR",
+                    "name":""+res.name+"",
+                    "prefill":{
+                        "contact":""+res.contact+"",
+                        "name":""+res.name+"",
+                        "email":""+res.email+""
+                    },
+                    "handler":function (response){
+                        alert("paymentDone")
+                        verifyPayment(response,res)
+                    } 
+                }
+                
+                const razorpay = new Razorpay(order);
+
+                const done=razorpay.open();
+                
+            }else{
+                window.location.href=`/user/checkout?message=${res.msg}`
+            }
+        },
+        error:function(err){
+            console.log(err);
+        }
+    })
+}
+function verifyPayment(res,order){
+ 
+
+    $.ajax({
+        url:"/user/checkout/verify-payment",
+        method:"POST",
+        data:{res,order},
+        success:function(){
+            window.location.href="/user/orders?message=Payment Successfull!,Order has been confirmed"
+        }
+    })
+}
+
 function confirms(event, fn) {
     let modal = new bootstrap.Modal(document.getElementById("confirmationModal"));
 
@@ -449,13 +502,13 @@ function confirms(event, fn) {
 
     let confirmButton = document.getElementById("confirmButton");
 
-    confirmButton.addEventListener("click", function() {
+    confirmButton.addEventListener("click", function () {
         modal.hide();
         fn();
     });
 
     let cancelButton = document.querySelector("#confirmationModal .btn-secondary");
-    cancelButton.addEventListener("click", function() {
+    cancelButton.addEventListener("click", function () {
         modal.hide();
     });
 }
@@ -468,13 +521,13 @@ function confirmsUser(event, fn) {
 
     let confirmButton = document.getElementById("confirmButton");
 
-    confirmButton.addEventListener("click", function() {
+    confirmButton.addEventListener("click", function () {
         modal.hide();
         fn();
     });
 
     let cancelButton = document.querySelector("#confirmationModalUser .btn-secondary");
-    cancelButton.addEventListener("click", function() {
+    cancelButton.addEventListener("click", function () {
         modal.hide();
     });
 }
@@ -497,7 +550,7 @@ window.addEventListener('load', function () {
         const modalMessage = document.getElementById("modalMessage");
         modalMessage.textContent = message;
         modal.show();
-    }else if (adminMessage) {
+    } else if (adminMessage) {
         const modal = new bootstrap.Modal(document.getElementById("adminMessageModal"));
         const modalMessage = document.getElementById("modalAdminMessage");
         modalMessage.textContent = adminMessage;
@@ -505,21 +558,21 @@ window.addEventListener('load', function () {
     }
 });
 
-deactivateLink.addEventListener("click", function(event) {
+deactivateLink.addEventListener("click", function (event) {
     let confirmationModalUser = new bootstrap.Modal(document.getElementById("confirmationModalUser"));
     let confirmButton = document.getElementById("confirmButton");
     let deactivateLink = document.getElementById("deactivateLink");
     event.preventDefault();
     confirmationModalUser.show();
 
-    confirmButton.addEventListener("click", function() {
+    confirmButton.addEventListener("click", function () {
 
         confirmationModalUser.hide();
         window.location.href = deactivateLink.getAttribute("href");
     });
 
     let cancelButton = document.querySelector("#confirmationModalUser .btn-secondary");
-    cancelButton.addEventListener("click", function() {
+    cancelButton.addEventListener("click", function () {
         confirmationModalUser.hide();
     });
 });

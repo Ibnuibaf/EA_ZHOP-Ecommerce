@@ -2,10 +2,11 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const { Session } = require('express-session')
 const nodemailer = require('nodemailer')
+const RazorPay = require('razorpay')
 const productsCollection = require("../models/productsSchema")
 const usersCollection = require("../models/usersSchema");
 const categories = require('../models/categorySchema');
-const banners=require('../models/bannerSchema')
+const banners = require('../models/bannerSchema')
 const otpVerification = require('../models/otpSchema')
 const orders = require('../models/ordersSchema')
 const { ObjectId } = require('mongoose').Types;
@@ -64,6 +65,10 @@ const sendVerificationOTP = async (user, email) => {
         res.status(statusCode).send(error.message);
     }
 }
+const razorpayInstance = new RazorPay({
+    key_id: process.env.RAZORPAY_ID_KEY,
+    key_secret: process.env.RAZORPAY_SECRET_KEY
+})
 
 module.exports = {
     loadHome: async (req, res) => {
@@ -79,19 +84,19 @@ module.exports = {
                     }
                 },
                 {
-                  $lookup: {
-                    from: 'categories', // Collection name for categories
-                    localField: 'latestProduct.category',
-                    foreignField: '_id',
-                    as: 'categoryName'
-                  }
+                    $lookup: {
+                        from: 'categories', // Collection name for categories
+                        localField: 'latestProduct.category',
+                        foreignField: '_id',
+                        as: 'categoryName'
+                    }
                 },
                 {
-                  $unwind: '$categoryName'
+                    $unwind: '$categoryName'
                 }
             ]);
-           const bannersList=await banners.find()
-            res.render('home',{latestProducts,bannersList})
+            const bannersList = await banners.find()
+            res.render('home', { latestProducts, bannersList })
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
@@ -502,7 +507,7 @@ module.exports = {
                         prd_images: "$order_detials.prd_images",
                     }
                 },
-                {$sort:{_id:-1}}
+                { $sort: { _id: -1 } }
             ])
             res.render('myorders', { orderDetails })
         } catch (error) {
@@ -540,7 +545,7 @@ module.exports = {
             const searchQuery = req.query.search
             const category = req.query.category
             const categoriesList = await categories.find()
-            let productsList = await productsCollection.find().sort({_id:-1})
+            let productsList = await productsCollection.find().sort({ _id: -1 })
             let foundCategory = ''
 
             if (category) {
@@ -623,7 +628,6 @@ module.exports = {
         try {
             const prd_id = req.params.id
             const prdDetails = await productsCollection.findOne({ _id: prd_id })
-            console.log(prdDetails);
 
             const user = req.session.user
             const exist = await usersCollection.findOne({ email: user, "cart.prd_id": prd_id })
@@ -807,14 +811,14 @@ module.exports = {
         try {
             const data = req.body
             const userDetails = req.userDetails
+        
             if (!data.pay_methods) {
                 return res.redirect('/user/checkout?message=Choose any of Payment Methods')
             }
             if (data.local_address && data.country && data.postcode && data.city && data.district && data.state && data.altr_number) {
-                console.log(data);
                 if (data.pay_methods == "cod") {
                     if (Array.isArray(data.prd_id)) {
-
+                   
                         for (let index = 0; index < data.prd_id.length; index++) {
                             if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
                                 // console.log(index,data.qty[index],data.stock[index]);
@@ -841,6 +845,7 @@ module.exports = {
                             };
 
                             await orders.create(order);
+                           
                             await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
                         }
 
@@ -850,7 +855,6 @@ module.exports = {
                         if (data.qty > data.stock) {
                             return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
                         }
-
                         const order = {
                             prd_id: data.prd_id,
                             address: {
@@ -873,12 +877,109 @@ module.exports = {
                         await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
                     }
 
-                    res.redirect('/user/profile?message=Order Placed Successfuly!')
+                    res.json({ codSuccess: true })
                 } else {
-                    res.redirect('/user/checkout?message=The selected payment method is not available now')
+                    
+                    const amount = req.body.amount
+                    req.session.orderList = req.body
+                    const randomOrderID = Math.floor(Math.random() * 1000000).toString()
+                    const options = {
+                        amount: amount * 100,
+                        currency: "INR",
+                        receipt: randomOrderID,
+                    }
+                    razorpayInstance.orders.create(options,
+                        (err) => {
+                            if (!err) {
+                                console.log("Reached RazorPay Method on cntrlr",randomOrderID);
+                                res.status(200).send({
+                                    razorSuccess: true,
+                                    msg: "order created",
+                                    amount: amount* 100,
+                                    key_id: process.env.RAZORPAY_ID_KEY,
+                                    name: userDetails.first_name,
+                                    contact: userDetails.mobile_number,
+                                    email: userDetails.email
+                                })
+                            } else {
+                                console.error("Razorpay Error:", err);
+                                res.status(400).send({ razorSuccess: false, msg: 'Error creating order with Razorpay' });
+                            }
+                        }
+                    )
                 }
             } else {
                 return res.redirect('/user/checkout?message=Fill the Address order to be delivered')
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(500).send("Internal Server Error");
+        }
+    },
+    verifyPayment: async (req, res) => {
+        try {
+         
+            const userDetails=req.userDetails
+            const data = req.session.orderList
+            req.session.orderList = ''
+            if (Array.isArray(data.prd_id)) {
+
+                for (let index = 0; index < data.prd_id.length; index++) {
+                    if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
+                        // console.log(index,data.qty[index],data.stock[index]);
+                        return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
+                    }
+
+                    const order = {
+                        prd_id: data.prd_id[index],
+                        address: {
+                            locality: data.local_address,
+                            country: data.country,
+                            district: data.district,
+                            state: data.state,
+                            city: data.city,
+                            altr_number: data.altr_number,
+                            postcode: data.postcode
+                        },
+                        date: Date.now(),
+                        amount: parseFloat(data.total_price[index]),
+                        consumer: userDetails._id,
+                        mobile_number: userDetails.mobile_number,
+                        payment: data.pay_methods,
+                        qty: parseInt(data.qty[index])
+                    };
+
+                    await orders.create(order);
+                    await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
+                }
+
+                res.send(200)
+
+            } else {
+                if (data.qty > data.stock) {
+                    return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
+                }
+                const order = {
+                    prd_id: data.prd_id,
+                    address: {
+                        locality: data.local_address,
+                        country: data.country,
+                        district: data.district,
+                        state: data.state,
+                        city: data.city,
+                        altr_number: data.altr_number,
+                        postcode: data.postcode
+                    },
+                    date: Date.now(),
+                    amount: parseFloat(data.total_price),
+                    consumer: userDetails._id,
+                    mobile_number: userDetails.mobile_number,
+                    payment: data.pay_methods,
+                    qty: parseInt(data.qty)
+                }
+                await orders.create(order)
+                await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
+                res.send(200)
             }
         } catch (error) {
             console.log(error.message);

@@ -3,6 +3,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const config = require('./config/config')
 const path = require('path');
+const Razorpay=require('razorpay')
 const session = require('express-session')
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');

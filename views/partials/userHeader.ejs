@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EA_ZHOP</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 </head>
@@ -94,22 +95,21 @@
     </div>
 
     <!-- Confirmation modal -->
- <div class="modal fade" id="confirmationModalUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content" style="background-color: #F3F2EE;">
+    <div class="modal fade" id="confirmationModalUser" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content" style="background-color: #F3F2EE;">
           <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Confirm Your Action!</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title" id="exampleModalLabel">Confirm Your Action!</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-              Are you sure you want to perform this action?
+            Are you sure you want to perform this action?
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
-              <button id="confirmButton" type="button" class="btn btn-dark text-warning">Confirm</button>
+            <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+            <button id="confirmButton" type="button" class="btn btn-dark text-warning">Confirm</button>
           </div>
+        </div>
       </div>
-  </div>
-</div>
-
-
+    </div>
