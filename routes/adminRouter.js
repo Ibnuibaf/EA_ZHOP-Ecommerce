@@ -37,8 +37,9 @@ router.post('/products-management/updateCategory',middle.loggedIn, controller.up
 
 //orders management
 router.get('/orders-management',middle.loggedIn,controller.loadOrdersManagement)
-router.get('/orders-management/cancel-order',middle.loggedIn,controller.cancelOrder)
+router.patch('/orders-management/cancel-order/:order',middle.loggedIn,controller.cancelOrder)
 router.patch('/update-order-status/:id',middle.loggedIn,controller.updateOrderStatus)
+router.patch('/orders-management/order-refund/:order',middle.loggedIn,controller.orderRefund)
 
 //banners management
 router.get('/banners-management',middle.loggedIn,controller.loadBannersManagement)
@@ -46,6 +47,12 @@ router.post("/create-banner/uploadImage",middle.uploadImage, controller.uploadIm
 router.post('/create-banner',middle.loggedIn, controller.createBanner)
 router.delete('/delete-banner/:id',middle.loggedIn, controller.removeBanner)
 
+//coupens management
+router.get('/coupens-management',middle.loggedIn,controller.loadCoupensManagement)
+router.post('/coupens-management/update-coupen',middle.loggedIn, controller.updateCoupen)
+router.delete('/coupens-management/delete-coupen/:id',middle.loggedIn, controller.removeCoupen)
+router.patch('/coupens-management/activate-coupen/:id',middle.loggedIn, controller.activateCoupen)
+router.patch('/coupens-management/deactivate-coupen/:id',middle.loggedIn, controller.deactivateCoupen)
 
 //logout
 router.get('/logout',middle.loggedIn,controller.adminlogOut)

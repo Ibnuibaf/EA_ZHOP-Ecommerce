@@ -114,22 +114,23 @@
                 </div>
 
                 <!-- Add Coupen Feature -->
-                <!-- <div class="add-coupen my-4 bg-secondary d-flex align-items-center justify-content-between px-2">
+                <div class="add-coupen mt-4 bg-secondary d-flex align-items-center justify-content-between px-2">
                     <input type="text" name="coupen" id="coupen" class="bg-transparent border-0 px-3 py-2 "
                         placeholder="Add Coupen" style="outline: none;color: #F3F2EE;">
-                    <button class="bg-transparent border-0  fs-5 text-light">+ verify</button>
-                </div> -->
+                    <button class="bg-transparent border-0  fs-5 text-light" type="button" onclick="verifyCoupen()">+ verify</button>
+                </div>
+                <label for="coupon_code" id="coupon_code" class="text-success fw-medium"></label>
 
                 <!-- Wallet Use Feature -->
-                <!-- <div
+                <div
                     class="wallet-option d-flex justify-content-between align-items-center fs-5 border-bottom border-3">
                     <div class="laabels d-flex justify-content-between align-items-center ">
-                        <input type="checkbox" name="wallet_balance" id="wallet_balance"
-                            style="height: 20px;width: 20px;">
+                        <input type="checkbox" name="wallet" id="wallet_balance"
+                            style="height: 20px;width: 20px;" onchange="walletBalance()">
                         <label for="wallet-option">Use Wallet Balance:</label>
                     </div>
-                    <i>₹87/-</i>
-                </div> -->
+                    <i id="balance" data-balance="<%= userDetails.wallet.balance %>">₹ <%= userDetails.wallet.balance %>/-</i>
+                </div>
                 
                 <div class="checkout-details">
                     <div class="grand-total d-flex justify-content-between fs-5">
@@ -165,7 +166,7 @@
                             <% productDetails.forEach(prd => { %>
                                 <% actualprize+=(prd.unit_prize*prd.qty) %>
                             <% }) %>
-                            <p class="text-danger fw-bold fs-5"><i>₹<%= actualprize %>/-</i></p>
+                            <p class="text-danger fw-bold fs-5" ><i id="amountDisplay">₹<%= actualprize %>/-</i></p>
                             <input type="hidden" name="amount" id="amount" value="<%= actualprize %>">
                         <% } else if (productDetails) { %>
                             <input type="hidden" name="amount" id="amount" value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
@@ -183,8 +184,13 @@
                     <div class="razor d-flex align-items-center">
                         <input type="radio" name="pay_methods" id="razorpay"
                             style="height: 20px;width: 20px; margin-inline: 5px;" value="razor_pay">
-                        <label for="razorpay">Razor Pay</label>
+                        <label for="razorpay">Online Payment</label>
                     </div>
+                </div>
+                <div class="error fs-6 m-3 p-2 bg-secondary text-center " style="max-width: 24vw;">
+                    <i class="text-warning">
+                        Choose <b>Online Payment</b> to experience wallet and coupens you have!
+                    </i>
                 </div>
                 <div class="text-center ">
                     <button class=" btn btn-dark px-5 my-3 rounded-0 fs-5" type="submit">Confirm Order</button>

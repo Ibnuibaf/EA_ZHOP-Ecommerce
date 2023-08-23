@@ -207,32 +207,57 @@ function editProduct(prd) {
 }
 function cancelOrder(id) {
 
-    window.location.href = `/user/cancel-order?order=${id}`
+    $.ajax({
+        url: `/user/cancel-order/${id}`,
+        method: "PATCH",
+        success: (response) => {
+            window.location.href = `/user/orders?message=Order canceled successfully`
+        }
+    })
 
 }
 function cancelOrderAsAdmin(id) {
 
+    $.ajax({
+        url: `/admin/orders-management/cancel-order/${id}`,
+        method: "PATCH",
+        success: (response) => {
+            window.location.href = `/admin/orders-management?adminMessage=Order canceled successfully`
+        }
+    })
 
-    window.location.href = `/admin/orders-management/cancel-order?order=${id}`
 
+}
+function refundPayment(order) {
+    const orderDetails = JSON.parse(order)
+    const order_id = orderDetails._id
+    $.ajax({
+        url: `/admin/orders-management/order-refund/${order_id}`,
+        method: "PATCH",
+        data: orderDetails,
+        success: (response) => {
+            window.location.href = `/admin/orders-management?adminMessage=Order Refunded to user Wallet`
+        }
+    })
 }
 function updateOrderStatus(orderId, newStatus) {
-    fetch(`/admin/update-order-status/${orderId}`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
+    $.ajax({
+        url: `/admin/update-order-status/${orderId}`,
+        type: "PATCH",
+        contentType: "application/json",
+        data: JSON.stringify({ status: newStatus }),
+        success: function (data) {
+            location.reload();
         },
-        body: JSON.stringify({ status: newStatus })
-    })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload()
-        })
-        .catch(error => {
+        error: function (error) {
             console.error("Error updating order status:", error);
-        });
+        }
+    });
 }
-
+function searchOrder() {
+    const query = document.getElementById("search").value
+    window.location.href = `/admin/orders-management?search=${query}`
+}
 const statusSelects = document.querySelectorAll(".status-select");
 statusSelects.forEach(select => {
     select.addEventListener("change", function () {
@@ -241,9 +266,17 @@ statusSelects.forEach(select => {
         updateOrderStatus(orderId, newStatus);
     });
 });
+
+
 function returnOrder(id) {
 
-    window.location.href = `/user/return-order?order=${id}`
+    $.ajax({
+        url: `/user/return-order/${id}`,
+        method: "PATCH",
+        success: (response) => {
+            window.location.href = `/user/orders?message=Requested for order Return`
+        }
+    })
 
 }
 function selectAddress(address) {
@@ -445,51 +478,51 @@ function removeBanner(id) {
 function confirmOrder() {
 
     $.ajax({
-        url:"/user/confirm-order",
-        method:"POST",
-        data:$('#checkoutForm').serialize(),
-        success:function(res){
-            if(res.codSuccess){
-                window.location.href="/user/orders?message=Order has been confirmed"
-            }else if(res.razorSuccess){
-                const order={
-                    "key":""+res.key_id+"",
-                    "amount":""+res.amount+"",
-                    "currency":"INR",
-                    "name":""+res.name+"",
-                    "prefill":{
-                        "contact":""+res.contact+"",
-                        "name":""+res.name+"",
-                        "email":""+res.email+""
+        url: "/user/confirm-order",
+        method: "POST",
+        data: $('#checkoutForm').serialize(),
+        success: function (res) {
+            if (res.codSuccess) {
+                window.location.href = "/user/orders?message=Order has been confirmed"
+            } else if (res.razorSuccess) {
+                const order = {
+                    "key": "" + res.key_id + "",
+                    "amount": "" + res.amount + "",
+                    "currency": "INR",
+                    "name": "" + res.name + "",
+                    "prefill": {
+                        "contact": "" + res.contact + "",
+                        "name": "" + res.name + "",
+                        "email": "" + res.email + ""
                     },
-                    "handler":function (response){
+                    "handler": function (response) {
                         alert("paymentDone")
-                        verifyPayment(response,res)
-                    } 
+                        verifyPayment(response, res)
+                    }
                 }
-                
+
                 const razorpay = new Razorpay(order);
 
-                const done=razorpay.open();
-                
-            }else{
-                window.location.href=`/user/checkout?message=${res.msg}`
+                const done = razorpay.open();
+
+            } else {
+                window.location.href = `/user/checkout?message=${res.msg}`
             }
         },
-        error:function(err){
+        error: function (err) {
             console.log(err);
         }
     })
 }
-function verifyPayment(res,order){
- 
+function verifyPayment(res, order) {
+
 
     $.ajax({
-        url:"/user/checkout/verify-payment",
-        method:"POST",
-        data:{res,order},
-        success:function(){
-            window.location.href="/user/orders?message=Payment Successfull!,Order has been confirmed"
+        url: "/user/checkout/verify-payment",
+        method: "POST",
+        data: { res, order },
+        success: function () {
+            window.location.href = "/user/orders?message=Payment Successfull!,Order has been confirmed"
         }
     })
 }
@@ -530,6 +563,87 @@ function confirmsUser(event, fn) {
     cancelButton.addEventListener("click", function () {
         modal.hide();
     });
+}
+function verifyCoupen(){
+    const amount=document.getElementById("amount").value;
+    const coupen=document.getElementById("coupen").value
+    $.ajax({
+        url:`/user/checkout/verify-coupen/${coupen}?total=${amount}`,
+        method:"GET",
+        success:function(res){
+
+            document.getElementById("coupon_code").innerHTML=res.coupon_code +" applied"
+            if(res.type=="flat_disc"){
+                document.getElementById("amount").value=(amount-res.value)
+                
+                document.getElementById("amountDisplay").innerHTML=(amount-res.value)
+            }else if(res.type=="percenetage_disc"){
+                document.getElementById("amount").value=(amount*res.value)/100
+                document.getElementById("amountDisplay").innerHTML="₹"+(amount*res.value)/100+"/-"
+            }
+        },
+        error:function(err){
+            document.getElementById("coupon_code").innerHTML="Coupon doesnt exist for this order"
+            console.log(err);
+        }    
+    })
+}
+function walletBalance(){
+    const chechbox=document.getElementById("wallet_balance")
+    const balance=document.getElementById("balance").dataset.balance
+    const amount=document.getElementById("amount").value;
+    if (chechbox.checked) {
+        console.log(balance,amount);
+        if(amount<balance){
+            document.getElementById("amount").value=0
+            document.getElementById("amountDisplay").innerHTML=0
+        }else if(amount>balance){
+            document.getElementById("amount").value=(amount-balance)
+            document.getElementById("amountDisplay").innerHTML=(amount-balance)
+        }
+    }
+}
+function deactivateCoupen(id) {
+    $.ajax({
+        url: `/admin/coupens-management/deactivate-coupen/${id}`,
+        method: "PATCH",
+        success: function () {
+            location.href = "/admin/coupens-management?adminMessage=Coupen Deactivated"
+        }
+    })
+}
+function activateCoupen(id) {
+    $.ajax({
+        url: `/admin/coupens-management/activate-coupen/${id}`,
+        method: "PATCH",
+        success: function () {
+            location.href = "/admin/coupens-management?adminMessage=Coupen Activated"
+        }
+    })
+}
+function deleteCoupen(id) {
+    $.ajax({
+        url: `/admin/coupens-management/delete-coupen/${id}`,
+        method: "DELETE",
+        success: function () {
+            location.href = "/admin/coupens-management?adminMessage=Coupen Destroyed"
+        }
+    })
+}
+function updateCoupen(coupen) {
+    const coupenDetails = JSON.parse(coupen)
+    document.getElementById("coupon_id").value = coupenDetails._id;
+    document.getElementById("coupon_code").value = coupenDetails.coupon_code;
+    if (coupenDetails.type == "flat_disc") {
+        document.getElementById("flat_disc").checked = true
+    } else {
+        document.getElementById("percenetage_disc").checked = true
+    }
+    document.getElementById("value").value = coupenDetails.value;
+    document.getElementById("hit_amount").value = coupenDetails.hit_amount;
+    
+    var datePart = coupenDetails.end_date.split("T")[0];
+    document.getElementById("end_date").value = datePart;
 }
 
 function getQueryParam(name) {

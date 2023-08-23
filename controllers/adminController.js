@@ -5,6 +5,7 @@ const usersCollection = require('../models/usersSchema')
 const productsCollection = require('../models/productsSchema')
 const orders=require('../models/ordersSchema')
 const categories = require('../models/categorySchema')
+const coupens=require('../models/coupenSchema')
 const banners=require('../models/bannerSchema')
 const cloudinary = require('cloudinary').v2;
 
@@ -250,7 +251,7 @@ module.exports = {
     loadOrdersManagement:async(req,res)=>{
         try {
             
-            const orderList = await orders.aggregate([
+            let orderList = await orders.aggregate([
                 {
                     $lookup: {
                         from: "products",
@@ -283,6 +284,10 @@ module.exports = {
                 }},
                 {$sort:{_id:-1}}
             ])
+            if(req.query.search){
+                const searchRegex=new RegExp(req.query.search, 'i')
+                orderList= orderList.filter((order)=>searchRegex.test(order._id)||searchRegex.test(order.prd_name))
+            }
             res.render('adminOrders',{orderList})
         } catch (error) {
             console.log(error.message);
@@ -291,9 +296,27 @@ module.exports = {
     },
     cancelOrder:async(req,res)=>{
         try {
-            const order=req.query.order;
+            const order=req.params.order;
             const isUpdated=await orders.updateOne({_id:order},{$set:{status:"canceled"}})
-            res.redirect('/admin/orders-management')
+            res.status(200).json({success:true})
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    orderRefund:async(req,res)=>{
+        try {
+            const order = req.body._id
+            const consumer=req.body.user
+            const amount = req.body.amount
+            const payment=req.body.payment
+            
+            const isUpdated =await orders.updateOne({_id:order},{$set:{refunded:true,status:"canceled"}})
+            
+            if(payment=="razor_pay"){
+                await usersCollection.updateOne({email:consumer},{$inc:{"wallet.balance":amount},$push:{"wallet.transactions":`${amount} from order ${order}`}})
+            }
+            res.status(200).json({success:true})
         } catch (error) {
             console.log(error.message);
             res.send(500)
@@ -339,6 +362,66 @@ module.exports = {
             const banner=req.params.id
             const result=await banners.findByIdAndDelete(banner)
             res.send(200)
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    loadCoupensManagement:async(req,res)=>{
+        try {
+            const coupensList=await coupens.find().sort({active:1})
+            res.render('adminCoupens',{coupensList})
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    updateCoupen:async(req,res)=>{
+        try {
+            let coupenDetails=req.body
+            const exist=await coupens.findOne({coupon_code:coupenDetails.coupon_code})
+            if(exist && !coupenDetails.coupon_id) {
+                return res.redirect('/admin/coupens-management?adminMessage=Coupen exist')
+            }
+            if(coupenDetails.coupon_id){
+                await coupens.updateOne({_id:coupenDetails.coupon_id},coupenDetails)
+                
+                res.redirect('/admin/coupens-management?adminMessage=Coupen Updated')
+            }else{
+                coupenDetails.start_date=Date.now()
+                await coupens.create(coupenDetails)
+                res.redirect('/admin/coupens-management?adminMessage=New Coupen Activated')
+            }
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    removeCoupen:async(req,res)=>{
+        try {
+            const coupen=req.params.id
+            await coupens.findByIdAndDelete(coupen)
+            res.status(200).json({success:true})
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    activateCoupen:async(req,res)=>{
+        try {
+            const coupen=req.params.id;
+            await coupens.updateOne({_id:coupen},{$set:{active:true}})
+            res.status(200).json({success:true})
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    deactivateCoupen:async(req,res)=>{
+        try {
+            const coupen=req.params.id;
+            await coupens.updateOne({_id:coupen},{$set:{active:false}})
+            res.status(200).json({success:true})
         } catch (error) {
             console.log(error.message);
             res.send(500)

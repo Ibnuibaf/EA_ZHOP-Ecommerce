@@ -7,6 +7,7 @@ const productsCollection = require("../models/productsSchema")
 const usersCollection = require("../models/usersSchema");
 const categories = require('../models/categorySchema');
 const banners = require('../models/bannerSchema')
+const coupens=require('../models/coupenSchema')
 const otpVerification = require('../models/otpSchema')
 const orders = require('../models/ordersSchema')
 const { ObjectId } = require('mongoose').Types;
@@ -409,7 +410,7 @@ module.exports = {
         try {
             const userDetails = req.userDetails
             const address = req.body
-            if (address.local_address && address.Country && address.city && address.District && address.State && address.postcode) {
+            if (address.local_address && address.country && address.city && address.district && address.state && address.postcode) {
                 if (address.address_id) {
                     await usersCollection.updateOne(
                         {
@@ -419,10 +420,10 @@ module.exports = {
                         {
                             $set: {
                                 "address.$.locality": address.local_address,
-                                "address.$.country": address.Country,
+                                "address.$.country": address.country,
                                 "address.$.city": address.city,
-                                "address.$.district": address.District,
-                                "address.$.state": address.State,
+                                "address.$.district": address.district,
+                                "address.$.state": address.state,
                                 "address.$.postcode": address.postcode,
                                 "address.$.altr_number": address.altr_number
                             }
@@ -437,10 +438,10 @@ module.exports = {
                             $push: {
                                 address: {
                                     locality: address.local_address,
-                                    country: address.Country,
+                                    country: address.country,
                                     city: address.city,
-                                    district: address.District,
-                                    state: address.State,
+                                    district: address.district,
+                                    state: address.state,
                                     postcode: address.postcode,
                                     altr_number: address.altr_number
                                 }
@@ -518,9 +519,9 @@ module.exports = {
     },
     cancelOrder: async (req, res) => {
         try {
-            const order = req.query.order;
+            const order = req.params.order;
             const isUpdated = await orders.updateOne({ _id: order }, { $set: { status: "canceled" } })
-            res.redirect('/user/orders')
+            res.status(200).json({success:true})
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
@@ -529,9 +530,9 @@ module.exports = {
     },
     returnOrder: async (req, res) => {
         try {
-            const order = req.query.order
+            const order = req.params.order
             await orders.updateOne({ _id: order }, { $set: { returned: true } })
-            res.redirect('/user/orders')
+            res.status(200).json({success:true})
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
@@ -807,9 +808,26 @@ module.exports = {
         }
         res.render('checkout', { productDetails, userDetails })
     },
+    verifyCoupen:async(req,res)=>{
+        try {
+            const coupon_code=req.params.code
+            const amount=req.query.total
+
+            const isValidCoupon=await coupens.findOne({ coupon_code: coupon_code, hit_amount: { $lte: amount } })
+            if(isValidCoupon){
+                res.status(200).json({success:true,coupon_code:isValidCoupon.coupon_code,value:isValidCoupon.value,type:isValidCoupon.type})
+            }else{
+                res.status(200).json({success:false})
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(500).send("Internal Server Error");
+        }
+    },
     confirmOrder: async (req, res) => {
         try {
             const data = req.body
+            
             const userDetails = req.userDetails
         
             if (!data.pay_methods) {
@@ -852,9 +870,10 @@ module.exports = {
 
 
                     } else {
-                        if (data.qty > data.stock) {
+                        if (parseInt(data.qty) > parseFloat(data.total_price)) {
                             return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
                         }
+                        console.log("here iam and now");
                         const order = {
                             prd_id: data.prd_id,
                             address: {
@@ -873,10 +892,19 @@ module.exports = {
                             payment: data.pay_methods,
                             qty: parseInt(data.qty)
                         }
+                        console.log("here iam and now after :",order);
+
                         await orders.create(order)
                         await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
                     }
-
+                    if(data.wallet){
+                        if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
+                            
+                            await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
+                        }else{
+                            await usersCollection.updateOne({_id:userDetails._id}, {$inc:{"wallet.balance":-data.total_price}})
+                        }
+                    }
                     res.json({ codSuccess: true })
                 } else {
                     
@@ -953,10 +981,10 @@ module.exports = {
                     await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
                 }
 
-                res.send(200)
+                
 
             } else {
-                if (data.qty > data.stock) {
+                if (parseInt(data.qty) > parseFloat(data.total_price)) {
                     return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
                 }
                 const order = {
@@ -979,8 +1007,17 @@ module.exports = {
                 }
                 await orders.create(order)
                 await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
-                res.send(200)
             }
+
+            if(data.wallet){
+                if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
+                    
+                    await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
+                }else{
+                    await usersCollection.updateOne({_id:userDetails._id}, {$inc:{"wallet.balance":-data.total_price}})
+                }
+            }
+            res.send(200)
         } catch (error) {
             console.log(error.message);
             return res.status(500).send("Internal Server Error");

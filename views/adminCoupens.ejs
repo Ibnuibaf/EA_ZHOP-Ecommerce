@@ -1,0 +1,121 @@
+<%- include('partials/adminHeader.ejs') %>
+
+
+    <div class="container-fluid tab-name ">
+        <h3 class="p-3 ">Coupens Management&GreaterGreater;</h3>
+    </div>
+    
+    <div class="coupensList m-5 row justify-content-center">
+        <div class="coupenManage mx-5 mt-5 p-2 rounded border border-3 col-md-8 " style="background-color: #f2f2ee;height: fit-content;">
+            <form action="/admin/coupens-management/update-coupen" method="post">
+                <div class=" row d-flex">
+                    <input type="hidden" name="coupon_id" id="coupon_id">
+                    <div class="form-group m-2 col ">
+                        <label for="coupon_code">Coupen Code:</label><br>
+                        <input type="text" class="form-control" id="coupon_code" placeholder="Enter Coupen Code" name="coupon_code">
+                    </div>
+                    <div class="form-group m-2 col">
+                        <label for="type">Type:</label><br>
+                        <div class="row">
+                            <div class="flat_disc d-flex align-items-center col">
+                                <input type="radio" name="type" id="flat_disc"
+                                    style="height: 20px;width: 20px; margin-inline: 5px;" value="flat_disc">
+                                <label for="flat_disc">Flat Discount</label>
+                            </div>
+                            <div class="percenetage_disc d-flex align-items-center col">
+                                <input type="radio" name="type" id="percenetage_disc"
+                                    style="height: 20px;width: 20px; margin-inline: 5px;" value="percenetage_disc">
+                                <label for="percenetage_disc">Percentage Discount</label>
+                            </div>
+    
+                        </div>
+                    </div>
+                    <div class="row d-flex">
+                        <div class="form-group m-2 col ">
+                            <label for="value">Value:</label><br>
+                            <input type="text" class="form-control" id="value" placeholder="Coupen Value in ₹ / %" name="value">
+                        </div>
+                        <div class="form-group m-2 col">
+                            <label for="hit_amount">Min Purchase:</label><br>
+                            <input type="text" class="form-control" id="hit_amount" placeholder="On minimum purchase of.." name="hit_amount">
+                        </div>
+                        <div class="form-group m-2 col">
+                            <label for="end_date">To:</label><br>
+                            <input type="date" class="form-control" id="end_date" placeholder="" name="end_date">
+                        </div>
+                    </div>
+                    <div class="text-start mx-3">
+                        <button type="submit" class="btn btn-dark px-5 " id="profile-submit">Update Details</button>
+                    </div>
+        
+                </div>
+            </form>
+        </div>
+        <div class="tab  my-5  rounded border border-2 " style="background-color: #E5E5E5;">
+            <table class="table text-center">
+                <thead class="fs-6 " style="position: sticky;top: 0;">
+                    <tr>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Coupen</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Value</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">On Min</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Type</th>
+                        <th scope="col" colspan="2" style="font-weight: 500;background-color: #E5E5E5;">From - to</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (coupensList.length) { %>
+                        <% coupensList.forEach(coupen=> { %>
+                            <tr class="data-row ">
+                                <td class="text-start"><button class="btn btn-dark p-1 btn-sm"
+                                <% if (coupen.active) { %>
+                                            onclick="confirms(event,function(){deactivateCoupen('<%= coupen._id %>')})">Deactivate</button>
+                                    
+
+                                    <% } else { %>
+                                       <button class="btn btn-dark p-1 btn-sm"
+                                                onclick="confirms(event,function(){activateCoupen('<%= coupen._id %>')})">Activate</button>
+                                                
+                                                <% } %>
+                                                <button class="btn btn-dark p-1 my-2 btn-sm"
+                                                onclick="confirms(event,function(){deleteCoupen('<%= coupen._id %>')})">Destroy</button>
+                                                <button class="btn btn-dark p-1 my-2 btn-sm" value="<%= JSON.stringify(coupen) %>"
+                                                onclick="updateCoupen(event.target.value)">Edit</button>
+                                            </td>
+                                            <td>
+                                                <%= coupen.coupon_code %>
+                                            </td>
+                                            <td>
+                                                <%= coupen.value %>
+                                            </td>
+                                            <td>
+                                                ₹<%= coupen.hit_amount %>/-
+                                            </td>
+                                            <td>
+                                                <%= coupen.type.toUpperCase() %>
+                                            </td>
+                                            <td>
+                                                <%= coupen.start_date.toLocaleDateString() %>-<%= coupen.end_date.toLocaleDateString() %>
+                                            </td>
+                            </tr>
+
+                            <% }) %>
+                            <% } else { %>
+                             <tr class="data-row fs-4 ">
+                                <td ></td>
+                                <td></td>
+                                <td class="text-warning"><i> Generate </i></td>
+                                <td class="text-warning"><i>New Coupens</i></td>
+                                <td></td>
+                                <td></td>
+                             </tr>
+                                <% } %>
+
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+
+
+    <%- include('partials/adminFooter.ejs') %>
