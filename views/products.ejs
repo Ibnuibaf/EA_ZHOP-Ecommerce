@@ -18,7 +18,7 @@
                     <h4>Categories : </h4>
 
 
-                    <div class="category-tab p-2" style="height: 180px;overflow-y: scroll;">
+                    <div class="category-tab p-2" style="height: 240px;overflow-y: scroll;">
                         <ul class="list-group">
                             <% categoriesList.forEach(category=> { %>
                                 <% if (category.active) { %>
@@ -68,10 +68,10 @@
                 <div class="category-selector">
 
                     <% if (foundCategory) { %>
-                        <h2>CATEGORY: <%= foundCategory.name %>
+                        <h2>CATEGORY: <i class="text-danger"><%= foundCategory.name.toUpperCase() %></i>
                         </h2>
                         <% } else { %>
-                            <h2>CATEGORY: None</h2>
+                            <h2>CATEGORY: <i>None</i></h2>
                             <% } %>
                 </div>
                 <!-- <div class="prd-tab-handle  d-flex justify-content-between" style="width: fit-content;">

@@ -813,7 +813,7 @@ module.exports = {
             const coupon_code=req.params.code
             const amount=req.query.total
 
-            const isValidCoupon=await coupens.findOne({ coupon_code: coupon_code, hit_amount: { $lte: amount } })
+            const isValidCoupon=await coupens.findOne({ coupon_code: coupon_code, hit_amount: { $lte: amount },active:true })
             if(isValidCoupon){
                 res.status(200).json({success:true,coupon_code:isValidCoupon.coupon_code,value:isValidCoupon.value,type:isValidCoupon.type})
             }else{
@@ -897,7 +897,7 @@ module.exports = {
                         await orders.create(order)
                         await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
                     }
-                    if(data.wallet){
+                    if(data.wallet_balance){
                         if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
                             
                             await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
@@ -907,34 +907,46 @@ module.exports = {
                     }
                     res.json({ codSuccess: true })
                 } else {
-                    
                     const amount = req.body.amount
-                    req.session.orderList = req.body
-                    const randomOrderID = Math.floor(Math.random() * 1000000).toString()
-                    const options = {
-                        amount: amount * 100,
-                        currency: "INR",
-                        receipt: randomOrderID,
-                    }
-                    razorpayInstance.orders.create(options,
-                        (err) => {
-                            if (!err) {
-                                console.log("Reached RazorPay Method on cntrlr",randomOrderID);
-                                res.status(200).send({
-                                    razorSuccess: true,
-                                    msg: "order created",
-                                    amount: amount* 100,
-                                    key_id: process.env.RAZORPAY_ID_KEY,
-                                    name: userDetails.first_name,
-                                    contact: userDetails.mobile_number,
-                                    email: userDetails.email
-                                })
-                            } else {
-                                console.error("Razorpay Error:", err);
-                                res.status(400).send({ razorSuccess: false, msg: 'Error creating order with Razorpay' });
+                    if(amount>0){
+
+                        req.session.orderList = req.body
+                        const randomOrderID = Math.floor(Math.random() * 1000000).toString()
+                        const options = {
+                            amount: amount * 100,
+                            currency: "INR",
+                            receipt: randomOrderID,
+                        }
+                        razorpayInstance.orders.create(options,
+                            (err) => {
+                                if (!err) {
+                                    console.log("Reached RazorPay Method on cntrlr",randomOrderID);
+                                    res.status(200).send({
+                                        razorSuccess: true,
+                                        msg: "order created",
+                                        amount: amount* 100,
+                                        key_id: process.env.RAZORPAY_ID_KEY,
+                                        name: userDetails.first_name,
+                                        contact: userDetails.mobile_number,
+                                        email: userDetails.email
+                                    })
+                                } else {
+                                    console.error("Razorpay Error:", err);
+                                    res.status(400).send({ razorSuccess: false, msg: 'Error creating order with Razorpay' });
+                                }
+                            }
+                        )
+                    }else{
+                        if(data.wallet_balance){
+                            if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
+                                
+                                await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
+                            }else{
+                                await usersCollection.updateOne({_id:userDetails._id}, {$inc:{"wallet.balance":-data.total_price}})
                             }
                         }
-                    )
+                        res.json({ codSuccess: true })
+                    }
                 }
             } else {
                 return res.redirect('/user/checkout?message=Fill the Address order to be delivered')
@@ -1009,7 +1021,7 @@ module.exports = {
                 await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
             }
 
-            if(data.wallet){
+            if(data.wallet_balance){
                 if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
                     
                     await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    

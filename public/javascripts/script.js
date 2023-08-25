@@ -405,17 +405,30 @@ async function uploadImage(file, id) {
 function removeImage(index) {
     const prd = document.getElementById('product_id').value
     const image = document.getElementById(`product_image${index}`).src
-    if (prd) {
-        fetch(`/admin/products-management/remove-image`, {
+    // if (prd) {
+    //     fetch(`/admin/products-management/remove-image`, {
+    //         method: "DELETE",
+    //         headers: {
+    //             "Content-Type": "application/json"
+    //         },
+    //         body: JSON.stringify({ prd_id: prd, image })
+    //     }).then(() => {
+    //         window.location.reload()
+    //     }).catch(error => {
+    //         console.error('Error deleting image:', error);
+    //     })
+    // }
+    if(prd){
+        $.ajax({
+            url:`/admin/products-management/remove-image`,
             method: "DELETE",
-            headers: {
-                "Content-Type": "application/json"
+            data:{ prd_id: prd, image },
+            success:function(res){
+                document.getElementById(`product_image${index}`).src="/images/jpeg_image_8_1_2_1_1_1_1.jpeg"
             },
-            body: JSON.stringify({ prd_id: prd, image })
-        }).then(() => {
-            window.location.reload()
-        }).catch(error => {
-            console.error('Error deleting image:', error);
+            error: function (err) {
+                console.log(err);
+            }
         })
     }
 }
@@ -567,19 +580,26 @@ function confirmsUser(event, fn) {
 function verifyCoupen(){
     const amount=document.getElementById("amount").value;
     const coupen=document.getElementById("coupen").value
+    const isOnline=document.getElementById("razorpay").checked
     $.ajax({
         url:`/user/checkout/verify-coupen/${coupen}?total=${amount}`,
         method:"GET",
         success:function(res){
+            if(res.coupon_code){
+                if(isOnline){
+                    document.getElementById("coupon_code").innerHTML=res.coupon_code +" applied"
+                    if(res.type=="flat_disc"){
+                        document.getElementById("amount").value=(amount-res.value)
+                        
+                        document.getElementById("amountDisplay").innerHTML="₹"+(amount-res.value)+"/-"
+                    }else if(res.type=="percenetage_disc"){
+                        document.getElementById("amount").value=(amount*res.value)/100
+                        document.getElementById("amountDisplay").innerHTML="₹"+(amount*res.value)/100+"/-"
+                    }
+                }
+            }else{
+            document.getElementById("coupon_code").innerHTML="Coupon doesnt exist for this order"
 
-            document.getElementById("coupon_code").innerHTML=res.coupon_code +" applied"
-            if(res.type=="flat_disc"){
-                document.getElementById("amount").value=(amount-res.value)
-                
-                document.getElementById("amountDisplay").innerHTML=(amount-res.value)
-            }else if(res.type=="percenetage_disc"){
-                document.getElementById("amount").value=(amount*res.value)/100
-                document.getElementById("amountDisplay").innerHTML="₹"+(amount*res.value)/100+"/-"
             }
         },
         error:function(err){
@@ -588,18 +608,34 @@ function verifyCoupen(){
         }    
     })
 }
-function walletBalance(){
-    const chechbox=document.getElementById("wallet_balance")
-    const balance=document.getElementById("balance").dataset.balance
-    const amount=document.getElementById("amount").value;
-    if (chechbox.checked) {
-        console.log(balance,amount);
-        if(amount<balance){
-            document.getElementById("amount").value=0
-            document.getElementById("amountDisplay").innerHTML=0
-        }else if(amount>balance){
-            document.getElementById("amount").value=(amount-balance)
-            document.getElementById("amountDisplay").innerHTML=(amount-balance)
+
+
+let initialAmount = 0; 
+function walletBalance() {
+    const checkbox = document.getElementById("wallet_balance");
+    const balance = parseFloat(document.getElementById("balance").dataset.balance);
+    const amountInput = document.getElementById("amount");
+    const amountDisplay = document.getElementById("amountDisplay");
+    const isOnline = document.getElementById("razorpay").checked;
+
+    if (isOnline) {
+        if (checkbox.checked) {
+            if (initialAmount === 0) {
+                initialAmount = parseFloat(amountInput.value);
+            }
+
+            console.log(balance, initialAmount);
+
+            if (initialAmount < balance) {
+                amountInput.value = 0;
+                amountDisplay.innerHTML = 0;
+            } else if (initialAmount > balance) {
+                amountInput.value = (initialAmount - balance);
+                amountDisplay.innerHTML = "₹"+(initialAmount - balance)+"/-";
+            }
+        } else {
+            amountInput.value = initialAmount;
+            amountDisplay.innerHTML = "₹"+initialAmount+"/-";
         }
     }
 }

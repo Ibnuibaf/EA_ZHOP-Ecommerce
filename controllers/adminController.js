@@ -242,7 +242,7 @@ module.exports = {
             { $pull: { prd_images: image } }
           );
       
-          res.sendStatus(200);
+          res.status(200).json({success:true});
         } catch (error) {
           console.error(error.message);
           res.sendStatus(500);
