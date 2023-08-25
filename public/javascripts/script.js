@@ -90,6 +90,16 @@ function updateQty(productId, action) {
                 $(".quantity[data-product-id='" + productId + "']").val(response.quantity);
                 $(".priceForQty[data-product-id='" + productId + "']").text("₹" + response.total_prize + "/-")
                 console.log("Cart updated successfully.");
+
+                
+                let updatedTotalAmount = 0;
+                $(".priceForQty").each(function () {
+                    const priceText = $(this).text();
+                    const price = parseFloat(priceText.replace("₹", "").replace("/-", ""));
+                    updatedTotalAmount += price;
+                });
+
+                $("#totalCart").text("₹" + updatedTotalAmount.toFixed(2) + "/-");
             }
         },
         error: function (error) {

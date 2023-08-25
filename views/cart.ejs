@@ -39,12 +39,12 @@
                                                                 <%= item.cartProduct.stock %>
                                                             </b> peice left</i>
                                                         <% } %><br>
-                                                            <i class="fw-medium">₹<%=Math.floor(item.cartProduct.mrp-((item.cartProduct.mrp*item.cartProduct.discount) /100))%>/-</i>
+                                                            <i class="fw-medium">₹<%=Math.floor(item.cartProduct.mrp-((item.cartProduct.mrp*item.cartProduct.discount)/100))%>/-</i>
                                         </td>
                                         <td>
                                             <div class="d-flex ">
                                                 <button class="fs-5 btn btn-dark mx-1 p-1 qty-inc"
-                                                    data-product-id="<%= item.cartProduct._id %>" >+</button>
+                                                    data-product-id="<%= item.cartProduct._id %>">+</button>
                                                 <input type="text" class="form-input text-center quantity"
                                                     style="max-width: 50px;"
                                                     data-product-id="<%= item.cartProduct._id %>"
@@ -53,7 +53,8 @@
                                                     data-product-id="<%= item.cartProduct._id %>">-</button>
                                             </div>
                                         </td>
-                                        <td class="priceForQty fw-bold fs-5 text-end" data-product-id="<%= item.cartProduct._id %>">
+                                        <td class="priceForQty fw-bold fs-5 text-end"
+                                            data-product-id="<%= item.cartProduct._id %>">
                                             ₹<%= item.cart.total_prize %>/-</td>
                                         <td><button class="bg-transparent border-0 "
                                                 onclick="removeCart(`<%= item.cartProduct._id %>`)"><img
@@ -91,18 +92,15 @@
                                             <p class="fs-6">Items Out of Stock: <b class="text-danger">
                                                     <%= pos %>
                                                 </b></p>
-                                            <% let dlcharge=(cartItems.length)*17 %>
-                                                <% if (dlcharge<80) { %>
-                                                    <input type="hidden" id="dlv-charge" value="<%= dlcharge %>">
-                                                    <i class="fs-6">Delivery Charge: ₹<%= dlcharge %>/-</i><br>
-                                                    <% } else { %>
-                                                        <i class="fs-6">Delivery Charge: <b
-                                                                class="text-danger">Free</b></i><br>
-                                                        <% } %>
-                                                            <div class="text-center">
-                                                                <button class=" btn btn-dark px-5 my-3 rounded-0 "
-                                                                    onclick="checkout()">Proceed To Checkout</button>
-                                                            </div>
+                                                <% let totalAmount=0 %>
+                                                <% cartItems.forEach(item => { %>
+                                                 <% totalAmount+=(item.cart.total_prize*item.cart.qty) %>
+                                                <% }) %>
+                                            <i class="fs-6" >Total Amount : <b id="totalCart">₹<%= totalAmount %>.00/-</b></i><br>
+                                            <div class="text-center">
+                                                <button class=" btn btn-dark px-5 my-3 rounded-0 "
+                                                    onclick="checkout()">Proceed To Checkout</button>
+                                            </div>
                 </div>
                 <div class="razor-secure text-center mt-4">
                     <img src="/images/razerpay.png" alt="" height="30"><br>
@@ -147,8 +145,7 @@
                                                 <td class="text-start">
                                                     <%= item.wishlistProduct.prd_name %>
                                                 </td>
-                                                <td>₹<%=Math.floor(item.wishlistProduct.mrp-((item.wishlistProduct.mrp*item.wishlistProduct.discount)
-                                                        /100)) %>/-</td>
+                                                <td>₹<%=Math.floor(item.wishlistProduct.mrp-((item.wishlistProduct.mrp*item.wishlistProduct.discount)/100)) %>/-</td>
                                                 <td><button class="btn btn-dark"
                                                         onclick="addCart('<%= item.wishlistProduct._id %>')">Add
                                                         Cart</button></td>
