@@ -3,11 +3,37 @@ const admin = require('../models/adminSchema')
 
 const usersCollection = require('../models/usersSchema')
 const productsCollection = require('../models/productsSchema')
-const orders=require('../models/ordersSchema')
 const categories = require('../models/categorySchema')
 const coupens=require('../models/coupenSchema')
 const banners=require('../models/bannerSchema')
+const nodemailer=require('nodemailer')
 const cloudinary = require('cloudinary').v2;
+
+
+const sendRefundNotificationMail=(email,amount)=>{
+    let transporter=nodemailer.createTransport({
+        service:"gmail",
+        auth:{
+            user:process.env.verifyAppEmail,
+            pass:process.env.verifyAppPassword
+        }
+    })
+    const mailOptions={
+        from:process.env.verifyAppEmail,
+        to:email,
+        subject:"Returned Orders Refund Added to Your Wallet",
+        html:`<h3 style="color:red;">Your Amount of order returned lately added to you EA_ZHOP Wallet ₹${amount}/-</h3><br>
+                <p style="color:grey;">Check your account profile of ${email} and verify!</p><br><i>Enjoy you future journey with <b style="color:red;">EAZHOP</b></i>`
+    }
+    transporter.sendMail(mailOptions,(err)=>{
+        if(err) {
+            console.log(err);
+            res.send(500)
+        }else{
+            console.log("Email Send Successfully");
+        }
+    })
+}
 
 module.exports = {
     loadAdminSignIn: (req, res) => {
@@ -142,6 +168,7 @@ module.exports = {
             const prd = req.body
 
             if (prd.prd_id && prd.prd_name) {
+                console.log(prd.prd_images);
                 if (prd.prd_images.length) {
                     await productsCollection.updateOne({ _id: prd.prd_id }, {
                         $set:{
@@ -251,42 +278,31 @@ module.exports = {
     loadOrdersManagement:async(req,res)=>{
         try {
             
-            let orderList = await orders.aggregate([
-                {
-                    $lookup: {
-                        from: "products",
-                        localField: "prd_id",
-                        foreignField: "_id",
-                        as: "order_detials"
-                    }
-                },
-                {$unwind:"$order_detials"},
+            let orderList=await usersCollection.aggregate([
+                {$unwind:"$orders"},
                 {$lookup:{
-                    from:"users",
-                    localField:"consumer",
+                    from:"products",
+                    localField:"orders.products.prd_id",
                     foreignField:"_id",
-                    as:"user_details"
+                    as:"products_details"
                 }},
-                {$unwind:"$user_details"},
                 {$project:{
-                    prd_id:1,
-                    date:1,
-                    address:1,
-                    status:1,
-                    returned:1,
-                    amount:1,
-                    mobile_number:1,
-                    payment:1,
-                    qty:1,
-                    prd_name:"$order_detials.prd_name",
-                    prd_images:"$order_detials.prd_images",
-                    user:"$user_details.email",
+                    order_id:"$orders._id",
+                    products:"$orders.products",
+                    products_details:"$products_details",
+                    total_amount:"$orders.total_amount",
+                    order_date:"$orders.order_date",
+                    payment_method:"$orders.payment_method",
+                    address:"$orders.address",
+                    consumer:"$email",
+                    phone_number:"$mobile_number",
                 }},
-                {$sort:{_id:-1}}
+                {$sort:{"order_id":-1}}
             ])
+            // console.log(orderList)
             if(req.query.search){
                 const searchRegex=new RegExp(req.query.search, 'i')
-                orderList= orderList.filter((order)=>searchRegex.test(order._id)||searchRegex.test(order.prd_name))
+                orderList= orderList.filter((order)=>searchRegex.test(order.order_id)||searchRegex.test(order.payment_method)||searchRegex.test(order.consumer)||searchRegex.test(order.phone_number))
             }
             res.render('adminOrders',{orderList})
         } catch (error) {
@@ -297,7 +313,22 @@ module.exports = {
     cancelOrder:async(req,res)=>{
         try {
             const order=req.params.order;
-            const isUpdated=await orders.updateOne({_id:order},{$set:{status:"canceled"}})
+            const email=req.body.user
+            console.log(order,email);
+            const isUpdated = await usersCollection.updateOne(
+                { 
+                  email: email,
+                  "orders.products._id": order 
+                }, 
+                { 
+                  $set: { "orders.$.products.$[product].status": "canceled" } 
+                },
+                {
+                  arrayFilters: [
+                    { "product._id": order }
+                  ]
+                }
+              );
             res.status(200).json({success:true})
         } catch (error) {
             console.log(error.message);
@@ -308,14 +339,23 @@ module.exports = {
         try {
             const order = req.body._id
             const consumer=req.body.user
-            const amount = req.body.amount
+            const amount = req.body.price
             const payment=req.body.payment
-            
-            const isUpdated =await orders.updateOne({_id:order},{$set:{refunded:true,status:"canceled"}})
-            
+            await usersCollection.updateOne(
+                {email:consumer,"orders.products._id":order},
+                {$set:{"orders.$.products.$[product].refunded":true,"orders.$.products.$[product].status": "canceled"}},
+                {
+                  arrayFilters: [
+                    { "product._id": order }
+                  ]
+                }
+            )
             if(payment=="razor_pay"){
                 await usersCollection.updateOne({email:consumer},{$inc:{"wallet.balance":amount},$push:{"wallet.transactions":`${amount} from order ${order}`}})
+                await sendRefundNotificationMail(consumer,amount)
+
             }
+            
             res.status(200).json({success:true})
         } catch (error) {
             console.log(error.message);
@@ -325,8 +365,17 @@ module.exports = {
     updateOrderStatus:async (req,res)=>{
         try {
             const updatedStatus=req.body.status
+            const consumer=req.body.email
             const orderId=req.params.id
-            await orders.updateOne({_id:orderId},{$set:{status:updatedStatus}})
+            await usersCollection.updateOne(
+                {email:consumer,"orders.products._id":orderId},
+                {$set:{"orders.$.products.$[product].status": updatedStatus}},
+                {
+                  arrayFilters: [
+                    { "product._id": orderId }
+                  ]
+                }
+            )
             res.send(200)
         } catch (error) {
             console.log(error.message);

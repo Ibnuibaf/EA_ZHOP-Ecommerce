@@ -53,7 +53,7 @@ router.patch('/user/cancel-order/:order',middle.loggedIn,controller.cancelOrder)
 router.patch('/user/return-order/:order',middle.loggedIn,controller.returnOrder)
 
 //checkout
-router.get('/user/checkout',middle.loggedIn,controller.loadCheckout)
+router.get('/user/checkout',middle.loggedIn,middle.ordered,controller.loadCheckout)
 router.get('/user/checkout/verify-coupen/:code',middle.loggedIn,controller.verifyCoupen)
 router.post('/user/confirm-order',middle.loggedIn,controller.confirmOrder)
 router.post('/user/checkout/verify-payment',middle.loggedIn,controller.verifyPayment)

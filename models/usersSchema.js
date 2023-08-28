@@ -54,6 +54,38 @@ const usersSchema = new mongoose.Schema({
 
     }],
     wishlist: [mongoose.Types.ObjectId],
+    orders:[{
+        products:[{
+            prd_id:mongoose.Types.ObjectId,
+            qty:Number,
+            price:Number,
+            status:{
+                type:String,
+                default:"pending"
+            },
+            returned:{
+                type:Boolean,
+                default:false
+            },
+            refunded:{
+                type:Boolean,
+                default:false
+            },
+        }],
+        total_amount:Number,
+        order_date:Date,
+        payment_method:String,
+        address:{
+            locality: String,
+            country: String,
+            district: String,
+            state:String,
+            city: String,
+            altr_number: Number,
+            postcode: Number
+        },
+
+    }],
     blocked: {
         type: Boolean,
         default: false

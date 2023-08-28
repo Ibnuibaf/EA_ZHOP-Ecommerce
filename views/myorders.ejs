@@ -12,14 +12,13 @@
             <table class="table ">
                 <thead class="fs-4 " style="position: sticky;top: 0;">
                     <tr>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Status</th>
-                        <th scope="col" colspan="2" style="font-weight: 500;background-color: #E5E5E5;">Product Details
-                        </th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Ordered</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Quantity</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Price</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Rating</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order Id</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">No. of Items</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order Date</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Payment Type</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Amount</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Address</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,52 +26,96 @@
                     <% orderDetails.forEach(order=> { %>
 
                         <tr class="data-row ">
+
+                            <td>
+                                Order<%= order.order_id %>
+                            </td>
+                            <td>
+                                <%= order.products.length %>
+                            </td>
+                            <td>
+                                <%= order.order_date.toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <%= order.payment_method.toUpperCase() %>
+                            </td>
+                            <td>
+                                ₹<%= order.total_amount %>/-
+                            </td>
+                            <td>
+                                <%= order.address.locality %>,<%= order.address.country %>,<%= order.address.district %>
+                                            ,<%= order.address.state %>,<br>
+                                                <%= order.address.city %>,<%= order.address.altr_number %>,<%=
+                                                            order.address.postcode %>
+                            </td>
                             <td>
 
-                                <% if (order.status=="delivery-period" ) { %>
-                                    <b class="text-warning">Delivery Soon </b><br>
-                                    <small><i>Within 7 days after Order</i></small>
-                                    <% } else if (order.status=="canceled" ) { %>
-                                        Canceled Order
-                                        <% } else if (order.returned) { %>
-                                            Order Returned
-                                            <% } else { %>
-                                                Delivered
-                                                <% } %>
-                            </td>
-                            <td id="prd_image">
-                                <a href="/user/products/product-details/<%= order.prd_id %>">
+                                <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#detailsModal_<%= order.order_id %>">View
+                                    Details</button>
 
-                                    <img src="<%= order.prd_images[0] %>" alt=""
-                                        style="max-width: 50px; max-height: 50px;">
-                                </a>
-                            </td>
-                            <td>
-                                <%= order.prd_name %>
-                            </td>
-                            <td>
-                                <%= order.date.toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <%= order.qty %>
-                            </td>
-                            <td>
-                                <%= order.amount %>
-                            </td>
-                            <td>
-                                <a href="/user/products/product-details/<%= order.prd_id %>" class="text-dark">Review &
-                                    Rating</a>
-                            </td>
-                            <td>
-                                <% if (order.status=="delivery-period" ) { %>
-                                    <button class="btn btn-dark text-warning"
-                                        onclick="confirmsUser(event,function(){cancelOrder('<%= order._id %>')})">Cancel</button>
-                                    <% } else if (order.status=="return-period" ) { %>
-                                        <% if (!order.returned) { %>
-                                            <button class="btn btn-dark text-warning"
-                                                onclick="confirmsUser(event,function(){returnOrder('<%= order._id %>')})">Return</button>
-                                            <% } %>
-                                                <% } %>
+                                <div class="modal modal-lg fade" id="detailsModal_<%= order.order_id %>" tabi="-1"
+                                    aria-labelledby="detailsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="detailsModalLabel">Order Details of Order<%= order.order_id %></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th colspan="2" style="background-color: #F3F2EE;">Product Details</th>
+                                                            <th style="background-color: #F3F2EE;">Quantity</th>
+                                                            <th style="background-color: #F3F2EE;">Price</th>
+                                                            <th style="background-color: #F3F2EE;">Status</th>
+                                                            <th style="background-color: #F3F2EE;">Options</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% for( let i = 0; i < order.products.length; i++ ) { %>
+                                                            <tr >
+                                                                <td>
+                                                                    <a href="/user/products/product-details/<%= order.products[i].prd_id %>">
+
+                                                                        <img src="<%= order.products_details[i].prd_images[0] %>" alt=""
+                                                                            style="max-width: 50px; max-height: 50px;">
+                                                                    </a>
+                                                                </td>
+                                                                <td class="" ><%= order.products_details[i].prd_name %></td>
+                                                                <td ><%= order.products[i].qty %></td>
+                                                                <td >₹<%= order.products[i].price %>/-</td>
+                                                                <td >
+                                                                    <% if (order.products[i].status=="canceled") { %>
+                                                                        <span class="badge bg-danger"><%= order.products[i].status %></span>
+                                                                        <% } else if (order.products[i].status=="pending"||order.products[i].status=="shipped"||order.products[i].status=="on delivery") { %>
+                                                                        <span class="badge bg-warning"><%= order.products[i].status %></span>
+                                                                        <% } else if (order.products[i].returned) { %>
+                                                                        <span class="badge bg-danger">order returned</span>
+                                                                        <% } else { %>
+                                                                        <span class="badge bg-success"><%= order.products[i].status %></span>
+                                                                    <% } %>
+                                                                </td>
+                                                                <td>
+                                                                    <% if (order.products[i].status=="pending") { %>
+                                                                        <button class="btn btn-dark" type="button" onclick="cancelOrder('<%= order.products[i]._id %>')" >Cancel</button>
+                                                                    <% } else if (order.products[i].status=="return period" && !order.products[i].returned) { %>
+                                                                        <button class="btn btn-dark" type="button" onclick="returnOrder('<%= order.products[i]._id %>')" >Return</button>
+                                                                    <% } %>
+                                                                </td>
+                                                            </tr>
+                                                        <% } %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <% }) %>

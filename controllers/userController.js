@@ -7,9 +7,8 @@ const productsCollection = require("../models/productsSchema")
 const usersCollection = require("../models/usersSchema");
 const categories = require('../models/categorySchema');
 const banners = require('../models/bannerSchema')
-const coupens=require('../models/coupenSchema')
+const coupens = require('../models/coupenSchema')
 const otpVerification = require('../models/otpSchema')
-const orders = require('../models/ordersSchema')
 const { ObjectId } = require('mongoose').Types;
 
 const securePass = async (pass) => {
@@ -482,33 +481,53 @@ module.exports = {
     loadOrders: async (req, res) => {
         try {
             const userDetails = req.userDetails
-            const orderDetails = await orders.aggregate([
-                { $match: { consumer: userDetails._id } },
-                {
-                    $lookup: {
-                        from: "products",
-                        localField: "prd_id",
-                        foreignField: "_id",
-                        as: "order_detials"
-                    }
-                },
-                { $unwind: "$order_detials" },
-                {
-                    $project: {
-                        prd_id: 1,
-                        date: 1,
-                        address: 1,
-                        status: 1,
-                        returned: 1,
-                        amount: 1,
-                        mobile_number: 1,
-                        payment: 1,
-                        qty: 1,
-                        prd_name: "$order_detials.prd_name",
-                        prd_images: "$order_detials.prd_images",
-                    }
-                },
-                { $sort: { _id: -1 } }
+            // const orderDetails = await orders.aggregate([
+            //     { $match: { consumer: userDetails._id } },
+            //     {
+            //         $lookup: {
+            //             from: "products",
+            //             localField: "prd_id",
+            //             foreignField: "_id",
+            //             as: "order_detials"
+            //         }
+            //     },
+            //     { $unwind: "$order_detials" },
+            //     {
+            //         $project: {
+            //             prd_id: 1,
+            //             date: 1,
+            //             address: 1,
+            //             status: 1,
+            //             returned: 1,
+            //             amount: 1,
+            //             mobile_number: 1,
+            //             payment: 1,
+            //             qty: 1,
+            //             prd_name: "$order_detials.prd_name",
+            //             prd_images: "$order_detials.prd_images",
+            //         }
+            //     },
+            //     { $sort: { _id: -1 } }
+            // ])
+            const orderDetails=await usersCollection.aggregate([
+                {$match:{_id:userDetails._id}},
+                {$unwind:"$orders"},
+                {$lookup:{
+                    from:"products",
+                    localField:"orders.products.prd_id",
+                    foreignField:"_id",
+                    as:"product_details"
+                }},
+                {$project:{
+                    order_id:"$orders._id",
+                    products:"$orders.products",
+                    products_details:"$product_details",
+                    total_amount:"$orders.total_amount",
+                    order_date:"$orders.order_date",
+                    payment_method:"$orders.payment_method",
+                    address:"$orders.address",   
+                }},
+
             ])
             res.render('myorders', { orderDetails })
         } catch (error) {
@@ -520,8 +539,25 @@ module.exports = {
     cancelOrder: async (req, res) => {
         try {
             const order = req.params.order;
-            const isUpdated = await orders.updateOne({ _id: order }, { $set: { status: "canceled" } })
-            res.status(200).json({success:true})
+            const userDetails=req.userDetails
+
+            console.log(order)
+            const isUpdated = await usersCollection.updateOne(
+                { 
+                  _id: userDetails._id,
+                  "orders.products._id": order 
+                }, 
+                { 
+                  $set: { "orders.$.products.$[product].status": "canceled" } 
+                },
+                {
+                  arrayFilters: [
+                    { "product._id": order }
+                  ]
+                }
+              );
+              
+            res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
@@ -531,8 +567,22 @@ module.exports = {
     returnOrder: async (req, res) => {
         try {
             const order = req.params.order
-            await orders.updateOne({ _id: order }, { $set: { returned: true } })
-            res.status(200).json({success:true})
+            const userDetails=req.userDetails
+            const isUpdated = await usersCollection.updateOne(
+                { 
+                  _id: userDetails._id,
+                  "orders.products._id": order 
+                }, 
+                { 
+                  $set: { "orders.$.products.$[product].returned": true } 
+                },
+                {
+                  arrayFilters: [
+                    { "product._id": order }
+                  ]
+                }
+              );
+            res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
             const statusCode = error.status || 500;
@@ -541,28 +591,59 @@ module.exports = {
     },
     loadProductView: async (req, res) => {
         try {
-            const filterMin = req.query.min
-            const filterMax = req.query.max
-            const searchQuery = req.query.search
-            const category = req.query.category
-            const categoriesList = await categories.find()
-            let productsList = await productsCollection.find().sort({ _id: -1 })
-            let foundCategory = ''
-
+            const filterMin = req.query.min;
+            const filterMax = req.query.max;
+            const searchQuery = req.query.search;
+            const category = req.query.category;
+            const pagination = req.query.view; // Corrected spelling
+            const categoriesList = await categories.find();
+            let productsList = await productsCollection.find().sort({ _id: -1 });
+            let foundCategory = '';
+    
             if (category) {
                 const catObjectId = new mongoose.Types.ObjectId(category);
-                productsList = productsList.filter(products => products.category.equals(catObjectId))
+                productsList = productsList.filter(products => products.category.equals(catObjectId));
                 foundCategory = categoriesList.find(category => category._id.equals(catObjectId));
             }
             if (filterMax || filterMin) {
-                productsList = productsList.filter(products => products.mrp > filterMin && products.mrp < filterMax)
+                productsList = productsList.filter(products => Math.floor(products.mrp-(products.mrp*products.discount)/100) > filterMin && Math.floor(products.mrp-(products.mrp*products.discount)/100) < filterMax);
             }
             if (searchQuery) {
                 const searchRegex = new RegExp(searchQuery, 'i');
-                productsList = productsList.filter(products => searchRegex.test(products.prd_name))
+                productsList = productsList.filter(products => searchRegex.test(products.prd_name));
             }
-            return res.render('products', { productsList, categoriesList, foundCategory });
-
+    
+            const pageSize = 8;
+            const totalPages = Math.ceil(productsList.length / pageSize);
+    
+            let productPages = [];
+            for (let i = 0; i < totalPages; i++) {
+                const startIndex = i * pageSize;
+                const endIndex = startIndex + pageSize;
+                productPages.push(productsList.slice(startIndex, endIndex));
+            }
+    
+            let selectedPage = 0;
+            if (pagination && pagination >= 0 && pagination < totalPages) {
+                selectedPage = parseInt(pagination);
+            }    
+            if(productPages.length){
+                return res.render('products', {
+                    productsList: productPages[selectedPage],
+                    categoriesList,
+                    foundCategory,
+                    totalPages,
+                    currentPage: selectedPage
+                });
+            }else{
+                return res.render('products', {
+                    productsList: productPages,
+                    categoriesList,
+                    foundCategory,
+                    totalPages,
+                    currentPage: selectedPage
+                });
+            }
         } catch (error) {
             console.log(error.stack);
             const statusCode = error.status || 500;
@@ -586,7 +667,7 @@ module.exports = {
                     }
                 });
             }
-
+            req.session.ordered=false
             res.render('product-details', { productDetails, isWishlist, isCart })
         } catch (error) {
             console.log(error.message);
@@ -708,7 +789,7 @@ module.exports = {
                     }
                 }
             ])
-            console.log(cartItems, wishlistItems);
+            req.session.ordered=false
             res.render('cart', { cartItems, wishlistItems })
         } catch (error) {
             console.log(error.message);
@@ -808,16 +889,16 @@ module.exports = {
         }
         res.render('checkout', { productDetails, userDetails })
     },
-    verifyCoupen:async(req,res)=>{
+    verifyCoupen: async (req, res) => {
         try {
-            const coupon_code=req.params.code
-            const amount=req.query.total
+            const coupon_code = req.params.code
+            const amount = req.query.total
 
-            const isValidCoupon=await coupens.findOne({ coupon_code: coupon_code, hit_amount: { $lte: amount },active:true })
-            if(isValidCoupon){
-                res.status(200).json({success:true,coupon_code:isValidCoupon.coupon_code,value:isValidCoupon.value,type:isValidCoupon.type})
-            }else{
-                res.status(200).json({success:false})
+            const isValidCoupon = await coupens.findOne({ coupon_code: coupon_code, hit_amount: { $lte: amount }, active: true })
+            if (isValidCoupon) {
+                res.status(200).json({ success: true, coupon_code: isValidCoupon.coupon_code, value: isValidCoupon.value, type: isValidCoupon.type })
+            } else {
+                res.status(200).json({ success: false })
             }
         } catch (error) {
             console.log(error.message);
@@ -827,55 +908,35 @@ module.exports = {
     confirmOrder: async (req, res) => {
         try {
             const data = req.body
-            
+
             const userDetails = req.userDetails
-        
+
+            let products = []
             if (!data.pay_methods) {
                 return res.redirect('/user/checkout?message=Choose any of Payment Methods')
             }
             if (data.local_address && data.country && data.postcode && data.city && data.district && data.state && data.altr_number) {
                 if (data.pay_methods == "cod") {
                     if (Array.isArray(data.prd_id)) {
-                   
                         for (let index = 0; index < data.prd_id.length; index++) {
                             if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
                                 // console.log(index,data.qty[index],data.stock[index]);
                                 return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
                             }
 
-                            const order = {
+                            const product = {
                                 prd_id: data.prd_id[index],
-                                address: {
-                                    locality: data.local_address,
-                                    country: data.country,
-                                    district: data.district,
-                                    state: data.state,
-                                    city: data.city,
-                                    altr_number: data.altr_number,
-                                    postcode: data.postcode
-                                },
-                                date: Date.now(),
-                                amount: parseFloat(data.total_price[index]),
-                                consumer: userDetails._id,
-                                mobile_number: userDetails.mobile_number,
-                                payment: data.pay_methods,
-                                qty: parseInt(data.qty[index])
+                                qty: parseInt(data.qty[index]),
+                                price: parseFloat(data.total_price[index]),
                             };
+                            products.push(product);
 
-                            await orders.create(order);
-                           
-                            await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
                         }
-
-
-
-                    } else {
-                        if (parseInt(data.qty) > parseFloat(data.total_price)) {
-                            return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
-                        }
-                        console.log("here iam and now");
                         const order = {
-                            prd_id: data.prd_id,
+                            products,
+                            total_amount: data.amount,
+                            order_date: Date.now(),
+                            payment_method: data.pay_methods,
                             address: {
                                 locality: data.local_address,
                                 country: data.country,
@@ -884,31 +945,58 @@ module.exports = {
                                 city: data.city,
                                 altr_number: data.altr_number,
                                 postcode: data.postcode
-                            },
-                            date: Date.now(),
-                            amount: parseFloat(data.total_price),
-                            consumer: userDetails._id,
-                            mobile_number: userDetails.mobile_number,
-                            payment: data.pay_methods,
-                            qty: parseInt(data.qty)
+                            }
                         }
-                        console.log("here iam and now after :",order);
+                        await usersCollection.updateOne({ _id: userDetails._id }, { $push: { orders: order } })
+                        for (let index = 0; index < data.prd_id.length; index++) {
+                            await productsCollection.updateOne({ _id: data.prd_id[index] }, { $inc: { stock: -data.qty[index] } });
+                        }
 
-                        await orders.create(order)
+                    } else {
+                        if (parseInt(data.qty) > parseFloat(data.total_price)) {
+                            return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
+                        }
+                        const product = {
+                            prd_id: data.prd_id,
+                            qty: parseInt(data.qty),
+                            price: parseFloat(data.total_price),
+                        };
+                        products.push(product);
+                        const order = {
+                            products,
+                            total_amount: data.amount,
+                            order_date: Date.now(),
+                            payment_method: data.pay_methods,
+                            address: {
+                                locality: data.local_address,
+                                country: data.country,
+                                district: data.district,
+                                state: data.state,
+                                city: data.city,
+                                altr_number: data.altr_number,
+                                postcode: data.postcode
+                            }
+                        }
+
+                        await usersCollection.updateOne({ _id: userDetails._id }, { $push: { orders: order } })
                         await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
                     }
-                    if(data.wallet_balance){
-                        if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
-                            
-                            await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
-                        }else{
-                            await usersCollection.updateOne({_id:userDetails._id}, {$inc:{"wallet.balance":-data.total_price}})
-                        }
-                    }
+                    req.session.ordered=true 
                     res.json({ codSuccess: true })
                 } else {
                     const amount = req.body.amount
-                    if(amount>0){
+                    if(Array.isArray(data.prd_id)){
+                        for (let index = 0; index < data.prd_id.length; index++) {
+                            if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
+                                return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
+                            }
+                        }
+                    }else{
+                        if (parseInt(data.qty) > parseFloat(data.total_price)) {
+                            return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
+                        }
+                    }
+                    if (amount > 0) {
 
                         req.session.orderList = req.body
                         const randomOrderID = Math.floor(Math.random() * 1000000).toString()
@@ -920,11 +1008,11 @@ module.exports = {
                         razorpayInstance.orders.create(options,
                             (err) => {
                                 if (!err) {
-                                    console.log("Reached RazorPay Method on cntrlr",randomOrderID);
+                                    console.log("Reached RazorPay Method on cntrlr", randomOrderID);
                                     res.status(200).send({
                                         razorSuccess: true,
                                         msg: "order created",
-                                        amount: amount* 100,
+                                        amount: amount * 100,
                                         key_id: process.env.RAZORPAY_ID_KEY,
                                         name: userDetails.first_name,
                                         contact: userDetails.mobile_number,
@@ -936,13 +1024,13 @@ module.exports = {
                                 }
                             }
                         )
-                    }else{
-                        if(data.wallet_balance){
-                            if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
-                                
-                                await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
-                            }else{
-                                await usersCollection.updateOne({_id:userDetails._id}, {$inc:{"wallet.balance":-data.total_price}})
+                    } else {
+                        if (data.wallet_balance) {
+                            if (parseInt(userDetails.wallet.balance) < parseInt(data.total_price)) {
+
+                                await usersCollection.updateOne({ _id: userDetails._id }, { $set: { "wallet.balance": 0 } })
+                            } else {
+                                await usersCollection.updateOne({ _id: userDetails._id }, { $inc: { "wallet.balance": -data.total_price } })
                             }
                         }
                         res.json({ codSuccess: true })
@@ -958,49 +1046,27 @@ module.exports = {
     },
     verifyPayment: async (req, res) => {
         try {
-         
-            const userDetails=req.userDetails
+
+            const userDetails = req.userDetails
             const data = req.session.orderList
+            let products = []
             req.session.orderList = ''
             if (Array.isArray(data.prd_id)) {
-
                 for (let index = 0; index < data.prd_id.length; index++) {
-                    if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
-                        // console.log(index,data.qty[index],data.stock[index]);
-                        return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
-                    }
-
-                    const order = {
+                   
+                    const product = {
                         prd_id: data.prd_id[index],
-                        address: {
-                            locality: data.local_address,
-                            country: data.country,
-                            district: data.district,
-                            state: data.state,
-                            city: data.city,
-                            altr_number: data.altr_number,
-                            postcode: data.postcode
-                        },
-                        date: Date.now(),
-                        amount: parseFloat(data.total_price[index]),
-                        consumer: userDetails._id,
-                        mobile_number: userDetails.mobile_number,
-                        payment: data.pay_methods,
-                        qty: parseInt(data.qty[index])
+                        qty: parseInt(data.qty[index]),
+                        price: parseFloat(data.total_price[index]),
                     };
+                    products.push(product);
 
-                    await orders.create(order);
-                    await productsCollection.updateOne({ _id: order.prd_id }, { $inc: { stock: -order.qty } });
-                }
-
-                
-
-            } else {
-                if (parseInt(data.qty) > parseFloat(data.total_price)) {
-                    return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
                 }
                 const order = {
-                    prd_id: data.prd_id,
+                    products,
+                    total_amount: data.amount,
+                    order_date: Date.now(),
+                    payment_method: data.pay_methods,
                     address: {
                         locality: data.local_address,
                         country: data.country,
@@ -1009,26 +1075,49 @@ module.exports = {
                         city: data.city,
                         altr_number: data.altr_number,
                         postcode: data.postcode
-                    },
-                    date: Date.now(),
-                    amount: parseFloat(data.total_price),
-                    consumer: userDetails._id,
-                    mobile_number: userDetails.mobile_number,
-                    payment: data.pay_methods,
-                    qty: parseInt(data.qty)
+                    }
                 }
-                await orders.create(order)
+                await usersCollection.updateOne({ _id: userDetails._id }, { $push: { orders: order } })
+                for (let index = 0; index < data.prd_id.length; index++) {
+                    await productsCollection.updateOne({ _id: data.prd_id[index] }, { $inc: { stock: -data.qty[index] } });
+                }
+
+            } else {
+                const product = {
+                    prd_id: data.prd_id,
+                    qty: parseInt(data.qty),
+                    price: parseFloat(data.total_price),
+                };
+                products.push(product);
+                const order = {
+                    products,
+                    total_amount: data.amount,
+                    order_date: Date.now(),
+                    payment_method: data.pay_methods,
+                    address: {
+                        locality: data.local_address,
+                        country: data.country,
+                        district: data.district,
+                        state: data.state,
+                        city: data.city,
+                        altr_number: data.altr_number,
+                        postcode: data.postcode
+                    }
+                }
+
+                await usersCollection.updateOne({ _id: userDetails._id }, { $push: { orders: order } })
                 await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
             }
 
-            if(data.wallet_balance){
-                if(parseInt(userDetails.wallet.balance)<parseInt(data.total_price)){
-                    
-                    await usersCollection.updateOne({_id:userDetails._id}, {$set:{"wallet.balance":0}})    
-                }else{
-                    await usersCollection.updateOne({_id:userDetails._id}, {$inc:{"wallet.balance":-data.total_price}})
+            if (data.wallet_balance) {
+                if (parseInt(userDetails.wallet.balance) < parseInt(data.total_price)) {
+
+                    await usersCollection.updateOne({ _id: userDetails._id }, { $set: { "wallet.balance": 0 } })
+                } else {
+                    await usersCollection.updateOne({ _id: userDetails._id }, { $inc: { "wallet.balance": -data.total_price } })
                 }
             }
+            req.session.ordered=true 
             res.send(200)
         } catch (error) {
             console.log(error.message);

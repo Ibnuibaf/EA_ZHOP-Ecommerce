@@ -21,107 +21,128 @@
             <table class="table ">
                 <thead class="fs-4 " style="position: sticky;top: 0;">
                     <tr>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order ID</th>
-                        <th scope="col" colspan="2" style="font-weight: 500;background-color: #E5E5E5;">Product Details
-                        </th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order Id</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Consumer</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Ordered</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Quantity</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Price</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Status</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Option</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Mobile</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Items</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Date</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Payment</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Amount</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Address</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;"></th>
                     </tr>
                 </thead>
                 <tbody>
 
                     <% orderList.forEach(order=> { %>
-                        <% if (order.status=="canceled" ) { %>
-                            <tr class="data-row ">
 
-                                <td class="bg-warning">
-                                    <%= order._id %>
-                                </td>
-                                <td id="prd_image" class="bg-warning">
-                                    <img src="<%= order.prd_images[0] %>" alt=""
-                                        style="max-width: 50px; max-height: 50px;">
-                                </td>
-                                <td class="bg-warning">
-                                    <%= order.prd_name %>
-                                </td>
-                                <td class="bg-warning">
-                                    <%= order.user %>
-                                </td>
-                                <td class="bg-warning">
-                                    <%= order.date.toLocaleDateString() %>
-                                </td>
-                                <td class="bg-warning">
-                                    <%= order.qty %>
-                                </td>
-                                <td class="bg-warning">
-                                    <%= order.amount %>
-                                </td>
-                                <td class="bg-warning">
-                                    <select name="status " class="ea-input status-select bg-warning"
-                                        data-order-id="<%= order._id %>">
-                                        <option>Order Canceled</option>
-                                    </select>
-                                </td>
-                                <td class="bg-warning">
+                        <tr class="data-row ">
 
-                                </td>
-                            </tr>
-                            <% } else { %>
-                                <tr class="data-row ">
+                            <td>
+                                Order<%= order.order_id %>
+                            </td>
+                            <td>
+                                <%= order.consumer %>
+                            </td>
+                            <td>
+                                <%= order.phone_number %>
+                            </td>
+                            <td>
+                                <%= order.products.length %>
+                            </td>
+                            <td>
+                                <%= order.order_date.toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <%= order.payment_method.toUpperCase() %>
+                            </td>
+                            <td>
+                                ₹<%= order.total_amount %>/-
+                            </td>
+                            <td>
+                                <%= order.address.locality %>,<%= order.address.country %>,<%= order.address.district %>
+                                            ,<%= order.address.state %>,<br>
+                                                <%= order.address.city %>,<%= order.address.altr_number %>,<%=
+                                                            order.address.postcode %>
+                            </td>
+                            <td>
 
-                                    <td>
-                                        <%= order._id %>
-                                    </td>
-                                    <td id="prd_image">
-                                        <img src="<%= order.prd_images[0] %>" alt=""
-                                            style="max-width: 50px; max-height: 50px;">
-                                    </td>
-                                    <td>
-                                        <%= order.prd_name %>
-                                    </td>
-                                    <td>
-                                        <%= order.user %>
-                                    </td>
-                                    <td>
-                                        <%= order.date.toLocaleDateString() %>
-                                    </td>
-                                    <td>
-                                        <%= order.qty %>
-                                    </td>
-                                    <td>
-                                        <%= order.amount %>
-                                    </td>
-                                    <td>
-                                        <select name="status" class="ea-input status-select"
-                                            data-order-id="<%= order._id %>">
-                                            <option value="delivery-period" <%=order.status==='delivery-period'
-                                                ? 'selected' : '' %>>Delivery Period</option>
-                                            <option value="return-period" <%=order.status==='return-period' ? 'selected'
-                                                : '' %>
-                                                >Return Period</option>
-                                            <option value="closed" <%=order.status==='closed' ? 'selected' : '' %>>Order
-                                                Closed
-                                            </option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <% if (order.status=="delivery-period" ) { %>
-                                            <button class="btn btn-dark text-warning"
-                                                onclick="confirms(event,function(){cancelOrderAsAdmin('<%= order._id %>')})">Cancel</button>
-                                            <% } else if (order.returned) { %>
-                                                <button class="btn btn-dark text-warning"
-                                                    value="<%= JSON.stringify(order) %>"
-                                                    onclick="refundPayment(event.target.value)">Refund</button>
-                                                <% } %>
-                                    </td>
-                                </tr>
-                                <% } %>
+                                <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#detailsModal_<%= order.order_id %>">View
+                                    Details</button>
 
-                                    <% }) %>
+                                <div class="modal modal-xl fade" id="detailsModal_<%= order.order_id %>" tabi="-1"
+                                    aria-labelledby="detailsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="detailsModalLabel">Order Details of Order<%= order.order_id %></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th colspan="2" style="background-color: #F3F2EE;">Product Details</th>
+                                                            <th style="background-color: #F3F2EE;">Quantity</th>
+                                                            <th style="background-color: #F3F2EE;">Price</th>
+                                                            <th style="background-color: #F3F2EE;">Status</th>
+                                                            <th style="background-color: #F3F2EE;" colspan="2">Options</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% for( let i = 0; i < order.products.length; i++ ) { %>
+                                                            <tr >
+                                                                <td><img src="<%= order.products_details[i].prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;"></td>
+                                                                <td class="" ><%= order.products_details[i].prd_name %></td>
+                                                                <td ><%= order.products[i].qty %></td>
+                                                                <td >₹<%= order.products[i].price %>/-</td>
+                                                                <td >
+                                                                    <% if (order.products[i].status=="canceled") { %>
+                                                                        <span class="badge bg-danger"><%= order.products[i].status %></span>
+                                                                        <% } else if (order.products[i].status=="pending"||order.products[i].status=="shipped"||order.products[i].status=="on delivery") { %>
+                                                                        <span class="badge bg-warning"><%= order.products[i].status %></span>
+                                                                        <% } else { %>
+                                                                        <span class="badge bg-success"><%= order.products[i].status %></span>
+                                                                    <% } %>
+                                                                </td>
+                                                                <td>
+                                                                    <% if (order.products[i].status==='canceled') { %>
+                                                                        <select name="status" class="ea-input status-select" data-order-id="<%= order.products[i]._id  %>" data-user="<%= order.consumer  %>">
+                                                                            <option >Canceled</option>
+                                                                        </select>
+                                                                        <% } else { %>
+                                                                            <select name="status" class="ea-input status-select" data-order-id="<%= order.products[i]._id  %>" data-user="<%= order.consumer  %>">
+                                                                                <option value="pending" <%=order.products[i].status==='pending' ? 'selected' : '' %>>Pending</option>
+                                                                                <option value="shipped" <%=order.products[i].status==='shipped' ? 'selected' : '' %>>Shipped</option>
+                                                                                <option value="on delivery" <%=order.products[i].status==='on delivery' ? 'selected' : '' %>>On Delivery</option>
+                                                                                <option value="return period" <%=order.products[i].status==='return period' ? 'selected' : '' %>>Return Period</option>
+                                                                                <option value="closed" <%=order.products[i].status==='closed' ? 'selected' : '' %>>Order Closed</option>
+                                                                            </select>
+                                                                    <% } %>
+                                                                </td>
+                                                                <td>
+                                                                    <% if (order.products[i].status=="pending") { %>
+                                                                        <button class="btn btn-dark" type="button" onclick="cancelOrderAsAdmin('<%= order.products[i]._id %>','<%= order.consumer %>')" >Cancel</button>
+                                                                    <% } else if ((order.products[i].returned&&order.products[i].refunded==false) || (order.products[i].status=="canceled"&& order.products[i].refunded==false)) { %>
+                                                                        <button class="btn btn-dark text-warning" value="<%= JSON.stringify(order.products[i]) %>" onclick="refundPayment(event.target.value,'<%=order.consumer%>','<%=order.payment_method%>')">Refund</button>
+                                                                    <% } %>
+                                                                </td>
+                                                            </tr>
+                                                        <% } %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
 
 
 

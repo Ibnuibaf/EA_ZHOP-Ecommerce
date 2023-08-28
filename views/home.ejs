@@ -7,7 +7,7 @@
             <div class="carousel-inner">
                 <% bannersList.forEach(banner => { %>
                  <div class="carousel-item active">
-                    <a href="/user/products"><img src="<%= banner.banner %>" class="d-block img-fluid w-100 "
+                    <a href="/user/products?category=<%= banner.category %>"><img src="<%= banner.banner %>" class="d-block img-fluid w-100 "
                             alt="Image 1" style="max-height: 70vh;"></a>
                 </div>
                 <% }) %>

@@ -137,6 +137,9 @@ function searchPrd(category) {
     const query = document.getElementById("search").value
     window.location.href = `/user/products?category=${category}&search=${query}`
 }
+function pagenate(index,category){
+    window.location.href = `/user/products?category=${category}&view=${index}   `
+}
 function blockUser(id) {
     fetch(`/admin/users-management/block-user/${id}`, {
         method: 'PATCH',
@@ -215,22 +218,24 @@ function editProduct(prd) {
     }
 
 }
-function cancelOrder(id) {
+function cancelOrder(id,consumer) {
 
     $.ajax({
         url: `/user/cancel-order/${id}`,
         method: "PATCH",
+        data:{user:consumer},
         success: (response) => {
             window.location.href = `/user/orders?message=Order canceled successfully`
         }
     })
 
 }
-function cancelOrderAsAdmin(id) {
+function cancelOrderAsAdmin(id,consumer) {
 
     $.ajax({
         url: `/admin/orders-management/cancel-order/${id}`,
         method: "PATCH",
+        data:{user:consumer},
         success: (response) => {
             window.location.href = `/admin/orders-management?adminMessage=Order canceled successfully`
         }
@@ -238,8 +243,10 @@ function cancelOrderAsAdmin(id) {
 
 
 }
-function refundPayment(order) {
+function refundPayment(order,consumer,payment) {
     const orderDetails = JSON.parse(order)
+    orderDetails.user=consumer
+    orderDetails.payment=payment
     const order_id = orderDetails._id
     $.ajax({
         url: `/admin/orders-management/order-refund/${order_id}`,
@@ -250,12 +257,12 @@ function refundPayment(order) {
         }
     })
 }
-function updateOrderStatus(orderId, newStatus) {
+function updateOrderStatus(orderId, newStatus,user) {
     $.ajax({
         url: `/admin/update-order-status/${orderId}`,
         type: "PATCH",
         contentType: "application/json",
-        data: JSON.stringify({ status: newStatus }),
+        data: JSON.stringify({ status: newStatus,email:user }),
         success: function (data) {
             location.reload();
         },
@@ -264,19 +271,22 @@ function updateOrderStatus(orderId, newStatus) {
         }
     });
 }
-function searchOrder() {
-    const query = document.getElementById("search").value
-    window.location.href = `/admin/orders-management?search=${query}`
-}
+
 const statusSelects = document.querySelectorAll(".status-select");
 statusSelects.forEach(select => {
     select.addEventListener("change", function () {
         const orderId = this.getAttribute("data-order-id");
+        const email = this.getAttribute("data-user");
         const newStatus = this.value;
-        updateOrderStatus(orderId, newStatus);
+        updateOrderStatus(orderId, newStatus,email);
     });
 });
 
+
+function searchOrder() {
+    const query = document.getElementById("search").value
+    window.location.href = `/admin/orders-management?search=${query}`
+}
 
 function returnOrder(id) {
 

@@ -40,8 +40,16 @@ const verificationPanel = (req, res, next) => {
         return res.redirect('/signin?message=Log in for Accessibility')
     }
 }
+const ordered=(req,res,next)=>{
+    if(!req.session.ordered){
+        next()
+    }else{
+        return res.redirect("/user/orders?message=Your order has been completed already!")
+    }
+}
 module.exports = {
     loggedIn,
     notLogged,
-    verificationPanel
+    verificationPanel,
+    ordered
 }
