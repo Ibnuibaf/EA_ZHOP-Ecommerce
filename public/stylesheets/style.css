@@ -77,7 +77,14 @@
   /* Add a scroll bar when content overflows */
 
 }
+.sales-tab {
 
+  height: 700px;
+  /* Set the desired height for the table container */
+  overflow: auto;
+  /* Add a scroll bar when content overflows */
+
+}
 section{
   min-height: 100vh !important;
 }

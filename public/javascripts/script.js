@@ -422,6 +422,7 @@ async function uploadImage(file, id) {
     }
 
 }
+
 function removeImage(index) {
     const prd = document.getElementById('product_id').value
     const image = document.getElementById(`product_image${index}`).src
@@ -451,6 +452,11 @@ function removeImage(index) {
             }
         })
     }
+}
+function filterSales(){
+    const from=document.getElementById("start_date").value
+    const to=document.getElementById("end_date").value
+    window.location.href=`/admin/sales-report?from=${from}&to=${to}`
 }
 async function uploadBannerImage(file, id) {
 

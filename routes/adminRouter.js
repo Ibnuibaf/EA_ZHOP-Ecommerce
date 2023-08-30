@@ -54,6 +54,11 @@ router.delete('/coupens-management/delete-coupen/:id',middle.loggedIn, controlle
 router.patch('/coupens-management/activate-coupen/:id',middle.loggedIn, controller.activateCoupen)
 router.patch('/coupens-management/deactivate-coupen/:id',middle.loggedIn, controller.deactivateCoupen)
 
+
+//sales report
+router.get('/sales-report', controller.loadSalesReport)
+router.post('/sales-report/download-report',controller.salesReportDownload)
+
 //logout
 router.get('/logout',middle.loggedIn,controller.adminlogOut)
 

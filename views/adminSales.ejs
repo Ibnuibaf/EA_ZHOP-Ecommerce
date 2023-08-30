@@ -1,0 +1,90 @@
+<%- include('partials/adminHeader.ejs') %>
+
+    <div class="container-fluid tab-name ">
+        <h3 class="p-3 ">Sales Report&GreaterGreater;</h3>
+    </div>
+    <div class="coupensList m-5 row justify-content-between">
+        <div class="coupenManage mx-md-5 mt-5 p-2 rounded border border-3 col-md-3 "
+            style="background-color: #f2f2ee;height: fit-content;">
+
+            <div class=" row d-flex">
+                <div class="tabhead">
+                    <h3>Select Sales Period:</h3>
+                </div>
+
+                <div class="row d-flex">
+
+                    <div class="form-group m-2 col">
+                        <label for="start_date">From:</label><br>
+                        <input type="date" class="form-control" id="start_date" placeholder="" name="start_date">
+                    </div>
+                    <div class="form-group m-2 col">
+                        <label for="end_date">To:</label><br>
+                        <input type="date" class="form-control" id="end_date" placeholder="" name="end_date">
+                    </div>
+                </div>
+                <div class="text-center ">
+                    <button type="button" class="btn btn-dark px-3 " id="profile-submit" onclick="filterSales()">Refresh Report</button>
+                </div>
+
+            </div>
+        </div>
+        <div class="sales-tab  my-5  rounded border border-2 col-md-8" style="background-color: #E5E5E5;">
+            <form action="/admin/sales-report/download-report" method="post">
+                <% if (salesReport.length) { %>
+                    <div class="text-center my-2 px-4">
+                        <button type="submit" class="btn btn-dark px-3 form-control" id="sales-report-submit">Download Sales Report</button>
+                    </div>
+                <% } %>
+                <table class="table text-center  table-striped table-hover">
+                    <thead class="fs-6 " style="position: sticky;top: 0;">
+                        <tr class="border">
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Date</th>
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">OrderId</th>
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Consumer</th>
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Product</th>
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Quantity</th>
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Payment</th>
+                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <% salesReport.forEach(sale=> { %>
+                            <tr>
+                                <td>
+                                    <%= sale.order_date.toLocaleDateString() %>
+                                </td>
+                                <input type="hidden" name="date" value="<%= sale.order_date.toLocaleDateString() %>">
+                                <td>
+                                    <%= sale.order_id %>
+                                </td>
+                                <input type="hidden" name="order_id" value="<%= sale.order_id %>">
+                                <td>
+                                    <%= sale.consumer %>
+                                </td>
+                                <input type="hidden" name="consumer" value="<%= sale.consumer %>">
+                                <td>
+                                    <%= sale.products_details.prd_name %>
+                                </td>
+                                <input type="hidden" name="product" value="<%= sale.products_details.prd_name %>">
+                                <td>
+                                    <%= sale.qty %>
+                                </td>
+                                <input type="hidden" name="qty" value="<%= sale.qty %>">
+                                <td>
+                                    <p class="btn btn-sm bg-success fw-medium text-light">
+                                        <%= sale.payment_method.split(' ').join('') %></p></td>
+                                <input type="hidden" name="payment" value="<%= sale.payment_method %>">
+                                <td><b>₹<%= sale.total_amount %>/-</b></td>
+                                <input type="hidden" name="amount" value="<%= sale.total_amount %>">
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+
+    </div>
+
+    <%- include('partials/adminFooter.ejs') %>

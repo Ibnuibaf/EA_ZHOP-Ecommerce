@@ -4,32 +4,34 @@ const admin = require('../models/adminSchema')
 const usersCollection = require('../models/usersSchema')
 const productsCollection = require('../models/productsSchema')
 const categories = require('../models/categorySchema')
-const coupens=require('../models/coupenSchema')
-const banners=require('../models/bannerSchema')
-const nodemailer=require('nodemailer')
+const coupens = require('../models/coupenSchema')
+const banners = require('../models/bannerSchema')
+const nodemailer = require('nodemailer')
+const { Parser } = require('json2csv')
+const fs = require('fs')
 const cloudinary = require('cloudinary').v2;
 
 
-const sendRefundNotificationMail=(email,amount)=>{
-    let transporter=nodemailer.createTransport({
-        service:"gmail",
-        auth:{
-            user:process.env.verifyAppEmail,
-            pass:process.env.verifyAppPassword
+const sendRefundNotificationMail = (email, amount) => {
+    let transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.verifyAppEmail,
+            pass: process.env.verifyAppPassword
         }
     })
-    const mailOptions={
-        from:process.env.verifyAppEmail,
-        to:email,
-        subject:"Returned Orders Refund Added to Your Wallet",
-        html:`<h3 style="color:red;">Your Amount of order returned lately added to you EA_ZHOP Wallet ₹${amount}/-</h3><br>
+    const mailOptions = {
+        from: process.env.verifyAppEmail,
+        to: email,
+        subject: "Returned Orders Refund Added to Your Wallet",
+        html: `<h3 style="color:red;">Your Amount of order returned lately added to you EA_ZHOP Wallet ₹${amount}/-</h3><br>
                 <p style="color:grey;">Check your account profile of ${email} and verify!</p><br><i>Enjoy you future journey with <b style="color:red;">EAZHOP</b></i>`
     }
-    transporter.sendMail(mailOptions,(err)=>{
-        if(err) {
+    transporter.sendMail(mailOptions, (err) => {
+        if (err) {
             console.log(err);
             res.send(500)
-        }else{
+        } else {
             console.log("Email Send Successfully");
         }
     })
@@ -171,7 +173,7 @@ module.exports = {
                 console.log(prd.prd_images);
                 if (prd.prd_images.length) {
                     await productsCollection.updateOne({ _id: prd.prd_id }, {
-                        $set:{
+                        $set: {
                             prd_name: prd.prd_name,
                             description: prd.prd_desc,
                             additional_info: prd.prd_addinfo,
@@ -180,7 +182,7 @@ module.exports = {
                             mrp: prd.prd_mrp,
                             stock: prd.prd_stock,
                             purchase: prd.prd_purchase,
-                            
+
                         },
                         $push: {
                             prd_images: prd.prd_images
@@ -188,7 +190,7 @@ module.exports = {
                     }, { upsert: true })
                 } else {
                     await productsCollection.updateOne({ _id: prd.prd_id }, {
-                        $set:{
+                        $set: {
                             prd_name: prd.prd_name,
                             description: prd.prd_desc,
                             additional_info: prd.prd_addinfo,
@@ -261,119 +263,123 @@ module.exports = {
     },
     removeImage: async (req, res) => {
         try {
-          const prd_id = req.body.prd_id;
-          const image = req.body.image;
-            console.log(prd_id,image);
-          await productsCollection.updateOne(
-            { _id: prd_id },
-            { $pull: { prd_images: image } }
-          );
-      
-          res.status(200).json({success:true});
+            const prd_id = req.body.prd_id;
+            const image = req.body.image;
+            console.log(prd_id, image);
+            await productsCollection.updateOne(
+                { _id: prd_id },
+                { $pull: { prd_images: image } }
+            );
+
+            res.status(200).json({ success: true });
         } catch (error) {
-          console.error(error.message);
-          res.sendStatus(500);
+            console.error(error.message);
+            res.sendStatus(500);
         }
-      },
-    loadOrdersManagement:async(req,res)=>{
+    },
+    loadOrdersManagement: async (req, res) => {
         try {
-            
-            let orderList=await usersCollection.aggregate([
-                {$unwind:"$orders"},
-                {$lookup:{
-                    from:"products",
-                    localField:"orders.products.prd_id",
-                    foreignField:"_id",
-                    as:"products_details"
-                }},
-                {$project:{
-                    order_id:"$orders._id",
-                    products:"$orders.products",
-                    products_details:"$products_details",
-                    total_amount:"$orders.total_amount",
-                    order_date:"$orders.order_date",
-                    payment_method:"$orders.payment_method",
-                    address:"$orders.address",
-                    consumer:"$email",
-                    phone_number:"$mobile_number",
-                }},
-                {$sort:{"order_id":-1}}
+
+            let orderList = await usersCollection.aggregate([
+                { $unwind: "$orders" },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "orders.products.prd_id",
+                        foreignField: "_id",
+                        as: "products_details"
+                    }
+                },
+                {
+                    $project: {
+                        order_id: "$orders._id",
+                        products: "$orders.products",
+                        products_details: "$products_details",
+                        total_amount: "$orders.total_amount",
+                        order_date: "$orders.order_date",
+                        payment_method: "$orders.payment_method",
+                        address: "$orders.address",
+                        consumer: "$email",
+                        phone_number: "$mobile_number",
+                    }
+                },
+                { $sort: { "order_id": -1 } }
             ])
             // console.log(orderList)
-            if(req.query.search){
-                const searchRegex=new RegExp(req.query.search, 'i')
-                orderList= orderList.filter((order)=>searchRegex.test(order.order_id)||searchRegex.test(order.payment_method)||searchRegex.test(order.consumer)||searchRegex.test(order.phone_number))
+            if (req.query.search) {
+                const searchRegex = new RegExp(req.query.search, 'i')
+                orderList = orderList.filter((order) => searchRegex.test(order.order_id) || searchRegex.test(order.payment_method) || searchRegex.test(order.consumer) || searchRegex.test(order.phone_number))
             }
-            res.render('adminOrders',{orderList})
+            res.render('adminOrders', { orderList })
         } catch (error) {
             console.log(error.message);
             res.render('error')
         }
     },
-    cancelOrder:async(req,res)=>{
+    cancelOrder: async (req, res) => {
         try {
-            const order=req.params.order;
-            const email=req.body.user
-            console.log(order,email);
+            const order = req.params.order;
+            const email = req.body.user
+            console.log(order, email);
             const isUpdated = await usersCollection.updateOne(
-                { 
-                  email: email,
-                  "orders.products._id": order 
-                }, 
-                { 
-                  $set: { "orders.$.products.$[product].status": "canceled" } 
+                {
+                    email: email,
+                    "orders.products._id": order
                 },
                 {
-                  arrayFilters: [
-                    { "product._id": order }
-                  ]
+                    $set: { "orders.$.products.$[product].status": "canceled" }
+                },
+                {
+                    arrayFilters: [
+                        { "product._id": order }
+                    ]
                 }
-              );
-            res.status(200).json({success:true})
+            );
+            res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    orderRefund:async(req,res)=>{
+    orderRefund: async (req, res) => {
         try {
             const order = req.body._id
-            const consumer=req.body.user
+            const consumer = req.body.user
             const amount = req.body.price
-            const payment=req.body.payment
+            const payment = req.body.payment
             await usersCollection.updateOne(
-                {email:consumer,"orders.products._id":order},
-                {$set:{"orders.$.products.$[product].refunded":true,"orders.$.products.$[product].status": "canceled"}},
+                { email: consumer, "orders.products._id": order },
+                { $set: { "orders.$.products.$[product].refunded": true, "orders.$.products.$[product].status": "canceled" } },
                 {
-                  arrayFilters: [
-                    { "product._id": order }
-                  ]
+                    arrayFilters: [
+                        { "product._id": order }
+                    ]
                 }
             )
-            if(payment=="razor_pay"){
-                await usersCollection.updateOne({email:consumer},{$inc:{"wallet.balance":amount},$push:{"wallet.transactions":`${amount} from order ${order}`}})
-                await sendRefundNotificationMail(consumer,amount)
+            if (payment == "razor_pay") {
+                await usersCollection.updateOne({ email: consumer }, { $inc: { "wallet.balance": amount }, $push: { "wallet.transactions": `${amount} from order ${order}` } })
+                await sendRefundNotificationMail(consumer, amount)
 
             }
-            
-            res.status(200).json({success:true})
+
+            res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    updateOrderStatus:async (req,res)=>{
+    updateOrderStatus: async (req, res) => {
         try {
-            const updatedStatus=req.body.status
-            const consumer=req.body.email
-            const orderId=req.params.id
+            const updatedStatus = req.body.status
+            const consumer = req.body.email
+            const orderId = req.params.id
             await usersCollection.updateOne(
-                {email:consumer,"orders.products._id":orderId},
-                {$set:{"orders.$.products.$[product].status": updatedStatus}},
+                { email: consumer, "orders.products._id": orderId },
+                { $set: { "orders.$.products.$[product].status": updatedStatus } },
                 {
-                  arrayFilters: [
-                    { "product._id": orderId }
-                  ]
+                    arrayFilters: [
+                        { "product._id": orderId }
+                    ]
                 }
             )
             res.send(200)
@@ -382,22 +388,22 @@ module.exports = {
             res.send(500)
         }
     },
-    loadBannersManagement:async(req,res)=>{
+    loadBannersManagement: async (req, res) => {
         try {
             const bannerList = await banners.find()
-            const categoriesList=await categories.find({active:true})
-            res.render('adminBanner',{bannerList,categoriesList})
+            const categoriesList = await categories.find({ active: true })
+            res.render('adminBanner', { bannerList, categoriesList })
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    createBanner:async(req,res)=>{
+    createBanner: async (req, res) => {
         try {
-            const bannerDetails=req.body
-            let bannerExist=await banners.find({banner: bannerDetails.banner})
+            const bannerDetails = req.body
+            let bannerExist = await banners.find({ banner: bannerDetails.banner })
             console.log(bannerExist);
-            if(!bannerExist.length){
+            if (!bannerExist.length) {
                 await banners.create(bannerDetails)
                 res.send(200)
             }
@@ -406,38 +412,38 @@ module.exports = {
             res.send(500)
         }
     },
-    removeBanner:async(req,res)=>{
+    removeBanner: async (req, res) => {
         try {
-            const banner=req.params.id
-            const result=await banners.findByIdAndDelete(banner)
+            const banner = req.params.id
+            const result = await banners.findByIdAndDelete(banner)
             res.send(200)
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    loadCoupensManagement:async(req,res)=>{
+    loadCoupensManagement: async (req, res) => {
         try {
-            const coupensList=await coupens.find().sort({active:1})
-            res.render('adminCoupens',{coupensList})
+            const coupensList = await coupens.find().sort({ active: 1 })
+            res.render('adminCoupens', { coupensList })
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    updateCoupen:async(req,res)=>{
+    updateCoupen: async (req, res) => {
         try {
-            let coupenDetails=req.body
-            const exist=await coupens.findOne({coupon_code:coupenDetails.coupon_code})
-            if(exist && !coupenDetails.coupon_id) {
+            let coupenDetails = req.body
+            const exist = await coupens.findOne({ coupon_code: coupenDetails.coupon_code })
+            if (exist && !coupenDetails.coupon_id) {
                 return res.redirect('/admin/coupens-management?adminMessage=Coupen exist')
             }
-            if(coupenDetails.coupon_id){
-                await coupens.updateOne({_id:coupenDetails.coupon_id},coupenDetails)
-                
+            if (coupenDetails.coupon_id) {
+                await coupens.updateOne({ _id: coupenDetails.coupon_id }, coupenDetails)
+
                 res.redirect('/admin/coupens-management?adminMessage=Coupen Updated')
-            }else{
-                coupenDetails.start_date=Date.now()
+            } else {
+                coupenDetails.start_date = Date.now()
                 await coupens.create(coupenDetails)
                 res.redirect('/admin/coupens-management?adminMessage=New Coupen Activated')
             }
@@ -446,31 +452,104 @@ module.exports = {
             res.send(500)
         }
     },
-    removeCoupen:async(req,res)=>{
+    removeCoupen: async (req, res) => {
         try {
-            const coupen=req.params.id
+            const coupen = req.params.id
             await coupens.findByIdAndDelete(coupen)
-            res.status(200).json({success:true})
+            res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    activateCoupen:async(req,res)=>{
+    activateCoupen: async (req, res) => {
         try {
-            const coupen=req.params.id;
-            await coupens.updateOne({_id:coupen},{$set:{active:true}})
-            res.status(200).json({success:true})
+            const coupen = req.params.id;
+            await coupens.updateOne({ _id: coupen }, { $set: { active: true } })
+            res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
             res.send(500)
         }
     },
-    deactivateCoupen:async(req,res)=>{
+    deactivateCoupen: async (req, res) => {
         try {
-            const coupen=req.params.id;
-            await coupens.updateOne({_id:coupen},{$set:{active:false}})
-            res.status(200).json({success:true})
+            const coupen = req.params.id;
+            await coupens.updateOne({ _id: coupen }, { $set: { active: false } })
+            res.status(200).json({ success: true })
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    loadSalesReport: async (req, res) => {
+        try {
+            const from = req.query.from
+            const to = req.query.to
+            let salesReport = await usersCollection.aggregate([
+                { $unwind: "$orders" },
+                { $unwind: "$orders.products" },
+                { $match: { "orders.products.status": "closed" } },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "orders.products.prd_id",
+                        foreignField: "_id",
+                        as: "products_details"
+                    }
+                },
+                { $unwind: "$products_details" },
+                {
+                    $project: {
+                        order_id: "$orders._id",
+                        products_details: "$products_details",
+                        qty: "$orders.products.qty",
+                        total_amount: "$orders.products.price",
+                        order_date: "$orders.order_date",
+                        payment_method: "$orders.payment_method",
+                        consumer: "$email",
+                    }
+                },
+                { $sort: { "order_id": -1 } }
+            ])
+            if (from && to) {
+                const fromDate = new Date(from);
+                const toDate = new Date(to);
+
+                salesReport = salesReport.filter((prd) => {
+                    const orderDate = new Date(prd.order_date);
+                    return orderDate >= fromDate && orderDate <= toDate;
+                });
+                console.log(salesReport)
+            }
+
+            res.render('adminSales', { salesReport })
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
+    },
+    salesReportDownload: (req, res) => {
+        try {
+            const data = req.body
+            let file = [];
+            for (let i = 0; i < data.date.length; i++) {
+                const row = {
+                    date: data.date[i],
+                    order_id: data.order_id[i],
+                    consumer: data.consumer[i],
+                    product: data.product[i],
+                    qty: data.qty[i],
+                    payment: data.payment[i],
+                    amount: data.amount[i]
+                };
+                file.push(row);
+            }
+            const json2csv = new Parser()
+            const csv = json2csv.parse(file)
+            
+            res.attachment(`report-${Date.now()}.csv`)
+            res.status(200).send(csv)
         } catch (error) {
             console.log(error.message);
             res.send(500)
