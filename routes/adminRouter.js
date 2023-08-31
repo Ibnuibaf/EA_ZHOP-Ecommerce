@@ -12,7 +12,7 @@ router.get('/',middle.notlogged,controller.loadAdminSignIn);
 router.post('/',middle.notlogged,controller.postAdminSignIn)
 
 //dashboard
-router.get('/dashboard',middle.loggedIn,controller.loadDashboard);
+router.get('/dashboard',controller.loadDashboard);
 router.get('/users-management',middle.loggedIn, controller.loadUsersManagement);
 
 //users management

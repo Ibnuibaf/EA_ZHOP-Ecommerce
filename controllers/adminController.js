@@ -68,8 +68,127 @@ module.exports = {
             res.render('error')
         }
     },
-    loadDashboard: (req, res) => {
-        res.render('dashboard')
+    loadDashboard: async (req, res) => {
+        try {
+            const categoriesSales = await usersCollection.aggregate([
+                { $unwind: "$orders" },
+                { $unwind: "$orders.products" },
+                { $match: { "orders.products.status": "closed" } },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "orders.products.prd_id",
+                        foreignField: "_id",
+                        as: "productDetails"
+                    }
+                },
+                { $unwind: "$productDetails" },
+                {
+                    $project: {
+                        category: "$productDetails.category",
+                        price: "$orders.products.price"
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$category",
+                        total: { $sum: "$price" }
+                    }
+                }
+            ]);
+            const categoriesList = await categories.find()
+
+            const monthSales = await usersCollection.aggregate([
+                {
+                    $unwind: "$orders"
+                },
+                {
+                    $unwind: "$orders.products"
+                },
+                {
+                    $match: {
+                        "orders.products.status": "closed"
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            year: { $year: "$orders.order_date" },
+                            month: { $month: "$orders.order_date" }
+                        },
+                        monthlySales: { $sum: "$orders.products.price" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        year: "$_id.year",
+                        month: "$_id.month",
+                        monthlySales: 1
+                    }
+                },
+                {
+                    $sort: {
+                        year: 1,
+                        month: 1
+                    }
+                }
+            ])
+
+            const paymentTypeSales = await usersCollection.aggregate([
+                {
+                    $unwind: "$orders"
+                },
+                {
+                    $unwind: "$orders.products"
+                },
+                {
+                    $match: {
+                        "orders.products.status": "closed"
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$orders.payment_method",
+                        paymentMethodSales: { $sum: "$orders.products.price" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        paymentMethod: "$_id",
+                        paymentMethodSales: 1
+                    }
+                }
+            ])
+            const amountOfUsers = await usersCollection.find({}).count()
+            const amountOfBlockedUsers = await usersCollection.find({ blocked: true }).count()
+            const amountOfOrders = await usersCollection.aggregate([
+                { $unwind: "$orders" },
+                { $unwind: "$orders.products" },
+                { $count: "ordersCount" }
+            ])
+            const amountOfCanceledOrders = await usersCollection.aggregate([
+                { $unwind: "$orders" },
+                { $unwind: "$orders.products" },
+                { $match: { "orders.products.status": "canceled" } },
+                { $count: "ordersCount" }
+            ])
+            console.log(paymentTypeSales)
+            res.render('dashboard', { 
+                categoriesSales, 
+                categoriesList,
+                monthSales, 
+                paymentTypeSales, 
+                amountOfUsers, 
+                amountOfOrders: amountOfOrders[0].ordersCount, 
+                amountOfBlockedUsers, 
+                amountOfCanceledOrders: amountOfCanceledOrders[0].ordersCount 
+            })
+        } catch (error) {
+            console.log(error.message);
+            res.send(500)
+        }
     },
     loadUsersManagement: async (req, res) => {
 
@@ -547,7 +666,7 @@ module.exports = {
             }
             const json2csv = new Parser()
             const csv = json2csv.parse(file)
-            
+
             res.attachment(`report-${Date.now()}.csv`)
             res.status(200).send(csv)
         } catch (error) {
