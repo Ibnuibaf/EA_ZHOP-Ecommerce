@@ -12,7 +12,7 @@ router.get('/',middle.notlogged,controller.loadAdminSignIn);
 router.post('/',middle.notlogged,controller.postAdminSignIn)
 
 //dashboard
-router.get('/dashboard',controller.loadDashboard);
+router.get('/dashboard',middle.loggedIn, controller.loadDashboard);
 router.get('/users-management',middle.loggedIn, controller.loadUsersManagement);
 
 //users management
@@ -56,8 +56,8 @@ router.patch('/coupens-management/deactivate-coupen/:id',middle.loggedIn, contro
 
 
 //sales report
-router.get('/sales-report', controller.loadSalesReport)
-router.post('/sales-report/download-report',controller.salesReportDownload)
+router.get('/sales-report',middle.loggedIn, controller.loadSalesReport)
+router.post('/sales-report/download-report',middle.loggedIn,controller.salesReportDownload)
 
 //logout
 router.get('/logout',middle.loggedIn,controller.adminlogOut)
