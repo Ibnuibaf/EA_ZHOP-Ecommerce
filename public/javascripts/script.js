@@ -134,7 +134,10 @@ function categorize(category) {
     window.location.href = `/user/products?category=${category}`
 }
 function searchPrd(category) {
-    const query = document.getElementById("search").value
+    let query = document.getElementById("search").value
+    if(!query){
+        query=document.getElementById("searchModal").value
+    }
     window.location.href = `/user/products?category=${category}&search=${query}`
 }
 function pagenate(index,category){
@@ -535,7 +538,6 @@ function confirmOrder() {
                         "email": "" + res.email + ""
                     },
                     "handler": function (response) {
-                        alert("paymentDone")
                         verifyPayment(response, res)
                     }
                 }
@@ -553,6 +555,7 @@ function confirmOrder() {
         }
     })
 }
+
 function verifyPayment(res, order) {
 
 

@@ -1,7 +1,13 @@
 <%- include('partials/userHeader.ejs') %>
 
-    <div class="container-fluid tab-name ">
+    <div class="container-fluid tab-name d-flex align-items-center justify-content-between">
         <h3 class="p-3 ">Products&GreaterGreater;</h3>
+        <div class="m-2">
+            <!-- Button to Open Modal on Smaller Screens -->
+            <button class="btn btn-dark d-lg-none text-end" style="width: fit-content;" type="button" data-toggle="modal" data-target="#filterModal">
+                Filter
+            </button>
+        </div>
     </div>
 
     <div class="row m-3 ">
@@ -62,13 +68,15 @@
                 </div>
             </div>
 
-
+            
 
             <div class="products mx-3 w-100 ">
                 <div class="category-selector">
 
                     <% if (foundCategory) { %>
-                        <h2>CATEGORY: <i class="text-danger"><%= foundCategory.name.toUpperCase() %></i>
+                        <h2>CATEGORY: <i class="text-danger">
+                                <%= foundCategory.name.toUpperCase() %>
+                            </i>
                         </h2>
                         <% } else { %>
                             <h2>CATEGORY: <i>None</i></h2>
@@ -103,7 +111,7 @@
 
                 <div class="products-tab row  justify-content-center">
                     <% if (productsList.length) { %>
-                     
+
                         <% productsList.forEach(product=> { %>
                             <% if (product.active) { %>
                                 <div class="shadow m-2 " style="width: 18rem;box-shadow: #F3F2EE;">
@@ -127,7 +135,8 @@
                                             <div class="price-disc-rating d-flex justify-content-between">
                                                 <div class="price-disc d-flex">
                                                     <h5 class="mx-2">
-                                                        ₹<%=Math.floor(product.mrp-((product.mrp*product.discount) /100)) %>
+                                                        ₹<%=Math.floor(product.mrp-((product.mrp*product.discount)
+                                                            /100)) %>
                                                             /-
                                                     </h5>
                                                     <i class="text-danger">
@@ -164,24 +173,29 @@
                                 <% } %>
 
                                     <% }) %>
-                                    <% } else { %>
-                                     No Products Available
-                    <% } %>
+                                        <% } else { %>
+                                            No Products Available
+                                            <% } %>
 
                 </div>
                 <div class="cursor d-flex p-2 justify-content-between align-items-center mt-4 px-3">
                     <div class="cursor-prev">
-                        <button type="" class="btn " onclick="pagenate('<%=currentPage-1%>','<%= foundCategory._id %>')">
+                        <button type="" class="btn "
+                            onclick="pagenate('<%=currentPage-1%>','<%= foundCategory._id %>')">
                             <img src="/images/icons8-back-30.png" alt="" height="20">
                             <i>prev</i>
                         </button>
                     </div>
                     <div class="pages d-flex text-center">
-                        <p class="fs-5">Page <b><%= currentPage+1 %></b> of <%= totalPages %></p>
+                        <p class="fs-5">Page <b>
+                                <%= currentPage+1 %>
+                            </b> of <%= totalPages %>
+                        </p>
                     </div>
                     <div class="cursor-next">
                         <% if ((currentPage+1)<totalPages) { %>
-                        <button type="" class="btn " onclick="pagenate('<%=currentPage+1%>','<%= foundCategory._id %>')"   >
+                            <button type="" class="btn "
+                                onclick="pagenate('<%=currentPage+1%>','<%= foundCategory._id %>')">
                                 <i>next</i>
                                 <img src="/images/icons8-next-30.png" alt="" height="20">
                             </button>
@@ -190,13 +204,87 @@
                                     <i>next</i>
                                     <img src="/images/icons8-next-30.png" alt="" height="20">
                                 </button>
-                        <% } %>
-                        
+                                <% } %>
+
                     </div>
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <!-- Modal for Filtering on Phone-Sized Screens -->
+    <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filterModalLabel">Filter Options</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body">
+                        <div class="search border px-2 py-1 mb-3" style="width: fit-content;">
+                            <input type="text" id="searchModal" placeholder="Search.." style="border: none;">
+                            <button type="submit" style="border: none;background: transparent;max-width: fit-content;"
+                                onclick="searchPrd('<%= foundCategory._id %>')">
+                                <img src="/images/icons8-search-30.png" alt="" height="20">
+                            </button>
+                        </div>
+                        <div class="categories border-bottom py-2">
+                            <h4>Categories:</h4>
+                            <div class="category-tab p-2" style="height: 240px;overflow-y: scroll;">
+                                <ul class="list-group">
+                                    <% categoriesList.forEach(category=> { %>
+                                        <% if (category.active) { %>
+                                            <button
+                                                style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                                                onclick="categorize('<%= category._id %>')">
+                                                <li class="list-unstyled">
+                                                    <%= category.name %>
+                                                </li>
+                                            </button>
+                                        <% } %>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="price-filter py-2">
+                            <h4>Filter Price Range</h4>
+                            <ul>
+                                <button type="submit"
+                                    style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                                    onclick="filter(0,99,'<%= foundCategory._id %>')">
+                                    <li class="list-unstyled">Rs.0 - Rs.99</li>
+                                </button><br>
+                                <button type="submit"
+                                    style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                                    onclick="filter(100,999,'<%= foundCategory._id %>')">
+                                    <li class="list-unstyled">Rs.100 - Rs.999</li>
+                                </button><br>
+                                <button type="submit"
+                                    style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                                    onclick="filter(1000,9999,'<%= foundCategory._id %>')">
+                                    <li class="list-unstyled">Rs.1000 - Rs.9999</li>
+                                </button><br>
+                                <button type="submit"
+                                    style="border: none;background: transparent; text-align: start;max-width: fit-content;"
+                                    onclick="filter(9999,99999,'<%= foundCategory._id %>')">
+                                    <li class="list-unstyled">Rs.9999 - More</li>
+                                </button>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <!-- <button type="button" class="btn btn-primary">Apply Filters</button> -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <%- include('partials/userFooter.ejs') %>

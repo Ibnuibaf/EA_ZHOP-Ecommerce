@@ -13,69 +13,74 @@
 
 <body>
   <header>
-    <div class="highlight card-header d-flex bg-black text-light align-items-center nav-fill px-2 "
-      style="justify-content: space-between;">
-      <p class="highlight-font">Free shipping, 30-day return or refund guarantee.</p>
-      <div class="btn-highlight mx-5 py-1 d-flex">
-
-        <a href="/signin" class="btn btn-outline-light">SignIn</a>
-        <a href="/aboutus" class="btn btn-outline-light">Contact</a>
-      </div>
+    <div class="highlight card-header d-flex bg-black text-light align-items-center nav-fill px-2"
+         style="justify-content: space-between;">
+        <p class="highlight-font d-flex">Free shipping, 30-day return <span class="d-none d-md-block"> or refund guarantee.</span></p>
+        <div class="btn-highlight mx-3 py-1 d-flex">
+            <a href="/signin" class="btn btn-outline-light">SignIn</a>
+            <a href="/aboutus" class="btn btn-outline-light">Contact</a>
+        </div>
     </div>
-    <nav class="navbar navbar-expand-lg  ">
-      <div class="container-fluid  ">
-        <a class="navbar-brand mx-3" href="#">
-          <img src="/images/EA_ZHOP_copyu.png" alt="Bootstrap" width="45" height="45" class="rounded-pill">
-        </a>
+    
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+          <div class="d-flex">
 
-        <div class="collapse navbar-collapse " id="navbarNav">
-          <ul class="nav-links navbar-nav mx-5  nav-justified">
-            <li class="nav-item ">
-              <a class="nav-link active " aria-current="page" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn" href="/user/profile">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn" href="/user/products">Store</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn" href="/user/cart">Cart</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn" href="/aboutus">About Us</a>
-            </li>
-          </ul>
+            <a class="navbar-brand mx-3" href="#">
+                <img src="/images/EA_ZHOP_copyu.png" alt="Bootstrap" width="45" height="45"
+                     class="rounded-pill">
+            </a>
+            
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav mx-auto nav-justified">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/" style="font-size: 18px; font-weight: bold; text-transform: uppercase;">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn" href="/user/profile" style="font-size: 18px; font-weight: bold; text-transform: uppercase;">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn" href="/user/products" style="font-size: 18px; font-weight: bold; text-transform: uppercase;">Store</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn" href="/user/cart" style="font-size: 18px; font-weight: bold; text-transform: uppercase;">Cart</a>
+                </li>
+            </ul>
+            </div>
+          </div>
+            <div class="nav-buttons d-flex">
+              <div class="search">
+                  <a href="/user/products">
+                      <img src="/images/icons8-search-30.png" alt="" width="20" height="20">
+                  </a>
+              </div>
+              <div class="wishlist">
+                  <a href="/user/cart">
+                      <img src="/images/icons8-wishlist-30.png" alt="" width="20" height="20">
+                  </a>
+              </div>
+              <div class="cart">
+                  <a href="/user/cart">
+                      <img src="/images/icons8-cart-30.png" alt="" width="20" height="20">
+                  </a>
+              </div>
+              <div class="wallet">
+                  <a href="/user/profile">
+                      <img src="/images/icons8-wallet-30.png" alt="" width="20" height="20">
+                  </a>
+              </div>
+          </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
         </div>
-        <div class="nav-buttons d-flex ">
-          <div class="search">
-            <a href="/user/products">
-              <img src="/images/icons8-search-30.png" alt="" width="20" height="20">
-            </a>
-          </div>
-          <div class="wishlist">
-            <a href="/user/cart">
-              <img src="/images/icons8-wishlist-30.png" alt="" width="20" height="20">
-            </a>
-          </div>
-          <div class="cart">
-            <a href="/user/cart">
-              <img src="/images/icons8-cart-30.png" alt="" width="20" height="20">
-            </a>
-          </div>
-          <div class="wallet">
-            <a href="/user/profile">
-              <img src="/images/icons8-wallet-30.png" alt="" width="20" height="20">
-            </a>
-          </div>
-        </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      </div>
+        
     </nav>
-  </header>
+</header>
+
   <section>
     <!-- Button to trigger the modal -->
     <button id="openModalButton" style="display: none;">Open Modal</button>

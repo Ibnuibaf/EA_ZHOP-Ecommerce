@@ -1,106 +1,117 @@
 <%- include('partials/userHeader.ejs') %>
-    
-
-    <div class="offer">
-        <div id="offerBanner" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000"
-            data-bs-wrap="true">
-            <div class="carousel-inner">
-                <% bannersList.forEach(banner => { %>
-                 <div class="carousel-item active">
-                    <a href="/user/products?category=<%= banner.category %>"><img src="<%= banner.banner %>" class="d-block img-fluid w-100 "
-                            alt="Image 1" style="max-height: 70vh;"></a>
-                </div>
-                <% }) %>
-                
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#offerBanner" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon visually-hidden" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#offerBanner" data-bs-slide="next">
-                <span class="carousel-control-next-icon  visually-hidden" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-        </div>
-    </div>
-    <div class="highlights">
-        <section style="background-color: #F3F2EE;height: fit-content;">
-            <div class="text-center container py-5">
-                <h4 class="mt-4 mb-5 fs-3"><strong>Latest Arrivals
-                        <hr>
-                    </strong></h4>
 
 
-                <div class="row">
-                    <% latestProducts.forEach(product=> { %>
-                        <% if (product.latestProduct.active) { %>
-                            <div class="col-lg-4 col-md-12 mb-4">
-                                <div class="card">
-                                    <a href="/user/products/product-details/<%= product.latestProduct._id %>">
-    
-                                        <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light"
-                                            data-mdb-ripple-color="light"
-                                            style="height: 270px;padding: 15px;display: flex; justify-content: center;align-items: center;">
-                                            <img src="<%= product.latestProduct.prd_images[0] %>" class="w-100"
-                                                style="max-width: fit-content;max-height: 240px;" />
-                                            <a href="#!">
-    
-                                                <div class="hover-overlay">
-                                                    <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);">
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                        <div class="card-body">
-                                            <p href="" class="text-reset">
-                                            <h5 class="card-title mb-3 text-truncate">
-                                                <%= product.latestProduct.prd_name %>
-                                            </h5>
-                                            </p>
-                                            <p class="text-reset">
-                                                <i class="fs-5 text-danger">
-                                                    <%= product.categoryName.name.toUpperCase() %>
-                                                </i>
-                                            </p>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        <% } %>
+    <div class="container-fluid">
+        <div class="offer">
+            <div id="offerBanner" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000"
+                data-bs-wrap="true">
+                <div class="carousel-inner">
+                    <% bannersList.forEach((banner, index)=> { %>
+                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                            <a href="/user/products?category=<%= banner.category %>">
+                                <img src="<%= banner.banner %>" class="d-block img-fluid w-100"
+                                    alt="Image <%= index + 1 %>" style="max-height: 70vh;">
+                            </a>
+                        </div>
                         <% }) %>
-
                 </div>
-
-
+                <button class="carousel-control-prev" type="button" data-bs-target="#offerBanner" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon visually-hidden" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#offerBanner" data-bs-slide="next">
+                    <span class="carousel-control-next-icon visually-hidden" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-        </section>
-    </div>
-    <div class="categories p-5">
-        <div class="d-flex justify-content-center align-items-center mt-5 "> <a class="btn btn-dark fs-5"
-                href="/user/products">OUR
-                CATEGORIES</a> </div>
-        <div class="d-flex justify-content-center mt-3 fs-4"> <span class="text text-center">Finding Best Products
-                Now<br> in
-                Your Fingertips</span> </div>
-        <div class="row mt-2 g-4">
-            <% latestProducts.forEach(category=> { %>
-                <div class="col-md-3">
-                    <div class="card p-1">
-                        <a href="/user/products?category=<%= category.categoryName._id %>" class="btn">
-                            <div class="d-flex justify-content-between align-items-center p-2 text-black ">
-                                <div class="flex-column lh-1 imagename"> <span>
-                                        <%= category.categoryName.name.toUpperCase() %>
-                                    </span> </div>
-                                <div> <img src="<%= category.latestProduct.prd_images[0] %>" height="100" width="100" />
+        </div>
+
+        <div class="highlights">
+            <section style="background-color: #F3F2EE;">
+                <div class="container py-5">
+                    <h4 class="mt-4 mb-5 fs-3"><strong>Latest Arrivals</strong></h4>
+                    <div class="row">
+                        <% for (let i = 0; i < 4; i++) { %>
+                            <% const product = latestProducts[i]; %>
+                            <% if (product.latestProduct.active) { %>
+                                <!-- Show only on medium and larger screens -->
+                                <div class="col-lg-3 col-md-6 col-sm-12 mb-4 d-none d-lg-block">
+                                    <div class="card h-100">
+                                        <a href="/user/products/product-details/<%= product.latestProduct._id %>" class="text-decoration-none text-black">
+                                            <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light" data-mdb-ripple-color="light">
+                                                <img src="<%= product.latestProduct.prd_images[0] %>" class="card-img-top" alt="<%= product.latestProduct.prd_name %>" style="max-height: 240px;">
+                                                <div class="hover-overlay">
+                                                    <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title mb-3 text-truncate"><%= product.latestProduct.prd_name %></h5>
+                                                <p class="text-danger"><%= product.categoryName.name.toUpperCase() %></p>
+                                            </div>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
+                                <!-- Show only on smaller screens -->
+                                <div class="col-6 col-md-6 d-lg-none mb-4">
+                                    <div class="card h-100">
+                                        <a href="/user/products/product-details/<%= product.latestProduct._id %>" class="text-decoration-none text-black">
+                                            <div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light" data-mdb-ripple-color="light">
+                                                <img src="<%= product.latestProduct.prd_images[0] %>" class="card-img-top" alt="<%= product.latestProduct.prd_name %>" style="max-height: 240px;">
+                                                <div class="hover-overlay">
+                                                    <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title mb-3 text-truncate"><%= product.latestProduct.prd_name %></h5>
+                                                <p class="text-danger"><%= product.categoryName.name.toUpperCase() %></p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } %>
+                        
                     </div>
                 </div>
+            </section>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
 
-
-                <% }) %>
-
+        <div class="categories p-5">
+            <div class="d-flex justify-content-center align-items-center mt-5">
+                <a class="btn btn-dark fs-5" href="/user/products">OUR CATEGORIES</a>
+            </div>
+            <div class="d-flex justify-content-center mt-3 fs-4">
+                <span class="text text-center">Finding Best Products Now<br> in Your Fingertips</span>
+            </div>
+            <div class="row mt-2 g-4">
+                <% latestProducts.forEach(category=> { %>
+                    <div class="col-md-3">
+                        <div class="card p-1">
+                            <a href="/user/products?category=<%= category.categoryName._id %>" class="btn">
+                                <div class="d-flex justify-content-between align-items-center p-2 text-black">
+                                    <div class="flex-column lh-1 imagename">
+                                        <span>
+                                            <%= category.categoryName.name.toUpperCase() %>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <img src="<%= category.latestProduct.prd_images[0] %>" height="100" width="100"
+                                            alt="<%= category.categoryName.name %>">
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
         </div>
     </div>
 
