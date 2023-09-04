@@ -1,19 +1,26 @@
 <%- include('partials/userHeader.ejs') %>
 
 
-    <div class="container-fluid tab-name ">
-        <h3 class="p-3 ">My Orders&GreaterGreater;</h3>
+<style>
+    .small-font {
+        font-size: 14px; /* Adjust the font size as needed */
+    }
+</style>
+
+<div class="container-fluid tab-name">
+    <h3 class="p-3">My Orders&GreaterGreater;</h3>
+</div>
+<div class="details mx-5 border-bottom border-3" id="products-details">
+    <div class="tab-hea border-bottom border-2 my-3">
+        <h3>Orders History</h3>
     </div>
-    <div class="details mx-5 border-bottom border-3" id="#products-details">
-        <div class="tab-hea  border-bottom border-2 my-3">
-            <h3>Orders History</h3>
-        </div>
-        <div class="tab  my-5">
-            <table class="table ">
-                <thead class="fs-4 " style="position: sticky;top: 0;">
+    <div class=" my-5">
+        <div class="tab table-responsive">
+            <table class=" table  small-font">
+                <thead style="position: sticky; top: 0;">
                     <tr>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order Id</th>
-                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">No. of Items</th>
+                        <th scope="col" style="font-weight: 500;background-color: #E5E5E5;" >No. of Items</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Order Date</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Payment Type</th>
                         <th scope="col" style="font-weight: 500;background-color: #E5E5E5;">Amount</th>
@@ -22,111 +29,108 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <% orderDetails.forEach(order => { %>
+                    <tr class="data-row">
+                        <td>
+                            Order<%= order.order_id %>
+                        </td>
+                        <td>
+                            <%= order.products.length %>
+                        </td>
+                        <td>
+                            <%= order.order_date.toLocaleDateString() %>
+                        </td>
+                        <td class="text-center">
+                            <p class="btn btn-sm btn-success small-font"><%= order.payment_method.toUpperCase() %></p>
+                        </td>
+                        <td>
+                            <b>₹<%= order.total_amount %>/-</b>
+                        </td>
+                        <td>
+                            <%= order.address.locality %>, <%= order.address.country %>,
+                            <%= order.address.district %>, <%= order.address.state %>,<br>
+                            <%= order.address.city %>, <%= order.address.altr_number %>,
+                            <%= order.address.postcode %>
+                        </td>
+                        <td>
+                            <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#detailsModal_<%= order.order_id %>">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                                  </svg> Details
+                            </button>
+                            
+                            <div class="modal modal-md fade" id="detailsModal_<%= order.order_id %>" tabi="-1"
+                                aria-labelledby="detailsModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="detailsModalLabel">Order Details of Order<%= order.order_id %></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th colspan="2" style="background-color: #F3F2EE;">Product Details</th>
+                                                        <th style="background-color: #F3F2EE;">Quantity</th>
+                                                        <th style="background-color: #F3F2EE;">Price</th>
+                                                        <th style="background-color: #F3F2EE;">Status</th>
+                                                        <th style="background-color: #F3F2EE;">Options</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% for( let i = 0; i < order.products.length; i++ ) { %>
+                                                        <tr >
+                                                            <td>
+                                                                <a href="/user/products/product-details/<%= order.products[i].prd_id %>">
 
-                    <% orderDetails.forEach(order=> { %>
-
-                        <tr class="data-row ">
-
-                            <td>
-                                Order<%= order.order_id %>
-                            </td>
-                            <td>
-                                <%= order.products.length %>
-                            </td>
-                            <td>
-                                <%= order.order_date.toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <%= order.payment_method.toUpperCase() %>
-                            </td>
-                            <td>
-                                ₹<%= order.total_amount %>/-
-                            </td>
-                            <td>
-                                <%= order.address.locality %>,<%= order.address.country %>,<%= order.address.district %>
-                                            ,<%= order.address.state %>,<br>
-                                                <%= order.address.city %>,<%= order.address.altr_number %>,<%=
-                                                            order.address.postcode %>
-                            </td>
-                            <td>
-
-                                <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#detailsModal_<%= order.order_id %>">View
-                                    Details</button>
-
-                                <div class="modal modal-lg fade" id="detailsModal_<%= order.order_id %>" tabi="-1"
-                                    aria-labelledby="detailsModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="detailsModalLabel">Order Details of Order<%= order.order_id %></h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <table class="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th colspan="2" style="background-color: #F3F2EE;">Product Details</th>
-                                                            <th style="background-color: #F3F2EE;">Quantity</th>
-                                                            <th style="background-color: #F3F2EE;">Price</th>
-                                                            <th style="background-color: #F3F2EE;">Status</th>
-                                                            <th style="background-color: #F3F2EE;">Options</th>
+                                                                    <img src="<%= order.products_details[i].prd_images[0] %>" alt=""
+                                                                        style="max-width: 50px; max-height: 50px;">
+                                                                </a>
+                                                            </td>
+                                                            <td class="" ><%= order.products_details[i].prd_name %></td>
+                                                            <td ><%= order.products[i].qty %></td>
+                                                            <td >₹<%= order.products[i].price %>/-</td>
+                                                            <td >
+                                                                <% if (order.products[i].status=="canceled") { %>
+                                                                    <span class="badge bg-danger"><%= order.products[i].status %></span>
+                                                                    <% } else if (order.products[i].status=="pending"||order.products[i].status=="shipped"||order.products[i].status=="on delivery") { %>
+                                                                    <span class="badge bg-warning"><%= order.products[i].status %></span>
+                                                                    <% } else if (order.products[i].returned) { %>
+                                                                    <span class="badge bg-danger">order returned</span>
+                                                                    <% } else { %>
+                                                                    <span class="badge bg-success"><%= order.products[i].status %></span>
+                                                                <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (order.products[i].status=="pending") { %>
+                                                                    <button class="btn btn-dark" type="button" onclick="cancelOrder('<%= order.products[i]._id %>')" >Cancel</button>
+                                                                <% } else if (order.products[i].status=="return period" && !order.products[i].returned) { %>
+                                                                    <button class="btn btn-dark" type="button" onclick="returnOrder('<%= order.products[i]._id %>')" >Return</button>
+                                                                <% } %>
+                                                            </td>
                                                         </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <% for( let i = 0; i < order.products.length; i++ ) { %>
-                                                            <tr >
-                                                                <td>
-                                                                    <a href="/user/products/product-details/<%= order.products[i].prd_id %>">
-
-                                                                        <img src="<%= order.products_details[i].prd_images[0] %>" alt=""
-                                                                            style="max-width: 50px; max-height: 50px;">
-                                                                    </a>
-                                                                </td>
-                                                                <td class="" ><%= order.products_details[i].prd_name %></td>
-                                                                <td ><%= order.products[i].qty %></td>
-                                                                <td >₹<%= order.products[i].price %>/-</td>
-                                                                <td >
-                                                                    <% if (order.products[i].status=="canceled") { %>
-                                                                        <span class="badge bg-danger"><%= order.products[i].status %></span>
-                                                                        <% } else if (order.products[i].status=="pending"||order.products[i].status=="shipped"||order.products[i].status=="on delivery") { %>
-                                                                        <span class="badge bg-warning"><%= order.products[i].status %></span>
-                                                                        <% } else if (order.products[i].returned) { %>
-                                                                        <span class="badge bg-danger">order returned</span>
-                                                                        <% } else { %>
-                                                                        <span class="badge bg-success"><%= order.products[i].status %></span>
-                                                                    <% } %>
-                                                                </td>
-                                                                <td>
-                                                                    <% if (order.products[i].status=="pending") { %>
-                                                                        <button class="btn btn-dark" type="button" onclick="cancelOrder('<%= order.products[i]._id %>')" >Cancel</button>
-                                                                    <% } else if (order.products[i].status=="return period" && !order.products[i].returned) { %>
-                                                                        <button class="btn btn-dark" type="button" onclick="returnOrder('<%= order.products[i]._id %>')" >Return</button>
-                                                                    <% } %>
-                                                                </td>
-                                                            </tr>
-                                                        <% } %>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button>
-                                            </div>
+                                                    <% } %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
                                         </div>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                        <% }) %>
-
-
-
-
-
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
                 </tbody>
             </table>
         </div>
     </div>
+</div>
+
 
     <%- include('partials/userFooter.ejs') %>

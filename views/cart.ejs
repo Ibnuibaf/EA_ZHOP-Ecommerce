@@ -94,9 +94,9 @@
                                                 </b></p>
                                                 <% let totalAmount=0 %>
                                                 <% cartItems.forEach(item => { %>
-                                                 <% totalAmount+=(item.cart.total_prize*item.cart.qty) %>
+                                                 <% totalAmount+=item.cart.total_prize %>
                                                 <% }) %>
-                                            <i class="fs-6" >Total Amount : <b id="totalCart">₹<%= totalAmount %>.00/-</b></i><br>
+                                            <i class="fs-6" >Total Amount : <b id="totalCart" class="fs-4">₹<%= totalAmount %>.00/-</b></i><br>
                                             <div class="text-center">
                                                 <button class=" btn btn-dark px-5 my-3 rounded-0 "
                                                     onclick="checkout()">Proceed To Checkout</button>

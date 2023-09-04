@@ -371,12 +371,10 @@ module.exports = {
                         email: updatedDetails.email
                     }
                 })
-            if (updated.modifiedCount) {
+    
                 req.session.user = updatedDetails.email
                 res.redirect('/user/profile?message=Profile Updated Successfully')
-            } else {
-                res.send(500)
-            }
+            
         } catch (error) {
             console.log(error);
             const statusCode = error.status || 500;

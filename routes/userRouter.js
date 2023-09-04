@@ -24,7 +24,7 @@ router.post('/signup',middle.notLogged,controller.registerUser)
 
 //otp
 router.get('/verification',middle.verificationPanel,controller.loadVerificationPanel)
-router.get('/resend-otp',controller.resendOTP)
+router.get('/resend-otp',middle.verificationPanel,controller.resendOTP)
 
 router.post('/otp',middle.verificationPanel,controller.verifyEmail)
 

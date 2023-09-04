@@ -1,101 +1,82 @@
 <%- include('partials/userHeader.ejs') %>
-    <% if (productDetails) { %>
+<% if (productDetails) { %>
 
-        <div class="prd-detail row align-items-center  px-5">
-            <div class="prd-imgs col-12 col-lg-6 py-3">
-                <div class="img d-flex">
-                    <div style="height: 40vh ;width: 20vw; padding: 15px;margin: 5px;display: flex; background-color: #ffffff; justify-content: center;align-items: center;">
-                        <img src="<%= productDetails.prd_images[0] %>" alt="" style="max-width: fit-content;max-height: 240px;" class="p-1">        
-                        
-                    </div>
-                    <div style="height: 40vh ;width: 20vw; padding: 15px;margin: 5px; display: flex;background-color: #ffffff; justify-content: center;align-items: center;">
-                        <img src="<%= productDetails.prd_images[1] %>" alt="" style="max-width: fit-content;max-height: 240px;" class="p-1">        
-                        
+    <div class="prd-detail row align-items-center px-5">
+        <div class="prd-imgs col-12 col-lg-6 py-3">
+            <div class="row">
+                <% for (let i = 0; i < 4; i++) { %>
+                <div class="col-6 mb-3">
+                    <div class="image-container" style="width: 100%; height: 40vh; display: flex; justify-content: center; align-items: center; background-color: #ffffff;">
+                        <img src="<%= productDetails.prd_images[i] %>" alt=""
+                            class="img-fluid " style="max-width: 100%; max-height: 100%;">
                     </div>
                 </div>
-                <div class="img d-flex">
-                    <div style="height: 40vh ;width: 20vw; padding: 15px;margin: 5px; display: flex;background-color: #ffffff; justify-content: center;align-items: center;">
-                        <img src="<%= productDetails.prd_images[2] %>" alt="" style="max-width: fit-content;max-height: 240px;" class="p-1">        
-                        
-                    </div>
-                    <div style="height: 40vh ;width: 20vw; padding: 15px;margin: 5px; display: flex;background-color: #ffffff; justify-content: center;align-items: center;">
-                        <img src="<%= productDetails.prd_images[3] %>" alt="" style="max-width: fit-content;max-height: 240px;" class="p-1">        
-                        
-                    </div>
-                </div>
-            </div>
-            <div class="prd-info col-12 col-lg-6 py-3" style="padding-right: 4rem;">
-                <h2 class="py-3">
-                    <%= productDetails.prd_name %>
-                </h2>
-                <p class="py-3">
-                    <%= productDetails.description %>
-                </p>
-                <div class=" my-3">
-                    <s>
-                        <%= productDetails.mrp %>
-                    </s>
-                    <div class="price-disc ">
-                        <h3>
-                            <%= Math.floor(productDetails.mrp-((productDetails.mrp*productDetails.discount)/100)) %>
-                                                        /-
-                        </h3>
-                        <i class="text-danger fs-5">
-                            <% if (productDetails.discount) { %>
-                                <%= productDetails.discount %>%Off
-                                    <% } %>
-                        </i>
-                    </div>
-                    <div class="rating d-flex ">
-                        <h6>
-                            <% if (productDetails.reviews.length) { %>
-                                <% let sum=0 %>
-                                    <% productDetails.reviews.forEach(review=> { %>
-                                        <% sum+=review.rating %>
-                                            <% }) %>
-                                                <%= sum/productDetails.reviews.length %>
-                                                    <img src="/images/icons8-rating-30.png"
-                                                        alt="" height="23">
-                                                    <% } %>
-                        </h6>
-                    </div>
-                    <i>
-                        <% if (productDetails.stock) { %>
-                            <%= productDetails.stock %> piece Left-
-                                <% } else { %>
-                                    <b class="text-danger">No Stock Left</b>
-                                    <% } %>
-
-                    </i>
-                </div>
-
-                <div class="add-wish my-3 fs-5 d-flex align-items-center">
-                    <label for="add-wishlist">Add to Wishlist</label>
-                    <% if (isWishlist) { %>
-                    <button id="" type="submit"  onclick="remWishlist('<%= productDetails._id %>')"><img
-                                src="/images/icons8-heart-30 wished.png" alt="" class="rounded-pill"></button>
-                        <% } else { %>
-                            <button id="add-wishlist" type="submit"  onclick="addWishlist('<%= productDetails._id %>')"><img
-                                    src="/images/icons8-heart-30.png" alt="" class="rounded-pill"></button>
-                            <% } %>
-
-
-                </div>
-                <div class="add-buy-prd d-flex border shadow" style="max-width: fit-content;cursor: pointer;">
-                    <% if (isCart) { %>
-                        <a class="addcart-link" href="/user/cart">
-                            Go To Cart
-                        </a>
-                    <% } else { %>
-                        <a class="addcart-link" href="" onclick="addCart('<%= productDetails._id %>')">Add To Cart</a>
-                    <% } %>
-                    <a class="order-link" href="/user/checkout?item=<%= productDetails._id %>">
-                        Order Now
-                    </a>
-                </div>
+                <% } %>
             </div>
         </div>
-
-        <% } %>
+        <div class="prd-info col-12 col-lg-6 py-3" style="padding-right: 4rem;">
+            <h2 class="py-3">
+                <%= productDetails.prd_name %>
+            </h2>
+            <p class="py-3 description">
+                <%= productDetails.description %>
+            </p>
+            <div class="my-3">
+                <s>
+                    ₹<%= productDetails.mrp %>/-
+                </s>
+                <div class="price-disc">
+                    <h3>
+                        ₹<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %> /-
+                    </h3>
+                    <i class="text-danger fs-5">
+                        <% if (productDetails.discount) { %>
+                        <%= productDetails.discount %>% Off
+                        <% } %>
+                    </i>
+                </div>
+                <div class="rating d-flex">
+                    <h6>
+                        <% if (productDetails.reviews.length) { %>
+                        <% let sum = 0 %>
+                        <% productDetails.reviews.forEach(review => { %>
+                        <% sum += review.rating %>
+                        <% }) %>
+                        <%= sum / productDetails.reviews.length %>
+                        <img src="/images/icons8-rating-30.png" alt="" height="23">
+                        <% } %>
+                    </h6>
+                </div>
+                <i>
+                    <% if (productDetails.stock) { %>
+                    <%= productDetails.stock %> piece Left-
+                    <% } else { %>
+                    <b class="text-danger">No Stock Left</b>
+                    <% } %>
+                </i>
+            </div>
+            <div class="add-wish my-3 fs-5 d-flex align-items-center">
+                <label for="add-wishlist">Add to Wishlist</label>
+                <% if (isWishlist) { %>
+                <button id="" type="submit" onclick="remWishlist('<%= productDetails._id %>')"><img
+                        src="/images/icons8-heart-30 wished.png" alt="" class="rounded-pill"></button>
+                <% } else { %>
+                <button id="add-wishlist" type="submit" onclick="addWishlist('<%= productDetails._id %>')"><img
+                        src="/images/icons8-heart-30.png" alt="" class="rounded-pill"></button>
+                <% } %>
+            </div>
+            <div class="add-buy-prd d-flex border shadow" style="max-width: fit-content;cursor: pointer;">
+                <% if (isCart) { %>
+                <a class="addcart-link" href="/user/cart">Go To Cart</a>
+                <% } else { %>
+                <a class="addcart-link" href="" onclick="addCart('<%= productDetails._id %>')">Add To Cart</a>
+                <% } %>
+                <a class="order-link" href="/user/checkout?item=<%= productDetails._id %>">Order Now</a>
+            </div>
+        </div>
+    </div>
+    
+    <% } %>
+    
 
             <%- include('partials/userFooter.ejs') %>

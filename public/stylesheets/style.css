@@ -134,10 +134,23 @@ section{
 
   
 }
+.wallet-card-sm{
+  background-image: url(/images/card-bg.jpg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
 .wallet-tab-area{
   height: 250px;
   overflow: auto;
 }
 .add-coupen input::placeholder{
   color: #F3F2EE;
+}
+@media (max-width: 768px) {
+  .description {
+      max-height: 9.8rem; /* Approximately 3 lines of text */
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
 }
