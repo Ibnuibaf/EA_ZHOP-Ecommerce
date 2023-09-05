@@ -175,15 +175,15 @@ module.exports = {
                 { $count: "ordersCount" }
             ])
             console.log(paymentTypeSales)
-            res.render('dashboard', { 
-                categoriesSales, 
+            res.render('dashboard', {
+                categoriesSales,
                 categoriesList,
-                monthSales, 
-                paymentTypeSales, 
-                amountOfUsers, 
-                amountOfOrders: amountOfOrders[0].ordersCount, 
-                amountOfBlockedUsers, 
-                amountOfCanceledOrders: amountOfCanceledOrders[0].ordersCount 
+                monthSales,
+                paymentTypeSales,
+                amountOfUsers,
+                amountOfOrders: amountOfOrders[0].ordersCount,
+                amountOfBlockedUsers,
+                amountOfCanceledOrders: amountOfCanceledOrders[0].ordersCount
             })
         } catch (error) {
             console.log(error.message);
@@ -347,16 +347,19 @@ module.exports = {
     updateCategories: async (req, res) => {
         try {
             const cat = req.body
+
+            const regexPattern = new RegExp(cat.cat_name, 'i');
+            const existName = await categories.findOne({ name: { $regex: regexPattern } });
+            if (existName) {
+                return res.redirect('/admin/products-management?adminMessage=category exist')
+            }
             if (cat.cat_id) {
                 await categories.updateOne({ _id: cat.cat_id }, {
                     name: cat.cat_name,
                 }, { upsert: true })
                 return res.redirect('/admin/products-management')
             }
-            const existName = await categories.findOne({ name: cat.cat_name })
-            if (existName) {
-                return res.redirect('/admin/products-management?adminMessage=category exist')
-            }
+
             await categories.create({
                 name: cat.cat_name
             })
@@ -605,32 +608,63 @@ module.exports = {
         try {
             const from = req.query.from
             const to = req.query.to
-            let salesReport = await usersCollection.aggregate([
-                { $unwind: "$orders" },
-                { $unwind: "$orders.products" },
-                { $match: { "orders.products.status": "closed" } },
-                {
-                    $lookup: {
-                        from: "products",
-                        localField: "orders.products.prd_id",
-                        foreignField: "_id",
-                        as: "products_details"
-                    }
-                },
-                { $unwind: "$products_details" },
-                {
-                    $project: {
-                        order_id: "$orders._id",
-                        products_details: "$products_details",
-                        qty: "$orders.products.qty",
-                        total_amount: "$orders.products.price",
-                        order_date: "$orders.order_date",
-                        payment_method: "$orders.payment_method",
-                        consumer: "$email",
-                    }
-                },
-                { $sort: { "order_id": -1 } }
-            ])
+            let selectedStatus=''
+            let salesReport
+            if(req.query.status){
+                selectedStatus=req.query.status
+                salesReport = await usersCollection.aggregate([
+                    { $unwind: "$orders" },
+                    { $unwind: "$orders.products" },
+                    { $match: { "orders.products.status": selectedStatus } },
+                    {
+                        $lookup: {
+                            from: "products",
+                            localField: "orders.products.prd_id",
+                            foreignField: "_id",
+                            as: "products_details"
+                        }
+                    },
+                    { $unwind: "$products_details" },
+                    {
+                        $project: {
+                            order_id: "$orders._id",
+                            products_details: "$products_details",
+                            qty: "$orders.products.qty",
+                            total_amount: "$orders.products.price",
+                            order_date: "$orders.order_date",
+                            payment_method: "$orders.payment_method",
+                            consumer: "$email",
+                        }
+                    },
+                    { $sort: { "order_id": -1 } }
+                ])
+            }else{
+                salesReport = await usersCollection.aggregate([
+                    { $unwind: "$orders" },
+                    { $unwind: "$orders.products" },
+                    {
+                        $lookup: {
+                            from: "products",
+                            localField: "orders.products.prd_id",
+                            foreignField: "_id",
+                            as: "products_details"
+                        }
+                    },
+                    { $unwind: "$products_details" },
+                    {
+                        $project: {
+                            order_id: "$orders._id",
+                            products_details: "$products_details",
+                            qty: "$orders.products.qty",
+                            total_amount: "$orders.products.price",
+                            order_date: "$orders.order_date",
+                            payment_method: "$orders.payment_method",
+                            consumer: "$email",
+                        }
+                    },
+                    { $sort: { "order_id": -1 } }
+                ])
+            }
             if (from && to) {
                 const fromDate = new Date(from);
                 const toDate = new Date(to);
@@ -642,7 +676,7 @@ module.exports = {
                 console.log(salesReport)
             }
 
-            res.render('adminSales', { salesReport })
+            res.render('adminSales', { salesReport,selectedStatus })
         } catch (error) {
             console.log(error.message);
             res.send(500)

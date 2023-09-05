@@ -18,6 +18,8 @@
             </div>
         </div>
         <div class="tab  my-5">
+            <div class="table-responsive">
+
             <table class="table ">
                 <thead class="fs-4 " style="position: sticky;top: 0;">
                     <tr>
@@ -67,7 +69,8 @@
                             </td>
                             <td>
 
-                                <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#detailsModal_<%= order.order_id %>">View
+                                <button class="btn btn-dark" data-bs-toggle="modal"
+                                    data-bs-target="#detailsModal_<%= order.order_id %>">View
                                     Details</button>
 
                                 <div class="modal modal-xl fade" id="detailsModal_<%= order.order_id %>" tabi="-1"
@@ -75,71 +78,126 @@
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="detailsModalLabel">Order Details of Order<%= order.order_id %></h5>
+                                                <h5 class="modal-title" id="detailsModalLabel">Order Details of Order<%=
+                                                        order.order_id %>
+                                                </h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                     aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <table class="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th colspan="2" style="background-color: #F3F2EE;">Product Details</th>
-                                                            <th style="background-color: #F3F2EE;">Quantity</th>
-                                                            <th style="background-color: #F3F2EE;">Price</th>
-                                                            <th style="background-color: #F3F2EE;">Status</th>
-                                                            <th style="background-color: #F3F2EE;" colspan="2">Options</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <% for( let i = 0; i < order.products.length; i++ ) { %>
-                                                            <tr >
-                                                                <td><img src="<%= order.products_details[i].prd_images[0] %>" alt="" style="max-width: 50px; max-height: 50px;"></td>
-                                                                <td class="" ><%= order.products_details[i].prd_name %></td>
-                                                                <td ><%= order.products[i].qty %></td>
-                                                                <td >₹<%= order.products[i].price %>/-</td>
-                                                                <td >
-                                                                    <% if (order.products[i].status=="canceled") { %>
-                                                                        <span class="badge bg-danger"><%= order.products[i].status %></span>
-                                                                        <% } else if (order.products[i].status=="pending"||order.products[i].status=="shipped"||order.products[i].status=="on delivery") { %>
-                                                                        <span class="badge bg-warning"><%= order.products[i].status %></span>
-                                                                        <% } else { %>
-                                                                        <span class="badge bg-success"><%= order.products[i].status %></span>
-                                                                    <% } %>
-                                                                </td>
-                                                                <td>
-                                                                    <% if (order.products[i].status==='canceled') { %>
-                                                                        <select name="status" class="ea-input status-select" data-order-id="<%= order.products[i]._id  %>" data-user="<%= order.consumer  %>">
-                                                                            <option >Canceled</option>
-                                                                        </select>
-                                                                        <% } else { %>
-                                                                            <select name="status" class="ea-input status-select" data-order-id="<%= order.products[i]._id  %>" data-user="<%= order.consumer  %>">
-                                                                                <option value="pending" <%=order.products[i].status==='pending' ? 'selected' : '' %>>Pending</option>
-                                                                                <option value="shipped" <%=order.products[i].status==='shipped' ? 'selected' : '' %>>Shipped</option>
-                                                                                <option value="on delivery" <%=order.products[i].status==='on delivery' ? 'selected' : '' %>>On Delivery</option>
-                                                                                <option value="return period" <%=order.products[i].status==='return period' ? 'selected' : '' %>>Return Period</option>
-                                                                                <option value="closed" <%=order.products[i].status==='closed' ? 'selected' : '' %>>Order Closed</option>
-                                                                            </select>
-                                                                    <% } %>
-                                                                </td>
-                                                                <td>
-                                                                    <% if (order.products[i].status=="pending") { %>
-                                                                        <button class="btn btn-dark" type="button" onclick="cancelOrderAsAdmin('<%= order.products[i]._id %>','<%= order.consumer %>')" >Cancel</button>
-                                                                    <% } else if ((order.products[i].returned&&order.products[i].refunded==false) || (order.products[i].status=="canceled"&& order.products[i].refunded==false)) { %>
-                                                                        <button class="btn btn-dark text-warning" value="<%= JSON.stringify(order.products[i]) %>" onclick="refundPayment(event.target.value,'<%=order.consumer%>','<%=order.payment_method%>')">Refund</button>
-                                                                    <% } %>
-                                                                </td>
+                                                <div class="table-responsive">
+                                                    <!-- Wrap the content in a responsive div -->
+                                                    <table class="table ">
+                                                        <thead>
+                                                            <tr>
+                                                                <th colspan="2" style="background-color: #F3F2EE;">
+                                                                    Product Details</th>
+                                                                <th style="background-color: #F3F2EE;">Quantity</th>
+                                                                <th style="background-color: #F3F2EE;">Price</th>
+                                                                <th style="background-color: #F3F2EE;">Status</th>
+                                                                <th style="background-color: #F3F2EE;" colspan="2">
+                                                                    Options</th>
                                                             </tr>
-                                                        <% } %>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% for( let i=0; i < order.products.length; i++ ) { %>
+                                                                <tr>
+                                                                    <td><img src="<%= order.products_details[i].prd_images[0] %>"
+                                                                            alt=""
+                                                                            style="max-width: 50px; max-height: 50px;">
+                                                                    </td>
+                                                                    <td class="product-name">
+                                                                        <%= order.products_details[i].prd_name %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <%= order.products[i].qty %>
+                                                                    </td>
+                                                                    <td>₹<%= order.products[i].price %>/-</td>
+                                                                    <td>
+                                                                        <% if (order.products[i].status=="canceled" ) {
+                                                                            %>
+                                                                            <span class="badge bg-danger">
+                                                                                <%= order.products[i].status %>
+                                                                            </span>
+                                                                            <% } else if
+                                                                                (order.products[i].status=="pending"
+                                                                                ||order.products[i].status=="shipped"
+                                                                                ||order.products[i].status=="on delivery"
+                                                                                ) { %>
+                                                                                <span class="badge bg-warning">
+                                                                                    <%= order.products[i].status %>
+                                                                                </span>
+                                                                                <% } else { %>
+                                                                                    <span class="badge bg-success">
+                                                                                        <%= order.products[i].status %>
+                                                                                    </span>
+                                                                                    <% } %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <% if (order.products[i].status==='canceled' ) {
+                                                                            %>
+                                                                            <select name="status"
+                                                                                class="ea-input status-select"
+                                                                                data-order-id="<%= order.products[i]._id  %>"
+                                                                                data-user="<%= order.consumer  %>">
+                                                                                <option>Canceled</option>
+                                                                            </select>
+                                                                            <% } else { %>
+                                                                                <select name="status"
+                                                                                    class="ea-input status-select"
+                                                                                    data-order-id="<%= order.products[i]._id  %>"
+                                                                                    data-user="<%= order.consumer  %>">
+                                                                                    <option value="pending"
+                                                                                        <%=order.products[i].status==='pending'
+                                                                                        ? 'selected' : '' %>>Pending
+                                                                                    </option>
+                                                                                    <option value="shipped"
+                                                                                        <%=order.products[i].status==='shipped'
+                                                                                        ? 'selected' : '' %>>Shipped
+                                                                                    </option>
+                                                                                    <option value="on delivery"
+                                                                                        <%=order.products[i].status==='on delivery'
+                                                                                        ? 'selected' : '' %>>On Delivery
+                                                                                    </option>
+                                                                                    <option value="return period"
+                                                                                        <%=order.products[i].status==='return period'
+                                                                                        ? 'selected' : '' %>>Return
+                                                                                        Period</option>
+                                                                                    <option value="closed"
+                                                                                        <%=order.products[i].status==='closed'
+                                                                                        ? 'selected' : '' %>>Order
+                                                                                        Closed</option>
+                                                                                </select>
+                                                                                <% } %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <% if (order.products[i].status=="pending" ) {
+                                                                            %>
+                                                                            <button class="btn btn-dark" type="button"
+                                                                                onclick="cancelOrderAsAdmin('<%= order.products[i]._id %>','<%= order.consumer %>')">Cancel</button>
+                                                                            <% } else if
+                                                                                ((order.products[i].returned&&order.products[i].refunded==false)
+                                                                                || (order.products[i].status=="canceled"
+                                                                                && order.products[i].refunded==false)) {
+                                                                                %>
+                                                                                <button
+                                                                                    class="btn btn-dark text-warning"
+                                                                                    value="<%= JSON.stringify(order.products[i]) %>"
+                                                                                    onclick="refundPayment(event.target.value,'<%=order.consumer%>','<%=order.payment_method%>')">Refund</button>
+                                                                                <% } %>
+                                                                    </td>
+                                                                </tr>
+                                                                <% } %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                             </td>
                         </tr>
                         <% }) %>
@@ -150,6 +208,7 @@
 
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

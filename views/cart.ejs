@@ -97,10 +97,23 @@
                                                  <% totalAmount+=item.cart.total_prize %>
                                                 <% }) %>
                                             <i class="fs-6" >Total Amount : <b id="totalCart" class="fs-4">₹<%= totalAmount %>.00/-</b></i><br>
-                                            <div class="text-center">
-                                                <button class=" btn btn-dark px-5 my-3 rounded-0 "
-                                                    onclick="checkout()">Proceed To Checkout</button>
-                                            </div>
+                                            
+                                            <% if (pos) { %>
+                                                <div class="error fs-6 m-3 p-2 bg-secondary text-center" >
+                                                    <i class="text-warning">
+                                                        There <b><%= pos %></b> items Out Of Stock
+                                                    </i>
+                                                </div>
+                                                <div class="text-center">
+                                                    <button class=" btn btn-dark px-5 my-3 rounded-0 "
+                                                         disabled>Proceed To Checkout</button>
+                                                </div>
+                                             <% } else { %>
+                                                <div class="text-center">
+                                                    <button class=" btn btn-dark px-5 my-3 rounded-0 "
+                                                        onclick="checkout()">Proceed To Checkout</button>
+                                                </div>
+                                            <% } %>
                 </div>
                 <div class="razor-secure text-center mt-4">
                     <img src="/images/razerpay.png" alt="" height="30"><br>

@@ -456,10 +456,16 @@ function removeImage(index) {
         })
     }
 }
-function filterSales(){
+function redirectToSelected() {
+    const selectElement = document.getElementById("statusFilter");
+    const selectedValue = selectElement.value;
+
+    window.location.href = selectedValue;
+}
+function filterSales(status){
     const from=document.getElementById("start_date").value
     const to=document.getElementById("end_date").value
-    window.location.href=`/admin/sales-report?from=${from}&to=${to}`
+    window.location.href=`/admin/sales-report?from=${from}&to=${to}&status=${status}`
 }
 async function uploadBannerImage(file, id) {
 

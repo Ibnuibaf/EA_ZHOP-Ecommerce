@@ -6,7 +6,7 @@
     </div>
     <div class="row m-5">
         <div class="col-md-8 d-flex row justify-content-center">
-            <div class="exist-address-box  bg-secondary text-light rounded p-4 mb-5"
+            <div class="exist-address-box  bg-secondary text-light rounded p-4 "
                 style="height: fit-content;width: fit-content ;">
                 <p class="fs-5 text-center my-2 text-decoration-underline">Your Addresses</p>
                 <% if (userDetails.address.length) { %>
@@ -34,7 +34,7 @@
 
 
             </div>
-            <div class="address-tab col-md-8 border rounded p-2 shadow-lg">
+            <div class="address-tab col-md-11 border rounded p-2 shadow-lg" style="height: fit-content;">
 
                 <form action="/user/confirm-order" onsubmit="event.preventDefault();  confirmOrder()" method="post"
                     id="checkoutForm">
@@ -81,148 +81,143 @@
 
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="checkout-proceed px-5 py-3" style="background-color: #F3F2EE;">
-                <p class="fs-5 fw-bold text-center border-bottom border-3">Proceed CheckOut</p>
-                <div class="products-tab  border-bottom border-3 " style="height: 170px;overflow: auto;">
+        <div class="col-md-4 mt-4">
+            <div class="checkout-proceed px-4 py-3" style="background-color: #F3F2EE;">
+                <p class="fs-5 fw-bold text-center border-bottom border-3">Proceed Checkout</p>
+                <div class="products-tab border-bottom border-3" style="max-height: 170px; overflow-y: auto;">
                     <ol class="fs-6">
-                        <li class="d-flex justify-content-between fw-medium"
-                            style="position: sticky;top: 0;background-color: #F3F2EE;"><label
-                                for="">Products</label><i>Total</i></li>
+                        <li class="d-flex justify-content-between fw-medium sticky-top bg-light">
+                            <label for="">Products</label>
+                            <i>Total</i>
+                        </li>
                         <% if (productDetails.length) { %>
-                            <% productDetails.forEach(prd=> { %>
-                                <li class="d-flex justify-content-between ">&GreaterGreater;
-                                    <label for="" class="text-truncate" style="max-width: 10vw;">
-                                        <%= prd.prd_name %>
-                                            <%= prd.unit_prize %>
-                                    </label>
-                                    <i class="mx-2">₹<%= prd.unit_prize %>/-</i>
-                                    <i class="fw-medium ">₹<%= prd.total_prize %>/-</i>
-                                </li>
-                                <input type="hidden" name="prd_id" id="prd_id" value="<%= prd.prd_id %>">
-                                <input type="hidden" name="qty" id="qty" value="<%= prd.qty %>">
-                                <input type="hidden" name="stock" id="stock" value="<%= prd.stock %>">
-                                <input type="hidden" name="total_price" id="total_price" value="<%= prd.total_prize %>">
-                                <% }) %>
-                                    <% } else if (productDetails) { %>
-                                        <li class="d-flex justify-content-between">
-                                            <label for="">
-                                                <%= productDetails.prd_name %>
-                                            </label>
-                                            <i>
-                                                <%= Math.floor(productDetails.mrp - ((productDetails.mrp *
-                                                    productDetails.discount) / 100)) %>
-                                            </i>
-                                        </li>
-                                        <input type="hidden" name="prd_id" id="prd_id"
-                                            value="<%= productDetails._id %>">
-                                        <input type="hidden" name="qty" id="qty" value="1">
-                                        <input type="hidden" name="stock" id="stock"
-                                            value="<%= productDetails.stock %>">
-                                        <input type="hidden" name="total_price" id="total_price"
-                                            value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
-                                        <% } %>
+                        <% productDetails.forEach(prd => { %>
+                        <li class="d-flex justify-content-between">
+                            <span class="text-truncate" style="max-width: 10vw;">
+                                <%= prd.prd_name %>
+                                <%= prd.unit_prize %>
+                            </span>
+                            <i class="mx-2">₹<%= prd.unit_prize %>/-</i>
+                            <i class="fw-medium">₹<%= prd.total_prize %>/-</i>
+                        </li>
+                        <input type="hidden" name="prd_id" id="prd_id" value="<%= prd.prd_id %>">
+                        <input type="hidden" name="qty" id="qty" value="<%= prd.qty %>">
+                        <input type="hidden" name="stock" id="stock" value="<%= prd.stock %>">
+                        <input type="hidden" name="total_price" id="total_price" value="<%= prd.total_prize %>">
+                        <% }) %>
+                        <% } else if (productDetails) { %>
+                        <li class="d-flex justify-content-between">
+                            <span>
+                                <%= productDetails.prd_name %>
+                            </span>
+                            <i>
+                                <%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>
+                            </i>
+                        </li>
+                        <input type="hidden" name="prd_id" id="prd_id" value="<%= productDetails._id %>">
+                        <input type="hidden" name="qty" id="qty" value="1">
+                        <input type="hidden" name="stock" id="stock" value="<%= productDetails.stock %>">
+                        <input type="hidden" name="total_price" id="total_price"
+                            value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
+                        <% } %>
                     </ol>
                 </div>
-                <div class="pay-methods border border-3 p-3 mt-2 rounded ">
+                <div class="pay-methods border border-3 p-3 mt-2 rounded">
                     <p class="fs-5">Payment Methods</p>
                     <div class="cod d-flex align-items-center">
-                        <input type="radio" name="pay_methods" id="cod"
-                            style="height: 20px;width: 20px; margin-inline: 5px;" value="cod">
-                        <label for="COD">Cash on Delivery</label>
+                        <input type="radio" name="pay_methods" id="cod" style="height: 20px; width: 20px; margin-right: 5px;"
+                            value="cod">
+                        <label for="cod">Cash on Delivery</label>
                     </div>
                     <div class="razor d-flex align-items-center">
-                        <input type="radio" name="pay_methods" id="razorpay"
-                            style="height: 20px;width: 20px; margin-inline: 5px;" value="razor_pay">
+                        <input type="radio" name="pay_methods" id="razorpay" style="height: 20px; width: 20px; margin-right: 5px;"
+                            value="razor_pay">
                         <label for="razorpay">Online Payment</label>
                     </div>
                 </div>
-
-
                 <div class="checkout-details">
-                    <!-- Add Coupen Feature -->
-                    <div class="add-coupen mt-4 bg-secondary d-flex align-items-center justify-content-between px-2"
-                        id="coupenDiv">
-                        <input type="text" name="coupen" id="coupen" class="bg-transparent border-0 px-3 py-2 "
-                            placeholder="Add Coupen" style="outline: none;color: #F3F2EE;">
-                        <button class="bg-transparent border-0  fs-5 text-light" type="button"
-                            onclick="verifyCoupen()">+ verify</button>
+                    <!-- Add Coupon Feature -->
+                    <div class="add-coupon mt-4 bg-secondary d-flex align-items-center justify-content-between px-2"
+                        id="couponDiv">
+                        <input type="text" name="coupon" id="coupon"
+                            class="bg-transparent border-0 px-3 py-2" placeholder="Add Coupon"
+                            style="outline: none; color: #F3F2EE;">
+                        <button class="bg-transparent border-0 fs-5 text-light" type="button"
+                            onclick="verifyCoupon()">+ Verify</button>
                     </div>
                     <label for="coupon_code" id="coupon_code" class="text-success fw-medium"></label>
-
+        
                     <!-- Wallet Use Feature -->
                     <div class="wallet-option d-flex justify-content-between align-items-center fs-5 border-bottom border-3"
                         id="walletDiv">
-                        <div class="laabels d-flex justify-content-between align-items-center ">
+                        <div class="labels d-flex align-items-center">
                             <input type="checkbox" name="wallet_balance" id="wallet_balance"
-                                style="height: 20px;width: 20px;" onchange="walletBalance()">
-                            <label for="wallet-option">Use Wallet Balance:</label>
+                                style="height: 20px; width: 20px;" onchange="walletBalance()">
+                            <label for="wallet_balance">Use Wallet Balance:</label>
                         </div>
-                        <i id="balance" data-balance="<%= userDetails.wallet.balance %>">₹ <%=
-                                userDetails.wallet.balance %>/-</i>
+                        <i id="balance" data-balance="<%= userDetails.wallet.balance %>">₹
+                            <%= userDetails.wallet.balance %>/-</i>
                     </div>
                     <div class="grand-total d-flex justify-content-between fs-5">
                         <label>Grand Total:</label>
                         <% if (productDetails.length) { %>
-                            <% let grandtotal=0 %>
-                                <% productDetails.forEach(prd=> { %>
-                                    <% grandtotal+=(prd.mrp*prd.qty) %>
-                                        <% }) %>
-                                            <i><s>₹ <%= grandtotal %> /-</s></i>
-                                            <% } else if (productDetails) { %>
-                                                <i><s>₹ <%= productDetails.mrp %> /-</s></i>
-                                                <% } %>
+                        <% let grandtotal = 0 %>
+                        <% productDetails.forEach(prd => { %>
+                        <% grandtotal += (prd.mrp * prd.qty) %>
+                        <% }) %>
+                        <i><s>₹ <%= grandtotal %> /-</s></i>
+                        <% } else if (productDetails) { %>
+                        <i><s>₹ <%= productDetails.mrp %> /-</s></i>
+                        <% } %>
                     </div>
                     <div class="saved d-flex justify-content-end text-danger">
                         <label>Saved </label> &nbsp;
                         <% if (productDetails.length) { %>
-                            <% let actualprize=0 %>
-                                <% let grandtotal=0 %>
-                                    <% productDetails.forEach(prd=> { %>
-                                        <% actualprize+=(prd.unit_prize*prd.qty) %>
-                                            <% grandtotal+=(prd.mrp*prd.qty) %>
-                                                <% }) %>
-                                                    <p class=" fw-bold"><i>₹<%= (grandtotal-actualprize) %>/-</i></p>
-                                                    <% } else if (productDetails) { %>
-                                                        <p>₹ <%= Math.floor((productDetails.mrp *
-                                                                productDetails.discount) / 100) %> /-</p>
-                                                        <% } %>
+                        <% let actualprize = 0 %>
+                        <% let grandtotal = 0 %>
+                        <% productDetails.forEach(prd => { %>
+                        <% actualprize += (prd.unit_prize * prd.qty) %>
+                        <% grandtotal += (prd.mrp * prd.qty) %>
+                        <% }) %>
+                        <p class="fw-bold"><i>₹<%= (grandtotal - actualprize) %>/-</i></p>
+                        <% } else if (productDetails) { %>
+                        <p>₹ <%= Math.floor((productDetails.mrp * productDetails.discount) / 100) %> /-</p>
+                        <% } %>
                     </div>
                     <div class="rate d-flex justify-content-between align-items-center">
                         <label>Amount to be Paid:</label>
                         <% if (productDetails.length) { %>
-                            <% let actualprize=0 %>
-                                <% productDetails.forEach(prd=> { %>
-                                    <% actualprize+=(prd.unit_prize*prd.qty) %>
-                                        <% }) %>
-                                            <p class="text-danger fw-bold fs-5"><i id="amountDisplay">₹<%= actualprize
-                                                        %>/-</i></p>
-                                            <input type="hidden" name="amount" id="amount" value="<%= actualprize %>">
-                                            <% } else if (productDetails) { %>
-                                                <input type="hidden" name="amount" id="amount"
-                                                    value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
-                                                <p class="text-danger fw-bold fs-5">₹ <%= Math.floor(productDetails.mrp
-                                                        - ((productDetails.mrp * productDetails.discount) / 100)) %> /-
-                                                </p>
-                                                <% } %>
+                        <% let actualprize = 0 %>
+                        <% productDetails.forEach(prd => { %>
+                        <% actualprize += (prd.unit_prize * prd.qty) %>
+                        <% }) %>
+                        <p class="text-danger fw-bold fs-5"><i id="amountDisplay">₹<%= actualprize %>/-</i></p>
+                        <input type="hidden" name="amount" id="amount" value="<%= actualprize %>">
+                        <% } else if (productDetails) { %>
+                        <input type="hidden" name="amount" id="amount"
+                            value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
+                        <p class="text-danger fw-bold fs-5">₹
+                            <%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>
+                            /-</p>
+                        <% } %>
                     </div>
                 </div>
-
-                <div class="error fs-6 m-3 p-2 bg-secondary text-center " style="max-width: 24vw;">
+                <div class="error fs-6 m-3 p-2 bg-secondary text-center" >
                     <i class="text-warning">
-                        Choose <b>Online Payment</b> to experience wallet and coupens you have!
+                        Choose <b>Online Payment</b> to experience wallet and coupons you have!
                     </i>
                 </div>
-                <div class="text-center ">
-                    <button class=" btn btn-dark px-5 my-3 rounded-0 fs-5" type="submit">Confirm Order</button>
+                <div class="text-center">
+                    <button class="btn btn-dark px-4 my-3 rounded-0 fs-5" type="submit">Confirm Order</button>
                 </div>
-                </form>
+            </form>
             </div>
             <div class="razor-secure text-center mt-3">
                 <img src="/images/razerpay.png" alt="" height="30"><br>
                 <i>Guaranteed Safe Checkout</i>
             </div>
         </div>
+        
     </div>
 
     <%- include('partials/userFooter.ejs') %>

@@ -1,91 +1,63 @@
 <%- include('partials/adminHeader.ejs') %>
 
 
-    <div class="container-fluid tab-name d-flex align-items-center justify-content-between">
-        <h3 class="p-3 ">Dashboard &GreaterGreater;</h3>
-        <div class="col-12 logout " style="max-width: fit-content;padding-right: 5rem;">
-            <a href="/admin/logout" class="login btn btn-dark text-danger ">logout</a>
+<div class="container-fluid tab-name d-flex align-items-center justify-content-between">
+    <h3 class="p-3 ">Dashboard &GreaterGreater;</h3>
+    <div class="col-12 logout " style="max-width: fit-content; padding-right: 5rem;">
+        <a href="/admin/logout" class="login btn btn-dark text-danger">Logout</a>
+    </div>
+</div>
+<div class="container-fluid d-flex align-items-center justify-content-between">
+</div>
+<div class="dashboard row m-3">
+    <div class="col-md-12 text-center">
+        <h2 class="btn btn-dark fs-5" style="width: fit-content;">Admin Analysis Charts of Sales</h2>
+    </div>
+    <div class="col-md-9 p-2" style="background-color: #F3F2EE;">
+        <div class="mainGraphbar rounded">
+            <div class="head">
+                <h4>Monthly Sales</h4>
+            </div>
+            <div class="border p-3" style="background-color: #ffffff;">
+                <canvas id="monthlyGraph"></canvas>
+                <input type="hidden" name="monthlySales" id="monthlySales" value="<%= JSON.stringify(monthSales) %>">
+            </div>
         </div>
     </div>
-    <div class="container-fluid d-flex align-items-center justify-content-between">
-        
+    <div class="col-md-3">
+        <div class="card m-2 border-success">
+            <div class="card-header px-3 fs-5 fw-medium text-light" style="background-color: #504e4e;">Analysis</div>
+            <ul class="list-group list-group-light list-group-small">
+                <li class="list-group-item px-3 fw-medium">Total Number of Users: <%= amountOfUsers %></li>
+                <li class="list-group-item px-3 fw-medium">Total Number of Users Blocked: <%= amountOfBlockedUsers %></li>
+                <li class="list-group-item px-3 fw-medium">Total Number of Orders: <%= amountOfOrders %></li>
+                <li class="list-group-item px-3 fw-medium">Total Number of Orders Canceled: <%= amountOfCanceledOrders %></li>
+            </ul>
+        </div>
+        <div class="border p-3" style="background-color: #ffffff;">
+            <canvas id="monthlyGraphPie"></canvas>
+        </div>
     </div>
-    <div class="dashboard row m-5">
-        <div class="text-center">
-            <h2 class="btn btn-dark fs-5" style="width: fit-content;">Admin Analysis Charts of Sales</h2>
-
+    <div class="col-md-7 p-2 m-3 rounded" style="background-color: #F3F2EE;">
+        <div class="head">
+            <h4>Categories Sales</h4>
         </div>
-        <div class="row d-flex justify-content-center p-2" style="background-color: #F3F2EE;">
-            <div class="mainGraphbar col-md-9">
-                <div class="  m-3 rounded ">
-                    <div class="head">
-                        <h4>Monthly Sales</h4>
-                    </div>
-                    <div class="border p-3" style="background-color: #ffffff;">
-                        <canvas id="monthlyGraph"></canvas>
-                        <input type="hidden" name="monthlySales" id="monthlySales"
-                            value="<%= JSON.stringify(monthSales) %>">
-                    </div>
-                </div>
-            </div>
-            <div class="analyst col-md-3 ">
-                <div class="card m-3  border-success" style="width: 22em;">
-                    <div class="card-header px-3 fs-5 fw-medium text-light" style="background-color: #504e4e;">Analysis
-                    </div>
-                    <ul class="list-group list-group-light list-group-small">
-                        <li class="list-group-item px-3 fw-medium">Total Number of Users : <%= amountOfUsers %>
-                        </li>
-                        <li class="list-group-item px-3 fw-medium">Total Number of Users Blocked : <%=
-                                amountOfBlockedUsers %>
-                        </li>
-                        <li class="list-group-item px-3 fw-medium">Total Number of Orders : <%= amountOfOrders %>
-                        </li>
-                        <li class="list-group-item px-3 fw-medium">Total Number of Orders Canceled : <%=
-                                amountOfCanceledOrders %>
-                        </li>
-
-                    </ul>
-                </div>
-                <div class="border p-3" style="background-color: #ffffff;">
-                    <canvas id="monthlyGraphPie"></canvas>
-                </div>
-            </div>
-
+        <div class="border p-3" style="background-color: #ffffff;">
+            <canvas id="mainGraph"></canvas>
+            <input type="hidden" name="categories" id="categories" value="<%= JSON.stringify(categoriesList) %>">
+            <input type="hidden" name="categories" id="categoriesSales" value="<%= JSON.stringify(categoriesSales) %>">
         </div>
-        <div class="row d-flex justify-content-center">
-            <div class="col-md-7 p-2 m-3 rounded" style="background-color: #F3F2EE;">
-                <div class="head">
-                    <h4>Categories Sales</h4>
-                </div>
-                <div class="border p-3" style="background-color: #ffffff;">
-                    <canvas id="mainGraph"></canvas>
-
-                    <input type="hidden" name="categories" id="categories"
-                        value="<%= JSON.stringify(categoriesList) %>">
-
-                    <input type="hidden" name="categories" id="categoriesSales"
-                        value="<%= JSON.stringify(categoriesSales) %>">
-
-
-                </div>
-            </div>
-            <div class="col-md-3 p-2 m-3 rounded" style="background-color: #F3F2EE;">
-                <div class="head">
-                    <h4>Payment Type Sales</h4>
-                </div>
-
-                <div class="border p-3 text-center" style="background-color: #ffffff;">
-                    <canvas id="paymentGraph"></canvas>
-
-                    <input type="hidden" name="paymentTypeSales" id="paymentTypeSales"
-                        value="<%= JSON.stringify(paymentTypeSales) %>">
-
-                </div>
-            </div>
-        </div>
-
-
     </div>
+    <div class="col-md-3 p-2 m-3 rounded" style="background-color: #F3F2EE;">
+        <div class="head">
+            <h4>Payment Type Sales</h4>
+        </div>
+        <div class="border p-3 text-center" style="background-color: #ffffff;">
+            <canvas id="paymentGraph"></canvas>
+            <input type="hidden" name="paymentTypeSales" id="paymentTypeSales" value="<%= JSON.stringify(paymentTypeSales) %>">
+        </div>
+    </div>
+</div>
 
 
 

@@ -24,64 +24,97 @@
                     </div>
                 </div>
                 <div class="text-center ">
-                    <button type="button" class="btn btn-dark px-3 " id="profile-submit" onclick="filterSales()">Refresh Report</button>
+                    <button type="button" class="btn btn-dark px-3 " id="profile-submit"  onclick="filterSales('<%= selectedStatus %>')">Refresh Report</button>
                 </div>
 
             </div>
         </div>
         <div class="sales-tab  my-5  rounded border border-2 col-md-8" style="background-color: #E5E5E5;">
-            <form action="/admin/sales-report/download-report" method="post">
-                <% if (salesReport.length) { %>
-                    <div class="text-center my-2 px-4">
-                        <button type="submit" class="btn btn-dark px-3 form-control" id="sales-report-submit">Download Sales Report</button>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="options">
+                        <select id="statusFilter" class="ea-input" onchange="redirectToSelected()" >
+                            <option value="" selected disabled>Select an option</option>
+                            <option value="/admin/sales-report">All Sales</option>
+                            <option value="/admin/sales-report?status=pending">Pending</option>
+                            <option value="/admin/sales-report?status=shipped">Shipped</option>
+                            <option value="/admin/sales-report?status=on delivery">On Delivery</option>
+                            <option value="/admin/sales-report?status=return period">Return period</option>
+                            <option value="/admin/sales-report?status=closed">Order Closed</option>
+                            <option value="/admin/sales-report?status=canceled">Canceled</option>
+                        </select>
+                        
+                       
                     </div>
-                <% } %>
-                <table class="table text-center  table-striped table-hover">
-                    <thead class="fs-6 " style="position: sticky;top: 0;">
-                        <tr class="border">
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Date</th>
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">OrderId</th>
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Consumer</th>
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Product</th>
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Quantity</th>
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Payment</th>
-                            <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                    <div class="selected-status d-none d-md-block">
+                        <% if (selectedStatus) { %>
+                            <h3 class="text-secondary"><%= selectedStatus.toUpperCase() %> Sales Report</h3>
+                         <% } else { %>
+                            <h3 class="text-secondary">All Sales Report</h3>
+                        <% } %>
+                    </div>
+            <form action="/admin/sales-report/download-report" method="post">
 
-                        <% salesReport.forEach(sale=> { %>
-                            <tr>
-                                <td>
-                                    <%= sale.order_date.toLocaleDateString() %>
-                                </td>
-                                <input type="hidden" name="date" value="<%= sale.order_date.toLocaleDateString() %>">
-                                <td>
-                                    <%= sale.order_id %>
-                                </td>
-                                <input type="hidden" name="order_id" value="<%= sale.order_id %>">
-                                <td>
-                                    <%= sale.consumer %>
-                                </td>
-                                <input type="hidden" name="consumer" value="<%= sale.consumer %>">
-                                <td>
-                                    <%= sale.products_details.prd_name %>
-                                </td>
-                                <input type="hidden" name="product" value="<%= sale.products_details.prd_name %>">
-                                <td>
-                                    <%= sale.qty %>
-                                </td>
-                                <input type="hidden" name="qty" value="<%= sale.qty %>">
-                                <td>
-                                    <p class="btn btn-sm bg-success fw-medium text-light">
-                                        <%= sale.payment_method.split(' ').join('') %></p></td>
-                                <input type="hidden" name="payment" value="<%= sale.payment_method %>">
-                                <td><b>₹<%= sale.total_amount %>/-</b></td>
-                                <input type="hidden" name="amount" value="<%= sale.total_amount %>">
+                    <% if (salesReport.length) { %>
+                        <div class="text-center my-2 px-4">
+                            <button type="submit" class="btn btn-dark px-3 form-control" id="sales-report-submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-download" viewBox="0 0 16 16">
+                                    <path d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383z"/>
+                                    <path d="M7.646 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V5.5a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708l3 3z"/>
+                                  </svg> Download
+                            </button>
+                        </div>
+                    <% } %>
+
+                </div>
+                <div class="table-responsive">
+                    <table class="table text-center  table-striped table-hover">
+                        <thead class="fs-6 " style="position: sticky;top: 0;">
+                            <tr class="border">
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Date</th>
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">OrderId</th>
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Consumer</th>
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Product</th>
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Quantity</th>
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Payment</th>
+                                <th scope="col" style="font-weight: 500;background-color: #504e4e;color: #E5E5E5;">Amount</th>
                             </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+    
+                            <% salesReport.forEach(sale=> { %>
+                                <tr>
+                                    <td>
+                                        <%= sale.order_date.toLocaleDateString() %>
+                                    </td>
+                                    <input type="hidden" name="date" value="<%= sale.order_date.toLocaleDateString() %>">
+                                    <td>
+                                        <%= sale.order_id %>
+                                    </td>
+                                    <input type="hidden" name="order_id" value="<%= sale.order_id %>">
+                                    <td>
+                                        <%= sale.consumer %>
+                                    </td>
+                                    <input type="hidden" name="consumer" value="<%= sale.consumer %>">
+                                    <td class="product-name">
+                                        <%= sale.products_details.prd_name %>
+                                    </td>
+                                    <input type="hidden" name="product" value="<%= sale.products_details.prd_name %>">
+                                    <td>
+                                        <%= sale.qty %>
+                                    </td>
+                                    <input type="hidden" name="qty" value="<%= sale.qty %>">
+                                    <td>
+                                        <p class="btn btn-sm bg-success fw-medium text-light">
+                                            <%= sale.payment_method.split(' ').join('') %></p></td>
+                                    <input type="hidden" name="payment" value="<%= sale.payment_method %>">
+                                    <td><b>₹<%= sale.total_amount %>/-</b></td>
+                                    <input type="hidden" name="amount" value="<%= sale.total_amount %>">
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+
+                </div>
             </form>
         </div>
 

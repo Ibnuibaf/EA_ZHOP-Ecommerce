@@ -154,3 +154,11 @@ section{
       text-overflow: ellipsis;
   }
 }
+@media (max-width: 767px) {
+  td.product-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px; /* Adjust the width to your preference */
+  }
+}
