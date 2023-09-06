@@ -1,3 +1,4 @@
 module.exports={
-    mongoUrl:"mongodb://localhost:27017/eazhop"
+    mongoUrl:"mongodb+srv://ibnuibaf2:IOZobXKuPvhoZnDj@eazhop.vuolezo.mongodb.net/?retryWrites=true&w=majority"
+    
 }
