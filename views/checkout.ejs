@@ -196,7 +196,7 @@
                         <% } else if (productDetails) { %>
                         <input type="hidden" name="amount" id="amount"
                             value="<%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>">
-                        <p class="text-danger fw-bold fs-5">₹
+                        <p class="text-danger fw-bold fs-5" id="amountDisplay">₹
                             <%= Math.floor(productDetails.mrp - ((productDetails.mrp * productDetails.discount) / 100)) %>
                             /-</p>
                         <% } %>

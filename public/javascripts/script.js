@@ -612,9 +612,9 @@ function confirmsUser(event, fn) {
         modal.hide();
     });
 }
-function verifyCoupen(){
+function verifyCoupon(){
     const amount=document.getElementById("amount").value;
-    const coupen=document.getElementById("coupen").value
+    const coupen=document.getElementById("coupon").value
     const isOnline=document.getElementById("razorpay").checked
     $.ajax({
         url:`/user/checkout/verify-coupen/${coupen}?total=${amount}`,

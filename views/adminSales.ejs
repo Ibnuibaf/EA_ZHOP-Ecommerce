@@ -95,7 +95,7 @@
                                         <%= sale.consumer %>
                                     </td>
                                     <input type="hidden" name="consumer" value="<%= sale.consumer %>">
-                                    <td class="product-name">
+                                    <td class="product-name" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 100px;">
                                         <%= sale.products_details.prd_name %>
                                     </td>
                                     <input type="hidden" name="product" value="<%= sale.products_details.prd_name %>">

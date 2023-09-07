@@ -144,7 +144,8 @@ section{
   height: 250px;
   overflow: auto;
 }
-.add-coupen input::placeholder{
+
+.add-coupon input::placeholder{
   color: #F3F2EE;
 }
 @media (max-width: 768px) {
