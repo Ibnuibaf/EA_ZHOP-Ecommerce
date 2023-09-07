@@ -162,13 +162,19 @@ module.exports = {
     newPass: async (req, res) => {
         try {
             const passDetails = req.body
-
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+          
             if (passDetails.new_password == passDetails.confirm_password) {
-                const hashedPass = await securePass(passDetails.new_password)
-                await usersCollection.updateOne({ email: passDetails.user }, { $set: { password: hashedPass } })
-                res.redirect('/signin?message=Password Updated!')
+                if (passwordRegex.test(passDetails.new_password)) {
+                    const hashedPass = await securePass(passDetails.new_password)
+                    await usersCollection.updateOne({ email: passDetails.user }, { $set: { password: hashedPass } })
+                    res.status(200).json({success:true})
+                } else {
+                    return res.status(200).json({ validateErr: "Password should contain *At least one uppercase or lowercase letter *At least one digit *At least one special character from the set @$!%*#?& *A minimum length of 8 characters" })
+                }
+                
             } else {
-                res.send(400).json({ message: "Both password does not match" })
+                res.status(200).json({ validateErr: "Both password does not match" })
             }
 
         } catch (error) {

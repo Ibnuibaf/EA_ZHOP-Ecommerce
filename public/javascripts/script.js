@@ -523,6 +523,21 @@ function removeBanner(id) {
         // Optionally handle error and show error message to the user
     });
 }
+function newPass(){
+    $.ajax({
+        url:"/user/new-password",
+        method:"POST",
+        data:$('#newPassForm').serialize(),
+        success:function(res){
+            if(res.validateErr){
+                console.log("Reached HEre")
+                document.getElementById("newPassErr").innerHTML = res.validateErr
+            }else{
+                window.location.href = "/signin?message=Password Updated!"
+            }
+        }
+    })
+}
 function confirmOrder() {
 
     $.ajax({
