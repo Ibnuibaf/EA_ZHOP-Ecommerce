@@ -163,16 +163,16 @@ module.exports = {
         try {
             const passDetails = req.body
             const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
-          
+
             if (passDetails.new_password == passDetails.confirm_password) {
                 if (passwordRegex.test(passDetails.new_password)) {
                     const hashedPass = await securePass(passDetails.new_password)
                     await usersCollection.updateOne({ email: passDetails.user }, { $set: { password: hashedPass } })
-                    res.status(200).json({success:true})
+                    res.status(200).json({ success: true })
                 } else {
                     return res.status(200).json({ validateErr: "Password should contain *At least one uppercase or lowercase letter *At least one digit *At least one special character from the set @$!%*#?& *A minimum length of 8 characters" })
                 }
-                
+
             } else {
                 res.status(200).json({ validateErr: "Both password does not match" })
             }
@@ -377,10 +377,10 @@ module.exports = {
                         email: updatedDetails.email
                     }
                 })
-    
-                req.session.user = updatedDetails.email
-                res.redirect('/user/profile?message=Profile Updated Successfully')
-            
+
+            req.session.user = updatedDetails.email
+            res.redirect('/user/profile?message=Profile Updated Successfully')
+
         } catch (error) {
             console.log(error);
             const statusCode = error.status || 500;
@@ -513,24 +513,28 @@ module.exports = {
             //     },
             //     { $sort: { _id: -1 } }
             // ])
-            const orderDetails=await usersCollection.aggregate([
-                {$match:{_id:userDetails._id}},
-                {$unwind:"$orders"},
-                {$lookup:{
-                    from:"products",
-                    localField:"orders.products.prd_id",
-                    foreignField:"_id",
-                    as:"product_details"
-                }},
-                {$project:{
-                    order_id:"$orders._id",
-                    products:"$orders.products",
-                    products_details:"$product_details",
-                    total_amount:"$orders.total_amount",
-                    order_date:"$orders.order_date",
-                    payment_method:"$orders.payment_method",
-                    address:"$orders.address",   
-                }},
+            const orderDetails = await usersCollection.aggregate([
+                { $match: { _id: userDetails._id } },
+                { $unwind: "$orders" },
+                {
+                    $lookup: {
+                        from: "products",
+                        localField: "orders.products.prd_id",
+                        foreignField: "_id",
+                        as: "product_details"
+                    }
+                },
+                {
+                    $project: {
+                        order_id: "$orders._id",
+                        products: "$orders.products",
+                        products_details: "$product_details",
+                        total_amount: "$orders.total_amount",
+                        order_date: "$orders.order_date",
+                        payment_method: "$orders.payment_method",
+                        address: "$orders.address",
+                    }
+                },
 
             ])
             res.render('myorders', { orderDetails })
@@ -543,24 +547,24 @@ module.exports = {
     cancelOrder: async (req, res) => {
         try {
             const order = req.params.order;
-            const userDetails=req.userDetails
+            const userDetails = req.userDetails
 
             console.log(order)
             const isUpdated = await usersCollection.updateOne(
-                { 
-                  _id: userDetails._id,
-                  "orders.products._id": order 
-                }, 
-                { 
-                  $set: { "orders.$.products.$[product].status": "canceled" } 
+                {
+                    _id: userDetails._id,
+                    "orders.products._id": order
                 },
                 {
-                  arrayFilters: [
-                    { "product._id": order }
-                  ]
+                    $set: { "orders.$.products.$[product].status": "canceled" }
+                },
+                {
+                    arrayFilters: [
+                        { "product._id": order }
+                    ]
                 }
-              );
-              
+            );
+
             res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
@@ -571,21 +575,21 @@ module.exports = {
     returnOrder: async (req, res) => {
         try {
             const order = req.params.order
-            const userDetails=req.userDetails
+            const userDetails = req.userDetails
             const isUpdated = await usersCollection.updateOne(
-                { 
-                  _id: userDetails._id,
-                  "orders.products._id": order 
-                }, 
-                { 
-                  $set: { "orders.$.products.$[product].returned": true } 
+                {
+                    _id: userDetails._id,
+                    "orders.products._id": order
                 },
                 {
-                  arrayFilters: [
-                    { "product._id": order }
-                  ]
+                    $set: { "orders.$.products.$[product].returned": true }
+                },
+                {
+                    arrayFilters: [
+                        { "product._id": order }
+                    ]
                 }
-              );
+            );
             res.status(200).json({ success: true })
         } catch (error) {
             console.log(error.message);
@@ -603,35 +607,35 @@ module.exports = {
             const categoriesList = await categories.find();
             let productsList = await productsCollection.find().sort({ _id: -1 });
             let foundCategory = '';
-    
+
             if (category) {
                 const catObjectId = new mongoose.Types.ObjectId(category);
                 productsList = productsList.filter(products => products.category.equals(catObjectId));
                 foundCategory = categoriesList.find(category => category._id.equals(catObjectId));
             }
             if (filterMax || filterMin) {
-                productsList = productsList.filter(products => Math.floor(products.mrp-(products.mrp*products.discount)/100) > filterMin && Math.floor(products.mrp-(products.mrp*products.discount)/100) < filterMax);
+                productsList = productsList.filter(products => Math.floor(products.mrp - (products.mrp * products.discount) / 100) > filterMin && Math.floor(products.mrp - (products.mrp * products.discount) / 100) < filterMax);
             }
             if (searchQuery) {
                 const searchRegex = new RegExp(searchQuery, 'i');
                 productsList = productsList.filter(products => searchRegex.test(products.prd_name));
             }
-    
+
             const pageSize = 8;
             const totalPages = Math.ceil(productsList.length / pageSize);
-    
+
             let productPages = [];
             for (let i = 0; i < totalPages; i++) {
                 const startIndex = i * pageSize;
                 const endIndex = startIndex + pageSize;
                 productPages.push(productsList.slice(startIndex, endIndex));
             }
-    
+
             let selectedPage = 0;
             if (pagination && pagination >= 0 && pagination < totalPages) {
                 selectedPage = parseInt(pagination);
-            }    
-            if(productPages.length){
+            }
+            if (productPages.length) {
                 return res.render('products', {
                     productsList: productPages[selectedPage],
                     categoriesList,
@@ -639,7 +643,7 @@ module.exports = {
                     totalPages,
                     currentPage: selectedPage
                 });
-            }else{
+            } else {
                 return res.render('products', {
                     productsList: productPages,
                     categoriesList,
@@ -671,7 +675,7 @@ module.exports = {
                     }
                 });
             }
-            req.session.ordered=false
+            req.session.ordered = false
             res.render('product-details', { productDetails, isWishlist, isCart })
         } catch (error) {
             console.log(error.message);
@@ -793,7 +797,7 @@ module.exports = {
                     }
                 }
             ])
-            req.session.ordered=false
+            req.session.ordered = false
             res.render('cart', { cartItems, wishlistItems })
         } catch (error) {
             console.log(error.message);
@@ -854,55 +858,65 @@ module.exports = {
         const itemSpecified = req.query.item
         const userDetails = req.userDetails
         let productDetails
-        if (itemSpecified) {
-            productDetails = await productsCollection.findById(itemSpecified)
+        if(itemSpecified || userDetails.cart.length){
+            if (itemSpecified) {
+                productDetails = await productsCollection.findById(itemSpecified)
+    
+            } else {
+                productDetails = await usersCollection.aggregate([
+                    { $match: { _id: userDetails._id } },
+                    {
+                        $unwind: "$cart"
+                    },
+                    {
+                        $lookup: {
+                            from: "products",
+                            localField: "cart.prd_id",
+                            foreignField: "_id",
+                            as: "cartProduct"
+                        }
+                    },
+                    {
+                        $unwind: "$cartProduct"
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            email: 1,
+                            prd_name: "$cartProduct.prd_name",
+                            prd_images: "$cartProduct.prd_images",
+                            mrp: "$cartProduct.mrp",
+                            discount: "$cartProduct.discount",
+                            prd_id: "$cartProduct._id",
+                            stock: "$cartProduct.stock",
+                            qty: "$cart.qty",
+                            unit_prize: "$cart.unit_prize",
+                            total_prize: "$cart.total_prize",
+                        }
+                    }
+                ])
+            }
+            res.render('checkout', { productDetails, userDetails })
 
-        } else {
-            productDetails = await usersCollection.aggregate([
-                { $match: { _id: userDetails._id } },
-                {
-                    $unwind: "$cart"
-                },
-                {
-                    $lookup: {
-                        from: "products",
-                        localField: "cart.prd_id",
-                        foreignField: "_id",
-                        as: "cartProduct"
-                    }
-                },
-                {
-                    $unwind: "$cartProduct"
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        email: 1,
-                        prd_name: "$cartProduct.prd_name",
-                        prd_images: "$cartProduct.prd_images",
-                        mrp: "$cartProduct.mrp",
-                        discount: "$cartProduct.discount",
-                        prd_id: "$cartProduct._id",
-                        stock: "$cartProduct.stock",
-                        qty: "$cart.qty",
-                        unit_prize: "$cart.unit_prize",
-                        total_prize: "$cart.total_prize",
-                    }
-                }
-            ])
+        }else{
+            res.redirect('/user/cart?message=Add Items to Cart')
         }
-        res.render('checkout', { productDetails, userDetails })
     },
     verifyCoupen: async (req, res) => {
         try {
             const coupon_code = req.params.code
             const amount = req.query.total
-
             const isValidCoupon = await coupens.findOne({ coupon_code: coupon_code, hit_amount: { $lte: amount }, active: true })
             if (isValidCoupon) {
-                res.status(200).json({ success: true, coupon_code: isValidCoupon.coupon_code, value: isValidCoupon.value, type: isValidCoupon.type })
+                if (!req.session.couponUsed) {
+                    console.log("Reached Coupon set");
+                    req.session.couponUsed = isValidCoupon.coupon_code
+                    res.status(200).json({ success: true, coupon_code: isValidCoupon.coupon_code, value: isValidCoupon.value, type: isValidCoupon.type })
+                }else{
+                     res.status(200).json({ success: false,msg:"Coupon already Used" })
+                }
             } else {
-                res.status(200).json({ success: false })
+                res.status(200).json({ success: false,msg:"Entered Coupon doesn't exist for this order " })
             }
         } catch (error) {
             console.log(error.message);
@@ -916,8 +930,10 @@ module.exports = {
             const userDetails = req.userDetails
 
             let products = []
+            req.session.couponUsed=''
             if (!data.pay_methods) {
-                return res.redirect('/user/checkout?message=Choose any of Payment Methods')
+                return res.status(200).send({ success: false, msg: 'Choose any of Payment Methods' });
+                // return res.redirect('/user/checkout?message=Choose any of Payment Methods')
             }
             if (data.local_address && data.country && data.postcode && data.city && data.district && data.state && data.altr_number) {
                 if (data.pay_methods == "cod") {
@@ -925,7 +941,9 @@ module.exports = {
                         for (let index = 0; index < data.prd_id.length; index++) {
                             if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
                                 // console.log(index,data.qty[index],data.stock[index]);
-                                return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
+                                return res.status(200).send({ success: false, msg: 'Some of the products quantity is excesive, Remove them from cart' });
+
+                                // return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
                             }
 
                             const product = {
@@ -958,7 +976,8 @@ module.exports = {
 
                     } else {
                         if (parseInt(data.qty) > parseFloat(data.total_price)) {
-                            return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
+                            return res.status(200).send({ success: false, msg: 'Some of the products quantity is excesive, Remove them from cart' });
+                            // return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
                         }
                         const product = {
                             prd_id: data.prd_id,
@@ -985,19 +1004,23 @@ module.exports = {
                         await usersCollection.updateOne({ _id: userDetails._id }, { $push: { orders: order } })
                         await productsCollection.updateOne({ _id: data.prd_id }, { $inc: { stock: -1 } })
                     }
-                    req.session.ordered=true 
+                    req.session.ordered = true
                     res.json({ codSuccess: true })
                 } else {
                     const amount = req.body.amount
-                    if(Array.isArray(data.prd_id)){
+                    if (Array.isArray(data.prd_id)) {
                         for (let index = 0; index < data.prd_id.length; index++) {
                             if (parseInt(data.qty[index]) > parseInt(data.stock[index])) {
-                                return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
+                                return res.status(200).send({ success: false, msg: 'Some of the products quantity is excesive, Remove them from cart' });
+
+                                // return res.redirect('/user/checkout?message=Some of the products quantity is excessive, Remove them from cart');
                             }
                         }
-                    }else{
+                    } else {
                         if (parseInt(data.qty) > parseFloat(data.total_price)) {
-                            return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
+                            return res.status(200).send({ success: false, msg: 'Some of the products quantity is excesive, Remove them from cart' });
+
+                            // return res.redirect('/user/checkout?message=Some of the products quantity is excesive, Remove them from cart')
                         }
                     }
                     if (amount > 0) {
@@ -1041,7 +1064,8 @@ module.exports = {
                     }
                 }
             } else {
-                return res.redirect('/user/checkout?message=Fill the Address order to be delivered')
+                return res.status(200).send({ success: false, msg: 'Fill the Address order to be delivered' });
+                // return res.redirect('/user/checkout?message=Fill the Address order to be delivered')
             }
         } catch (error) {
             console.log(error.message);
@@ -1057,7 +1081,7 @@ module.exports = {
             req.session.orderList = ''
             if (Array.isArray(data.prd_id)) {
                 for (let index = 0; index < data.prd_id.length; index++) {
-                   
+
                     const product = {
                         prd_id: data.prd_id[index],
                         qty: parseInt(data.qty[index]),
@@ -1121,7 +1145,7 @@ module.exports = {
                     await usersCollection.updateOne({ _id: userDetails._id }, { $inc: { "wallet.balance": -data.total_price } })
                 }
             }
-            req.session.ordered=true 
+            req.session.ordered = true
             res.send(200)
         } catch (error) {
             console.log(error.message);

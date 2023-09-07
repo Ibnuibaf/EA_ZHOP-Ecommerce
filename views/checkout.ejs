@@ -184,6 +184,9 @@
                         <p>₹ <%= Math.floor((productDetails.mrp * productDetails.discount) / 100) %> /-</p>
                         <% } %>
                     </div>
+                    <div class="couponApply d-flex justify-content-between" id="couponApply">
+                        <i>Coupon Applied : </i><b id="couponCodeDisplay" class="text-danger"></b>
+                    </div>
                     <div class="rate d-flex justify-content-between align-items-center">
                         <label>Amount to be Paid:</label>
                         <% if (productDetails.length) { %>

@@ -627,7 +627,10 @@ function confirmsUser(event, fn) {
         modal.hide();
     });
 }
+// let checkoutTotalDisplay=document.getElementById("amountDisplay").value
+let checkoutTotal=0
 function verifyCoupon(){
+    checkoutTotal=document.getElementById("amount").value
     const amount=document.getElementById("amount").value;
     const coupen=document.getElementById("coupon").value
     const isOnline=document.getElementById("razorpay").checked
@@ -638,18 +641,22 @@ function verifyCoupon(){
             if(res.coupon_code){
                 if(isOnline){
                     document.getElementById("coupon_code").innerHTML=res.coupon_code +" applied"
+                    document.getElementById("couponCodeDisplay").innerHTML=res.coupon_code
+                    document.getElementById("couponApply").style.display = "block"
                     if(res.type=="flat_disc"){
                         document.getElementById("amount").value=(amount-res.value)
-                        
+                        checkoutTotal=(amount-res.value)
                         document.getElementById("amountDisplay").innerHTML="₹"+(amount-res.value)+"/-"
                     }else if(res.type=="percenetage_disc"){
                         document.getElementById("amount").value=(amount*res.value)/100
+                        checkoutTotal=(amount*res.value)/100
                         document.getElementById("amountDisplay").innerHTML="₹"+(amount*res.value)/100+"/-"
                     }
                 }
             }else{
-            document.getElementById("coupon_code").innerHTML="Coupon doesnt exist for this order"
-
+                document.getElementById("coupon_code").innerHTML=res.msg
+                document.getElementById("amount").value=checkoutTotal
+                document.getElementById("amountDisplay").innerHTML="₹"+checkoutTotal+"/-"
             }
         },
         error:function(err){
@@ -746,6 +753,7 @@ window.addEventListener('load', function () {
     else if (getQueryParam('message')) { message = getQueryParam('message') }
     else if (getQueryParam('adminMessage')) { adminMessage = getQueryParam('adminMessage') }
     if (message) {
+        console.log('Message:', message);
         const modal = new bootstrap.Modal(document.getElementById("myModal"));
         const modalMessage = document.getElementById("modalMessage");
         modalMessage.textContent = message;
