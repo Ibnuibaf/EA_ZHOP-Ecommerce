@@ -9,7 +9,14 @@
   border-radius: 5px;
   background-color: #111111;
 }
-
+.cat-div{
+  transition: 0.3s;
+}
+.cat-div:hover{
+  box-shadow: 0 0 5px rgba(0, 0, 1, 0.4);
+  transition: 0.3s;
+  transform: scale(1.05);
+}
 .nav-links{
   width: 50vw
 }
