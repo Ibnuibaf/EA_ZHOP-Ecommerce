@@ -117,7 +117,8 @@
         let monthlySales = document.getElementById('monthlySales').value;
         let monthlySalesArray = JSON.parse(monthlySales);
         let monthlySalesAmount = []
-        for (let i = 0; i <= 12; i++) {
+        // console.log(monthlySalesArray[monthlySalesArray.length-1].month-1)
+        for (let i = 0; i <= monthlySalesArray[monthlySalesArray.length-1].month-1; i++) {
             for (let j = 0; j < monthlySalesArray.length; j++) {
                 if ((monthlySalesArray[j].month - 1) == i) {
                     monthlySalesAmount[i] = monthlySalesArray[j].monthlySales
@@ -130,14 +131,15 @@
         }
         console.log(monthlySalesAmount)
         new Chart(monthlyCtx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [{
                     label: `Sales of Month on ${monthlySalesArray[0].year}`,
                     data: monthlySalesAmount,
-                    borderWidth: 1,
-                    backgroundColor: "#5EBA7D"
+                    borderWidth: 4,
+                    borderColor: "#5EBA7D",
+                    backgroundColor: "#F3F2EE"
                 }]
             },
             options: {

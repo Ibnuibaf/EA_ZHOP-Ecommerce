@@ -73,7 +73,7 @@ module.exports = {
             const categoriesSales = await usersCollection.aggregate([
                 { $unwind: "$orders" },
                 { $unwind: "$orders.products" },
-                { $match: { "orders.products.status": "closed" } },
+                // { $match: { "orders.products.status": "closed" } },
                 {
                     $lookup: {
                         from: "products",
@@ -105,11 +105,11 @@ module.exports = {
                 {
                     $unwind: "$orders.products"
                 },
-                {
-                    $match: {
-                        "orders.products.status": "closed"
-                    }
-                },
+                // {
+                //     $match: {
+                //         "orders.products.status": "closed"
+                //     }
+                // },
                 {
                     $group: {
                         _id: {
@@ -142,11 +142,11 @@ module.exports = {
                 {
                     $unwind: "$orders.products"
                 },
-                {
-                    $match: {
-                        "orders.products.status": "closed"
-                    }
-                },
+                // {
+                //     $match: {
+                //         "orders.products.status": "closed"
+                //     }
+                // },
                 {
                     $group: {
                         _id: "$orders.payment_method",
@@ -174,7 +174,7 @@ module.exports = {
                 { $match: { "orders.products.status": "canceled" } },
                 { $count: "ordersCount" }
             ])
-            console.log(paymentTypeSales)
+            // console.log(paymentTypeSales)
             res.render('dashboard', {
                 categoriesSales,
                 categoriesList,
