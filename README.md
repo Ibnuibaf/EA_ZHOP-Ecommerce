@@ -27,6 +27,7 @@ EAZHOP is a single-vendor e-commerce website designed to provide users with a se
 - Node.js: JavaScript runtime environment.
 - Express: Web application framework for Node.js.
 - EJS: Embedded JavaScript templating for server-side rendering.
+- Bootstrap: Front-end component library for responsive and mobile-first web development.
 - AJAX: Asynchronous JavaScript and XML for interactive web applications.
 - Chart.js: JavaScript library for creating charts and graphs.
 - Razorpay: Payment gateway for secure online transactions.
